@@ -23,15 +23,17 @@ type Point = { x: number; y: number };
 const palette = d3.schemeTableau10;
 
 function computeNodePositions(nodesLength: number, width: number, height: number) {
-  const radius = Math.max(Math.min(width, height) / 2 - 60, 60);
   const cx = width / 2;
   const cy = height / 2;
+  const rx = width / 2 - 20;
+  const ry = height / 2 - 20;
   const positions: Point[] = [];
+  
   for (let i = 0; i < nodesLength; i += 1) {
     const angle = (i / Math.max(nodesLength, 1)) * Math.PI * 2;
     positions.push({
-      x: cx + radius * Math.cos(angle),
-      y: cy + radius * Math.sin(angle),
+      x: cx + rx * Math.cos(angle),
+      y: cy + ry * Math.sin(angle),
     });
   }
   return positions;
@@ -42,6 +44,7 @@ export default function GraphCanvas({ frame, isLoading }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<{ source: string; target: string; weight: number } | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -76,7 +79,25 @@ export default function GraphCanvas({ frame, isLoading }: Props) {
     return mapping;
   }, [frame, size.width, size.height]);
 
+  const connectedNodes = useMemo(() => {
+    const activeNode = selectedNode || hoveredNode;
+    console.log("[GraphCanvas] connectedNodes calc:", { selectedNode, hoveredNode, activeNode });
+    if (!activeNode || !frame) return new Set<string>();
+    
+    const connected = new Set<string>([activeNode]);
+    frame.edges.forEach((edge) => {
+      if (edge.source === activeNode) connected.add(edge.target);
+      if (edge.target === activeNode) connected.add(edge.source);
+    });
+    console.log("[GraphCanvas] connected nodes:", Array.from(connected));
+    return connected;
+  }, [selectedNode, hoveredNode, frame]);
+
+  const activeNodeId = selectedNode || hoveredNode;
+  console.log("[GraphCanvas] render:", { selectedNode, hoveredNode, activeNodeId });
+
   useEffect(() => {
+    console.log("[GraphCanvas] draw effect triggered:", { selectedNode, hoveredNode, activeNodeId, connectedNodesSize: connectedNodes.size });
     const canvas = canvasRef.current;
     if (!canvas || !frame || size.width === 0 || size.height === 0) {
       if (canvas && size.width > 0 && size.height > 0) {
@@ -107,13 +128,25 @@ export default function GraphCanvas({ frame, isLoading }: Props) {
       .domain([0, 255])
       .range([0.5, 8]);
     
+    const isEdgeConnected = (edge: { source: string; target: string }) => {
+      if (!activeNodeId) return true;
+      return edge.source === activeNodeId || edge.target === activeNodeId;
+    };
+
     frame.edges.forEach((edge) => {
       const source = nodePositions.get(edge.source);
       const target = nodePositions.get(edge.target);
       if (!source || !target || edge.weight <= 0) return;
       
       const weight = Math.max(0, Math.min(255, edge.weight));
-      const color = colorScale(weight);
+      const baseColor = colorScale(weight);
+      const edgeIsConnected = isEdgeConnected(edge);
+      const opacity = edgeIsConnected ? 1 : 0.15;
+      
+      const rgbMatch = baseColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      const color = rgbMatch 
+        ? `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${opacity})`
+        : baseColor;
       const thickness = thicknessScale(weight);
       const pair = [edge.source, edge.target].sort();
       const [sourceId, targetId] = pair;
@@ -172,17 +205,53 @@ export default function GraphCanvas({ frame, isLoading }: Props) {
     frame.nodes.forEach((node, idx) => {
       const pos = nodePositions.get(node.id);
       if (!pos) return;
-      const fill = palette[idx % palette.length];
+      const isNodeConnected = !activeNodeId || connectedNodes.has(node.id);
+      const opacity = isNodeConnected ? 1 : 0.2;
+      const isSelected = node.id === selectedNode;
+      
+      const baseFill = palette[idx % palette.length];
+      let fill = baseFill;
+      
+      if (opacity < 1) {
+        if (baseFill.startsWith("rgb")) {
+          const rgbMatch = baseFill.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+          if (rgbMatch) {
+            fill = `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${opacity})`;
+          }
+        } else if (baseFill.startsWith("#")) {
+          const hex = baseFill.slice(1);
+          const r = parseInt(hex.slice(0, 2), 16);
+          const g = parseInt(hex.slice(2, 4), 16);
+          const b = parseInt(hex.slice(4, 6), 16);
+          fill = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        } else {
+          ctx.globalAlpha = opacity;
+          fill = baseFill;
+        }
+      }
       const radius = 8 + (node.degree ?? 0) * 0.5;
+      ctx.globalAlpha = opacity;
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
       ctx.fillStyle = fill;
       ctx.fill();
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = 1.5;
+      
+      if (isSelected) {
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, radius + 4, 0, Math.PI * 2);
+        ctx.strokeStyle = "#fbbf24";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+      
+      ctx.strokeStyle = isNodeConnected ? "white" : "rgba(255, 255, 255, 0.5)";
+      ctx.lineWidth = isSelected ? 2.5 : 1.5;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
       ctx.stroke();
+      ctx.globalAlpha = 1;
     });
-  }, [frame, nodePositions, size.height, size.width]);
+  }, [frame, nodePositions, size.height, size.width, selectedNode, hoveredNode, connectedNodes]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -260,8 +329,35 @@ export default function GraphCanvas({ frame, isLoading }: Props) {
         }
       }
 
+      if (foundNode !== hoveredNode) {
+        console.log("[GraphCanvas] hover node changed:", { from: hoveredNode, to: foundNode });
+      }
       setHoveredNode(foundNode);
       setHoveredEdge(foundEdge);
+    };
+
+    const handleClick = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      console.log("[GraphCanvas] click at:", { x, y });
+
+      for (const [nodeId, pos] of nodePositions.entries()) {
+        const node = frame.nodes.find((n) => n.id === nodeId);
+        if (!node) continue;
+        const radius = 8 + (node.degree ?? 0) * 0.5;
+        const dx = x - pos.x;
+        const dy = y - pos.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist <= radius) {
+          const newSelected = nodeId === selectedNode ? null : nodeId;
+          console.log("[GraphCanvas] clicked node:", nodeId, "setting selectedNode to:", newSelected);
+          setSelectedNode(newSelected);
+          return;
+        }
+      }
+      console.log("[GraphCanvas] click missed all nodes, clearing selection");
+      setSelectedNode(null);
     };
 
     const handleMouseLeave = () => {
@@ -270,13 +366,15 @@ export default function GraphCanvas({ frame, isLoading }: Props) {
     };
 
     canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("click", handleClick);
     canvas.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
       canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("click", handleClick);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [frame, nodePositions]);
+  }, [frame, nodePositions, selectedNode]);
 
   const getNodeName = (nodeId: string): string => {
     if (!metadataQuery.data?.node_names) return nodeId;
@@ -292,7 +390,7 @@ export default function GraphCanvas({ frame, isLoading }: Props) {
 
   return (
     <div ref={containerRef} style={{ height: "100%", width: "100%", position: "relative" }}>
-      <canvas ref={canvasRef} style={{ width: "100%", height: "100%" }} />
+      <canvas ref={canvasRef} style={{ width: "100%", height: "100%", cursor: "pointer" }} />
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
