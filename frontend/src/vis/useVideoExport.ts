@@ -9,6 +9,8 @@ type UseVideoExportOptions = {
   nodeNames?: string[];
   edgeThreshold?: number;
   hiddenNodes?: Set<string>;
+  smoothing?: string;
+  interpolation?: string;
   width?: number;
   height?: number;
 };
@@ -19,8 +21,10 @@ export function useVideoExport({
   nodeNames,
   edgeThreshold = 0,
   hiddenNodes,
-  width = 1920,
-  height = 1080,
+  smoothing = "none",
+  interpolation = "none",
+  width = 2560,
+  height = 1440,
 }: UseVideoExportOptions) {
   const [state, setState] = useState<ExportState>("idle");
   const [progress, setProgress] = useState(0);
@@ -87,10 +91,12 @@ export function useVideoExport({
       nodeNames,
       edgeThreshold,
       hiddenNodes: hiddenNodes ? Array.from(hiddenNodes) : [],
+      smoothing,
+      interpolation,
       width,
       height,
     });
-  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, width, height]);
+  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, smoothing, interpolation, width, height]);
 
   const cancel = useCallback(() => {
     if (workerRef.current) {

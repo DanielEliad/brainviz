@@ -4,7 +4,7 @@ import { GraphFrame } from "./types";
 export type Point = { x: number; y: number };
 
 export const palette = d3.schemeTableau10;
-export const PADDING = 60;
+export const PADDING_RATIO = 0.08; // 8% of smaller dimension
 
 export const colorScale = d3
   .scaleLinear<string>()
@@ -20,8 +20,9 @@ export function computeNodePositions(
 ): Point[] {
   const cx = width / 2;
   const cy = height / 2;
-  const rx = width / 2 - PADDING;
-  const ry = height / 2 - PADDING;
+  const padding = Math.min(width, height) * PADDING_RATIO;
+  const rx = width / 2 - padding;
+  const ry = height / 2 - padding;
   const positions: Point[] = [];
 
   for (let i = 0; i < nodesLength; i += 1) {
@@ -40,6 +41,12 @@ export type DrawOptions = {
   activeNodeId?: string | null;
   connectedNodes?: Set<string>;
   selectedNode?: string | null;
+  infoBox?: {
+    smoothing: string;
+    interpolation: string;
+    speed: number;
+    edgeThreshold: number;
+  };
 };
 
 type AnyCanvasContext = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
@@ -51,7 +58,7 @@ export function drawFrame(
   height: number,
   options: DrawOptions = {}
 ): void {
-  const { nodeNames, edgeThreshold = 0, activeNodeId, connectedNodes, selectedNode } = options;
+  const { nodeNames, edgeThreshold = 0, activeNodeId, connectedNodes, selectedNode, infoBox } = options;
 
   const positions = computeNodePositions(frame.nodes.length, width, height);
   const nodePositions = new Map<string, Point>();
@@ -198,4 +205,41 @@ export function drawFrame(
 
     ctx.globalAlpha = 1;
   });
+
+  // Draw info box if provided
+  if (infoBox) {
+    const padding = 18;
+    const lineHeight = 28;
+    const fontSize = 18;
+    const lines = [
+      `Smoothing: ${infoBox.smoothing}`,
+      `Interpolation: ${infoBox.interpolation}`,
+      `Speed: ${infoBox.speed}x`,
+      `Edge Threshold: ${infoBox.edgeThreshold.toFixed(1)}`,
+    ];
+    const boxWidth = 280;
+    const boxHeight = padding * 2 + lines.length * lineHeight;
+    const boxX = 24;
+    const boxY = 24;
+
+    ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
+    ctx.beginPath();
+    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 12);
+    ctx.fill();
+
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 12);
+    ctx.stroke();
+
+    ctx.font = `600 ${fontSize}px system-ui, -apple-system, sans-serif`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillStyle = "white";
+
+    lines.forEach((line, i) => {
+      ctx.fillText(line, boxX + padding, boxY + padding + i * lineHeight);
+    });
+  }
 }

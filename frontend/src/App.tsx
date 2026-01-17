@@ -50,6 +50,8 @@ function App() {
     nodeNames: metadataQuery.data?.node_names,
     edgeThreshold,
     hiddenNodes,
+    smoothing,
+    interpolation,
   });
 
   useEffect(() => {

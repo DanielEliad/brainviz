@@ -9,6 +9,8 @@ type WorkerMessage = {
   nodeNames?: string[];
   edgeThreshold?: number;
   hiddenNodes?: string[];
+  smoothing?: string;
+  interpolation?: string;
   width: number;
   height: number;
 };
@@ -32,7 +34,9 @@ async function encodeVideo(
   height: number,
   nodeNames?: string[],
   edgeThreshold: number = 0,
-  hiddenNodes: string[] = []
+  hiddenNodes: string[] = [],
+  smoothing: string = "none",
+  interpolation: string = "none"
 ) {
   const hiddenSet = new Set(hiddenNodes);
   const frameDurationMs = BASE_INTERVAL_MS / playbackSpeed;
@@ -68,8 +72,9 @@ async function encodeVideo(
     codec: "avc1.640032",
     width,
     height,
-    bitrate: 15_000_000,
+    bitrate: 50_000_000,
     framerate: fps,
+    latencyMode: "quality",
   });
 
   const timestampIncrement = 1_000_000 / fps;
@@ -83,14 +88,23 @@ async function encodeVideo(
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     const frame = filterFrame(frames[i], hiddenSet);
-    drawFrame(ctx, frame, width, height, { nodeNames, edgeThreshold });
+    drawFrame(ctx, frame, width, height, {
+      nodeNames,
+      edgeThreshold,
+      infoBox: {
+        smoothing,
+        interpolation,
+        speed: playbackSpeed,
+        edgeThreshold,
+      },
+    });
 
     const videoFrame = new VideoFrame(canvas, {
       timestamp: Math.round(i * timestampIncrement),
       duration: Math.round(timestampIncrement),
     });
 
-    encoder.encode(videoFrame, { keyFrame: i % 30 === 0 });
+    encoder.encode(videoFrame, { keyFrame: i % 5 === 0 });
     videoFrame.close();
 
     self.postMessage({
@@ -116,7 +130,9 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
         e.data.height,
         e.data.nodeNames,
         e.data.edgeThreshold ?? 0,
-        e.data.hiddenNodes ?? []
+        e.data.hiddenNodes ?? [],
+        e.data.smoothing ?? "none",
+        e.data.interpolation ?? "none"
       );
       self.postMessage({ type: "done", buffer }, [buffer]);
     } catch (err) {
