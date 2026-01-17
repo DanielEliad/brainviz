@@ -23,8 +23,8 @@ export function useVideoExport({
   hiddenNodes,
   smoothing = "none",
   interpolation = "none",
-  width = 2560,
-  height = 1440,
+  width = 1920,
+  height = 1080,
 }: UseVideoExportOptions) {
   const [state, setState] = useState<ExportState>("idle");
   const [progress, setProgress] = useState(0);

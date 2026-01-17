@@ -72,7 +72,7 @@ async function encodeVideo(
     codec: "avc1.640032",
     width,
     height,
-    bitrate: 50_000_000,
+    bitrate: 20_000_000,
     framerate: fps,
     latencyMode: "quality",
   });
