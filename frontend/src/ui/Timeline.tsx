@@ -14,12 +14,6 @@ export function Timeline({ meta, value, onChange }: Props) {
   const min = times[0] ?? 0;
   const max = times[times.length - 1] ?? 0;
 
-  console.log("[Timeline] Render:", {
-    availableTimestamps: times,
-    currentValue,
-    valueProp: value,
-    hasOnChange: !!onChange,
-  });
 
   return (
     <div className="space-y-3">
@@ -34,7 +28,6 @@ export function Timeline({ meta, value, onChange }: Props) {
           step={1}
           value={currentValue}
           onValueChange={(v) => {
-            console.log("[Timeline] Slider onChange:", v, "previous value:", currentValue);
             onChange?.(v);
           }}
           className="w-full"

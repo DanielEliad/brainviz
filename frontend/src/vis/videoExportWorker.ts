@@ -80,13 +80,25 @@ async function encodeVideo(
   const timestampIncrement = 1_000_000 / fps;
   const MAX_QUEUE_SIZE = 5;
 
-  for (let i = 0; i < frames.length; i++) {
-    // Wait for encoder queue to drain before adding more frames
-    while (encoder.encodeQueueSize > MAX_QUEUE_SIZE) {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-    }
-    await new Promise((resolve) => setTimeout(resolve, 0));
+  let totalDrawTime = 0;
+  let totalEncodeTime = 0;
+  let totalWaitTime = 0;
+  let totalPostTime = 0;
+  let backpressureHits = 0;
+  const overallStart = performance.now();
 
+  for (let i = 0; i < frames.length; i++) {
+    const waitStart = performance.now();
+    // Only wait if queue is full (not on every frame)
+    if (encoder.encodeQueueSize >= MAX_QUEUE_SIZE) {
+      backpressureHits++;
+      while (encoder.encodeQueueSize >= MAX_QUEUE_SIZE) {
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      }
+    }
+    totalWaitTime += performance.now() - waitStart;
+
+    const drawStart = performance.now();
     const frame = filterFrame(frames[i], hiddenSet);
     drawFrame(ctx, frame, width, height, {
       nodeNames,
@@ -98,7 +110,9 @@ async function encodeVideo(
         edgeThreshold,
       },
     });
+    totalDrawTime += performance.now() - drawStart;
 
+    const encodeStart = performance.now();
     const videoFrame = new VideoFrame(canvas, {
       timestamp: Math.round(i * timestampIncrement),
       duration: Math.round(timestampIncrement),
@@ -106,16 +120,29 @@ async function encodeVideo(
 
     encoder.encode(videoFrame, { keyFrame: i % 5 === 0 });
     videoFrame.close();
+    totalEncodeTime += performance.now() - encodeStart;
 
+    const postStart = performance.now();
     self.postMessage({
       type: "progress",
       progress: Math.round(((i + 1) / frames.length) * 100),
     });
+    totalPostTime += performance.now() - postStart;
   }
 
   await encoder.flush();
   encoder.close();
   muxer.finalize();
+
+  const overallTime = performance.now() - overallStart;
+  const accountedTime = totalDrawTime + totalEncodeTime + totalWaitTime + totalPostTime;
+  console.log(`=== Video Export Timing (${frames.length} frames) ===`);
+  console.log(`Draw:     ${totalDrawTime.toFixed(0)}ms (${(totalDrawTime / frames.length).toFixed(1)}ms/frame)`);
+  console.log(`Encode:   ${totalEncodeTime.toFixed(0)}ms (${(totalEncodeTime / frames.length).toFixed(1)}ms/frame)`);
+  console.log(`Wait:     ${totalWaitTime.toFixed(0)}ms (backpressure hits: ${backpressureHits})`);
+  console.log(`PostMsg:  ${totalPostTime.toFixed(0)}ms`);
+  console.log(`Other:    ${(overallTime - accountedTime).toFixed(0)}ms (unaccounted)`);
+  console.log(`Total:    ${overallTime.toFixed(0)}ms`);
 
   return target.buffer;
 }
