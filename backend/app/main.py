@@ -185,14 +185,23 @@ def get_graph_data(
         )
     
     available_timestamps = list(range(len(matrices)))
-    
+
+    # Calculate edge weight range across all frames
+    all_weights = []
+    for matrix in matrices:
+        all_weights.extend(matrix.flatten().tolist())
+    edge_weight_min = float(min(all_weights)) if all_weights else 0.0
+    edge_weight_max = float(max(all_weights)) if all_weights else 255.0
+
     meta = GraphMeta(
         available_timestamps=available_timestamps,
         node_attributes=["label", "group", "degree"],
         edge_attributes=["weight"],
+        edge_weight_min=edge_weight_min,
+        edge_weight_max=edge_weight_max,
         description="Graph states from inline numpy matrices",
     )
-    
+
     return {
         "frames": [frame.model_dump() for frame in processed_frames],
         "meta": meta.model_dump(),

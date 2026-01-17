@@ -16,6 +16,7 @@ type GraphMetadata = {
 type Props = {
   frame?: GraphFrame;
   isLoading?: boolean;
+  edgeThreshold?: number;
 };
 
 type Point = { x: number; y: number };
@@ -39,7 +40,7 @@ function computeNodePositions(nodesLength: number, width: number, height: number
   return positions;
 }
 
-export default function GraphCanvas({ frame, isLoading }: Props) {
+export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -136,7 +137,7 @@ export default function GraphCanvas({ frame, isLoading }: Props) {
     frame.edges.forEach((edge) => {
       const source = nodePositions.get(edge.source);
       const target = nodePositions.get(edge.target);
-      if (!source || !target || edge.weight <= 0) return;
+      if (!source || !target || edge.weight <= 0 || edge.weight < edgeThreshold) return;
       
       const weight = Math.max(0, Math.min(255, edge.weight));
       const baseColor = colorScale(weight);
@@ -208,10 +209,10 @@ export default function GraphCanvas({ frame, isLoading }: Props) {
       const isNodeConnected = !activeNodeId || connectedNodes.has(node.id);
       const opacity = isNodeConnected ? 1 : 0.2;
       const isSelected = node.id === selectedNode;
-      
+
       const baseFill = palette[idx % palette.length];
       let fill = baseFill;
-      
+
       if (opacity < 1) {
         if (baseFill.startsWith("rgb")) {
           const rgbMatch = baseFill.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
@@ -235,7 +236,7 @@ export default function GraphCanvas({ frame, isLoading }: Props) {
       ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
       ctx.fillStyle = fill;
       ctx.fill();
-      
+
       if (isSelected) {
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, radius + 4, 0, Math.PI * 2);
@@ -243,15 +244,28 @@ export default function GraphCanvas({ frame, isLoading }: Props) {
         ctx.lineWidth = 3;
         ctx.stroke();
       }
-      
+
       ctx.strokeStyle = isNodeConnected ? "white" : "rgba(255, 255, 255, 0.5)";
       ctx.lineWidth = isSelected ? 2.5 : 1.5;
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
       ctx.stroke();
+
+      // Draw node name label
+      const nodeNames = metadataQuery.data?.node_names;
+      if (nodeNames) {
+        const nameIndex = node.id.charCodeAt(0) - "A".charCodeAt(0);
+        const name = nodeNames[nameIndex] ?? node.id;
+        ctx.font = "11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        ctx.fillStyle = isNodeConnected ? "white" : `rgba(255, 255, 255, ${opacity})`;
+        ctx.fillText(name, pos.x, pos.y - radius - 4);
+      }
+
       ctx.globalAlpha = 1;
     });
-  }, [frame, nodePositions, size.height, size.width, selectedNode, hoveredNode, connectedNodes]);
+  }, [frame, nodePositions, size.height, size.width, selectedNode, hoveredNode, connectedNodes, metadataQuery.data, edgeThreshold]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

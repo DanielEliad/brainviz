@@ -23,5 +23,7 @@ export type GraphMeta = {
   available_timestamps: number[];
   node_attributes: string[];
   edge_attributes: string[];
+  edge_weight_min: number;
+  edge_weight_max: number;
   description?: string;
 };

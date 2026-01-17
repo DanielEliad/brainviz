@@ -30,4 +30,6 @@ class GraphMeta(BaseModel):
     available_timestamps: List[int]
     node_attributes: List[str]
     edge_attributes: List[str]
+    edge_weight_min: float = 0.0
+    edge_weight_max: float = 255.0
     description: Optional[str] = None

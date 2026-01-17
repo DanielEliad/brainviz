@@ -72,7 +72,8 @@ export function useGraphData(
 
   return {
     frame,
-    meta: meta ?? { available_timestamps: [], node_attributes: [], edge_attributes: [] },
+    allFrames,
+    meta: meta ?? { available_timestamps: [], node_attributes: [], edge_attributes: [], edge_weight_min: 0, edge_weight_max: 255 },
     time: normalizedTime,
     isLoading: dataQuery.isLoading || dataQuery.isPending || (!dataQuery.data && !dataQuery.error),
     error: dataQuery.error,

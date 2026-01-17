@@ -1,20 +1,54 @@
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import GraphCanvas from "./vis/GraphCanvas";
 import { Timeline } from "./ui/Timeline";
 import { ControlsBar } from "./ui/ControlsBar";
 import { useGraphData, SmoothingAlgorithm, InterpolationAlgorithm } from "./vis/useGraphData";
+import { useVideoExport } from "./vis/useVideoExport";
+
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+
+type GraphMetadata = {
+  num_nodes: number;
+  node_names: string[];
+  description: string;
+};
 
 function App() {
   const [smoothing, setSmoothing] = useState<SmoothingAlgorithm>("none");
   const [interpolation, setInterpolation] = useState<InterpolationAlgorithm>("none");
   const [interpolationFactor, setInterpolationFactor] = useState<number>(2);
+  const [factorInput, setFactorInput] = useState<string>("2");
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
-  const { frame, isLoading, error, refetch, setTime, meta, time } = useGraphData(smoothing, interpolation, interpolationFactor);
+  const [edgeThreshold, setEdgeThreshold] = useState<number>(0);
+  const { frame, allFrames, isLoading, error, refetch, setTime, meta, time } = useGraphData(smoothing, interpolation, interpolationFactor);
   const [isPlaying, setIsPlaying] = useState(false);
   const intervalRef = useRef<number | null>(null);
   const prevParamsRef = useRef<{ smoothing: SmoothingAlgorithm; interpolation: InterpolationAlgorithm; interpolationFactor: number } | null>(null);
+
+  const metadataQuery = useQuery<GraphMetadata>({
+    queryKey: ["graphMetadata"],
+    queryFn: async () => {
+      const res = await fetch(`${API_URL}/graph/metadata`);
+      if (!res.ok) {
+        throw new Error(`Metadata fetch failed (${res.status})`);
+      }
+      return res.json();
+    },
+  });
+
+  const {
+    state: exportState,
+    progress: exportProgress,
+    exportVideo,
+  } = useVideoExport({
+    frames: allFrames,
+    playbackSpeed,
+    nodeNames: metadataQuery.data?.node_names,
+    edgeThreshold,
+  });
 
   useEffect(() => {
     if (isPlaying && meta.available_timestamps.length > 0) {
@@ -97,7 +131,7 @@ function App() {
                   Failed to load data: {String(error)}
                 </div>
               )}
-              <GraphCanvas frame={frame} isLoading={isLoading} />
+              <GraphCanvas frame={frame} isLoading={isLoading} edgeThreshold={edgeThreshold} />
             </div>
           </CardContent>
         </Card>
@@ -136,13 +170,30 @@ function App() {
               </div>
               {interpolation !== "none" && (
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-foreground">Factor</label>
+                  <label className="text-xs font-medium text-foreground">Factor (2-10)</label>
                   <input
-                    type="number"
-                    min="2"
-                    max="10"
-                    value={interpolationFactor}
-                    onChange={(e) => setInterpolationFactor(parseInt(e.target.value) || 2)}
+                    type="text"
+                    inputMode="numeric"
+                    value={factorInput}
+                    onChange={(e) => setFactorInput(e.target.value.replace(/\D/g, ""))}
+                    onBlur={() => {
+                      const val = parseInt(factorInput);
+                      if (isNaN(val) || val < 2) {
+                        setFactorInput("2");
+                        setInterpolationFactor(2);
+                      } else if (val > 10) {
+                        setFactorInput("10");
+                        setInterpolationFactor(10);
+                      } else {
+                        setFactorInput(String(val));
+                        setInterpolationFactor(val);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        (e.target as HTMLInputElement).blur();
+                      }
+                    }}
                     className="w-full h-9 rounded-md border border-input bg-background px-3 py-2 text-sm"
                   />
                 </div>
@@ -162,9 +213,34 @@ function App() {
                   className="w-full"
                 />
               </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">
+                  Edge Threshold: {edgeThreshold.toFixed(1)}
+                </label>
+                <input
+                  type="range"
+                  min={meta.edge_weight_min}
+                  max={meta.edge_weight_max}
+                  step={(meta.edge_weight_max - meta.edge_weight_min) / 100}
+                  value={edgeThreshold}
+                  onChange={(e) => setEdgeThreshold(parseFloat(e.target.value))}
+                  className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] text-muted-foreground">
+                  <span>{meta.edge_weight_min.toFixed(1)}</span>
+                  <span>{meta.edge_weight_max.toFixed(1)}</span>
+                </div>
+              </div>
             </div>
             <div className="pt-2 border-t border-border">
-              <ControlsBar isPlaying={isPlaying} onPlay={handlePlayPause} onRefresh={() => refetch()} />
+              <ControlsBar
+                isPlaying={isPlaying}
+                onPlay={handlePlayPause}
+                onRefresh={() => refetch()}
+                onExportVideo={exportVideo}
+                exportState={exportState}
+                exportProgress={exportProgress}
+              />
             </div>
           </CardContent>
         </Card>
