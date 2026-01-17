@@ -1,9 +1,17 @@
 import * as d3 from "d3";
 import { GraphFrame } from "./types";
 
-type Point = { x: number; y: number };
+export type Point = { x: number; y: number };
 
-const palette = d3.schemeTableau10;
+export const palette = d3.schemeTableau10;
+export const PADDING = 60;
+
+export const colorScale = d3
+  .scaleLinear<string>()
+  .domain([0, 255])
+  .range(["rgb(220, 38, 38)", "rgb(59, 130, 246)"]);
+
+export const thicknessScale = d3.scaleLinear().domain([0, 255]).range([0.5, 8]);
 
 export function computeNodePositions(
   nodesLength: number,
@@ -12,12 +20,12 @@ export function computeNodePositions(
 ): Point[] {
   const cx = width / 2;
   const cy = height / 2;
-  const rx = width / 2 - 20;
-  const ry = height / 2 - 20;
+  const rx = width / 2 - PADDING;
+  const ry = height / 2 - PADDING;
   const positions: Point[] = [];
 
   for (let i = 0; i < nodesLength; i += 1) {
-    const angle = (i / Math.max(nodesLength, 1)) * Math.PI * 2;
+    const angle = (i / Math.max(nodesLength, 1)) * Math.PI * 2 - Math.PI / 2;
     positions.push({
       x: cx + rx * Math.cos(angle),
       y: cy + ry * Math.sin(angle),
@@ -26,37 +34,53 @@ export function computeNodePositions(
   return positions;
 }
 
+export type DrawOptions = {
+  nodeNames?: string[];
+  edgeThreshold?: number;
+  activeNodeId?: string | null;
+  connectedNodes?: Set<string>;
+  selectedNode?: string | null;
+};
+
+type AnyCanvasContext = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+
 export function drawFrame(
-  ctx: CanvasRenderingContext2D,
+  ctx: AnyCanvasContext,
   frame: GraphFrame,
   width: number,
-  height: number
+  height: number,
+  options: DrawOptions = {}
 ): void {
+  const { nodeNames, edgeThreshold = 0, activeNodeId, connectedNodes, selectedNode } = options;
+
   const positions = computeNodePositions(frame.nodes.length, width, height);
   const nodePositions = new Map<string, Point>();
   frame.nodes.forEach((node, i) => {
     nodePositions.set(node.id, positions[i]);
   });
 
-  // Clear background
   ctx.fillStyle = "#0f172a";
   ctx.fillRect(0, 0, width, height);
 
-  const colorScale = d3
-    .scaleLinear<string>()
-    .domain([0, 255])
-    .range(["rgb(220, 38, 38)", "rgb(59, 130, 246)"]);
+  const isEdgeConnected = (edge: { source: string; target: string }) => {
+    if (!activeNodeId) return true;
+    return edge.source === activeNodeId || edge.target === activeNodeId;
+  };
 
-  const thicknessScale = d3.scaleLinear().domain([0, 255]).range([0.5, 8]);
-
-  // Draw edges
   frame.edges.forEach((edge) => {
     const source = nodePositions.get(edge.source);
     const target = nodePositions.get(edge.target);
-    if (!source || !target || edge.weight <= 0) return;
+    if (!source || !target || edge.weight <= 0 || edge.weight < edgeThreshold) return;
 
     const weight = Math.max(0, Math.min(255, edge.weight));
-    const color = colorScale(weight);
+    const baseColor = colorScale(weight);
+    const edgeIsConnected = isEdgeConnected(edge);
+    const opacity = edgeIsConnected ? 1 : 0.15;
+
+    const rgbMatch = baseColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    const color = rgbMatch
+      ? `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${opacity})`
+      : baseColor;
     const thickness = thicknessScale(weight);
     const pair = [edge.source, edge.target].sort();
     const [sourceId, targetId] = pair;
@@ -81,7 +105,6 @@ export function drawFrame(
     ctx.lineWidth = thickness;
     ctx.stroke();
 
-    // Draw arrows
     const arrowSize = Math.max(4, thickness * 2.2);
     const arrowSpacing = 40;
     const numArrows = Math.max(1, Math.floor(dist / arrowSpacing));
@@ -121,23 +144,58 @@ export function drawFrame(
     }
   });
 
-  // Draw nodes
   frame.nodes.forEach((node, idx) => {
     const pos = nodePositions.get(node.id);
     if (!pos) return;
 
-    const baseFill = palette[idx % palette.length];
-    const radius = 8 + (node.degree ?? 0) * 0.5;
+    const isNodeConnected = !activeNodeId || connectedNodes?.has(node.id);
+    const opacity = isNodeConnected ? 1 : 0.2;
+    const isSelected = node.id === selectedNode;
 
+    const baseFill = palette[idx % palette.length];
+    let fill = baseFill;
+
+    if (opacity < 1) {
+      if (baseFill.startsWith("#")) {
+        const hex = baseFill.slice(1);
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        fill = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      }
+    }
+
+    const radius = 8 + (node.degree ?? 0) * 0.5;
+    ctx.globalAlpha = opacity;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
-    ctx.fillStyle = baseFill;
+    ctx.fillStyle = fill;
     ctx.fill();
 
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 1.5;
+    if (isSelected) {
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, radius + 4, 0, Math.PI * 2);
+      ctx.strokeStyle = "#fbbf24";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    ctx.strokeStyle = isNodeConnected ? "white" : "rgba(255, 255, 255, 0.5)";
+    ctx.lineWidth = isSelected ? 2.5 : 1.5;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
     ctx.stroke();
+
+    if (nodeNames) {
+      const nameIndex = node.id.charCodeAt(0) - "A".charCodeAt(0);
+      const name = nodeNames[nameIndex] ?? node.id;
+      ctx.font = "500 12px system-ui, -apple-system, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillStyle = isNodeConnected ? "white" : `rgba(255, 255, 255, ${opacity})`;
+      ctx.fillText(name, pos.x, pos.y - radius - 6);
+    }
+
+    ctx.globalAlpha = 1;
   });
 }

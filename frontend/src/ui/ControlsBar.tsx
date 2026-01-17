@@ -49,7 +49,7 @@ export function ControlsBar({
           <RefreshCw className="h-3.5 w-3.5" />
         </Button>
       </Tooltip>
-      <Tooltip content={isExporting ? `Exporting ${exportProgress}%` : "Download Video"}>
+      <Tooltip content="Download Video">
         <Button
           size="icon"
           variant="outline"
@@ -65,6 +65,19 @@ export function ControlsBar({
           )}
         </Button>
       </Tooltip>
+      {isExporting && (
+        <div className="flex items-center gap-2 ml-1 flex-1 min-w-0">
+          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden min-w-12 max-w-32">
+            <div
+              className="h-full bg-primary transition-all duration-150"
+              style={{ width: `${exportProgress}%` }}
+            />
+          </div>
+          <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+            {exportProgress}%
+          </span>
+        </div>
+      )}
     </div>
   );
 }

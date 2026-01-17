@@ -23,6 +23,7 @@ function App() {
   const [factorInput, setFactorInput] = useState<string>("2");
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
   const [edgeThreshold, setEdgeThreshold] = useState<number>(0);
+  const [hiddenNodes, setHiddenNodes] = useState<Set<string>>(new Set());
   const { frame, allFrames, isLoading, error, refetch, setTime, meta, time } = useGraphData(smoothing, interpolation, interpolationFactor);
   const [isPlaying, setIsPlaying] = useState(false);
   const intervalRef = useRef<number | null>(null);
@@ -48,6 +49,7 @@ function App() {
     playbackSpeed,
     nodeNames: metadataQuery.data?.node_names,
     edgeThreshold,
+    hiddenNodes,
   });
 
   useEffect(() => {
@@ -131,7 +133,7 @@ function App() {
                   Failed to load data: {String(error)}
                 </div>
               )}
-              <GraphCanvas frame={frame} isLoading={isLoading} edgeThreshold={edgeThreshold} />
+              <GraphCanvas frame={frame} isLoading={isLoading} edgeThreshold={edgeThreshold} hiddenNodes={hiddenNodes} />
             </div>
           </CardContent>
         </Card>
@@ -231,6 +233,58 @@ function App() {
                   <span>{meta.edge_weight_max.toFixed(1)}</span>
                 </div>
               </div>
+              {metadataQuery.data?.node_names && metadataQuery.data.node_names.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-foreground">Nodes</label>
+                    <button
+                      onClick={() => {
+                        if (hiddenNodes.size === 0) {
+                          setHiddenNodes(new Set(metadataQuery.data!.node_names.map((_, i) => String.fromCharCode(65 + i))));
+                        } else {
+                          setHiddenNodes(new Set());
+                        }
+                      }}
+                      className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {hiddenNodes.size === 0 ? "Hide All" : "Show All"}
+                    </button>
+                  </div>
+                  <div className="space-y-1">
+                    {metadataQuery.data.node_names.map((name, idx) => {
+                      const nodeId = String.fromCharCode(65 + idx);
+                      const isHidden = hiddenNodes.has(nodeId);
+                      const colors = ["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab"];
+                      const color = colors[idx % colors.length];
+                      return (
+                        <button
+                          key={nodeId}
+                          onClick={() => {
+                            setHiddenNodes((prev) => {
+                              const next = new Set(prev);
+                              if (isHidden) {
+                                next.delete(nodeId);
+                              } else {
+                                next.add(nodeId);
+                              }
+                              return next;
+                            });
+                          }}
+                          className="w-full flex items-center gap-2 px-2 py-1 rounded text-left transition-all hover:bg-white/10"
+                        >
+                          <span
+                            className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isHidden ? "grayscale" : ""}`}
+                            style={{ backgroundColor: color }}
+                          />
+                          <span className={`text-xs truncate ${isHidden ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                            {name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="pt-2 border-t border-border">
               <ControlsBar

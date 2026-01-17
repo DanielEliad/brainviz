@@ -15,6 +15,14 @@ NUM_FRAMES = 200
 GRAPH_MATRICES = [
     np.random.uniform(0, 255, size=(NUM_NODES, NUM_NODES)) for _ in range(NUM_FRAMES)
 ]
+NODE_NAMES = [
+    "Prefrontal Cortex",
+    "Motor Cortex",
+    "Visual Cortex",
+    "Temporal Lobe",
+    "Parietal Lobe",
+    "Hippocampus",
+]
 
 app = FastAPI(title="BrainViz Graph Backend", version="0.1.0")
 app.add_middleware(
@@ -34,11 +42,10 @@ def healthcheck() -> dict:
 @app.get("/graph/metadata")
 def get_graph_metadata() -> dict:
     n = NUM_NODES
-    node_names = [chr(ord("A") + i) for i in range(n)]
     return {
         "num_nodes": n,
-        "node_names": node_names,
-        "description": f"Graph with {n} nodes, matrix is {n}x{n} where (0,0) is {node_names[0]}->{node_names[0]}",
+        "node_names": NODE_NAMES,
+        "description": f"Graph with {n} nodes representing brain regions",
     }
 
 
