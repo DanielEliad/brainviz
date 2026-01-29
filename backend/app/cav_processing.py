@@ -3,10 +3,12 @@ CAV Data Processing Module
 
 This module provides functionality for:
 1. Parsing CAV (Correlation/Adjacency/Covariance) files and time series data
-2. Applying various correlation and transformation techniques
-3. Converting processed data to pipeline-compatible format
+2. Parsing ABIDE dual-regression ICA time series files
+3. Applying various correlation and transformation techniques
+4. Converting processed data to pipeline-compatible format
 
 Supported input formats:
+- ABIDE dual-regression files (dr_stage1_subjectXXXXXXX.txt)
 - Time series data (nodes x timepoints)
 - Adjacency/correlation matrices per timestamp
 - Raw CSV with node time series
@@ -22,12 +24,83 @@ Transformations available:
 
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 import numpy as np
 import pandas as pd
 from scipy import stats
 from scipy.ndimage import uniform_filter1d
+
+
+# =============================================================================
+# ABIDE RSN (Resting-State Network) Component Mapping
+# =============================================================================
+# Based on the 32-component group ICA from ABIDE preprocessing
+# Component indices follow melodic_ic output (1-indexed)
+
+RSN_COMPONENTS: Dict[int, str] = {
+    1: "Anterior Default Mode Network",
+    2: "Primary Visual Network",
+    5: "Salience Network",
+    6: "Posterior Default Mode Network",
+    7: "Auditory Network",
+    9: "Left Frontoparietal Network",
+    12: "Right Frontoparietal Network",
+    13: "Lateral Visual Network",
+    14: "Lateral Sensorimotor Network",
+    15: "Cerebellum Network",
+    18: "Primary Sensorimotor Network",
+    19: "Dorsal Attention Network",
+    21: "Language Network",
+    27: "Occipital Visual Network",
+}
+
+# Short names for visualization
+RSN_SHORT_NAMES: Dict[int, str] = {
+    1: "aDMN",
+    2: "V1",
+    5: "SAL",
+    6: "pDMN",
+    7: "AUD",
+    9: "lFPN",
+    12: "rFPN",
+    13: "latVIS",
+    14: "latSM",
+    15: "CER",
+    18: "SM1",
+    19: "DAN",
+    21: "LANG",
+    27: "occVIS",
+}
+
+# All RSN component indices (0-indexed for array access)
+RSN_INDICES_0BASED: List[int] = [i - 1 for i in RSN_COMPONENTS.keys()]
+RSN_INDICES_1BASED: List[int] = list(RSN_COMPONENTS.keys())
+
+
+def get_rsn_name(component_index: int, one_indexed: bool = True, short: bool = False) -> str:
+    """
+    Get the RSN name for a component index.
+
+    Args:
+        component_index: The ICA component index
+        one_indexed: If True, index starts at 1 (melodic_ic style)
+        short: If True, return short name for visualization
+
+    Returns:
+        RSN name or "Component_N" if not a recognized RSN
+    """
+    idx = component_index if one_indexed else component_index + 1
+
+    if short:
+        return RSN_SHORT_NAMES.get(idx, f"IC{idx}")
+    return RSN_COMPONENTS.get(idx, f"Component_{idx}")
+
+
+def is_rsn_component(component_index: int, one_indexed: bool = True) -> bool:
+    """Check if a component index corresponds to a recognized RSN."""
+    idx = component_index if one_indexed else component_index + 1
+    return idx in RSN_COMPONENTS
 
 
 class CorrelationType(Enum):
@@ -63,10 +136,155 @@ class CAVParser:
     Parser for CAV (Correlation/Adjacency/Covariance) data files.
 
     Supports multiple input formats:
+    - ABIDE dual-regression files: space-separated, 32 columns (ICA components)
     - Time series CSV: rows are timepoints, columns are nodes
     - Matrix files: adjacency/correlation matrices
     - Multi-timestamp matrices: 3D arrays (time x nodes x nodes)
     """
+
+    @staticmethod
+    def parse_abide_dr_file(
+        filepath: Path,
+        rsn_only: bool = True,
+        use_short_names: bool = True,
+    ) -> Tuple[np.ndarray, List[str]]:
+        """
+        Parse an ABIDE dual-regression time series file.
+
+        These files are named 'dr_stage1_subjectXXXXXXX.txt' and contain
+        space-separated values with 32 columns (one per ICA component).
+        Each row is a timepoint.
+
+        Args:
+            filepath: Path to the dr_stage1_*.txt file
+            rsn_only: If True, only include the 14 identified RSN components
+            use_short_names: If True, use short names (e.g., "aDMN", "V1")
+
+        Returns:
+            Tuple of (data array [timepoints x nodes], node names)
+        """
+        # Load space/tab separated data
+        data = np.loadtxt(filepath)
+
+        if data.ndim == 1:
+            # Single timepoint, reshape to 2D
+            data = data.reshape(1, -1)
+
+        n_timepoints, n_components = data.shape
+
+        if n_components != 32:
+            raise ValueError(
+                f"Expected 32 components in ABIDE DR file, got {n_components}"
+            )
+
+        if rsn_only:
+            # Filter to only RSN components (0-indexed)
+            rsn_indices = RSN_INDICES_0BASED
+            data = data[:, rsn_indices]
+
+            # Get names for filtered components
+            if use_short_names:
+                node_names = [RSN_SHORT_NAMES[i + 1] for i in rsn_indices]
+            else:
+                node_names = [RSN_COMPONENTS[i + 1] for i in rsn_indices]
+        else:
+            # Include all 32 components
+            if use_short_names:
+                node_names = [
+                    RSN_SHORT_NAMES.get(i + 1, f"IC{i + 1}")
+                    for i in range(n_components)
+                ]
+            else:
+                node_names = [
+                    RSN_COMPONENTS.get(i + 1, f"Component_{i + 1}")
+                    for i in range(n_components)
+                ]
+
+        return data, node_names
+
+    @staticmethod
+    def parse_abide_subject_files(
+        filepaths: List[Path],
+        rsn_only: bool = True,
+        use_short_names: bool = True,
+        concatenate: bool = False,
+    ) -> Tuple[Union[np.ndarray, List[np.ndarray]], List[str], List[str]]:
+        """
+        Parse multiple ABIDE dual-regression files (multiple subjects).
+
+        Args:
+            filepaths: List of paths to dr_stage1_*.txt files
+            rsn_only: If True, only include the 14 identified RSN components
+            use_short_names: If True, use short names
+            concatenate: If True, concatenate all subjects' data
+
+        Returns:
+            Tuple of:
+                - data: Either single array (if concatenate) or list of arrays
+                - node_names: List of node/network names
+                - subject_ids: List of extracted subject IDs
+        """
+        all_data = []
+        subject_ids = []
+        node_names = None
+
+        for fp in filepaths:
+            data, names = CAVParser.parse_abide_dr_file(
+                fp, rsn_only=rsn_only, use_short_names=use_short_names
+            )
+            all_data.append(data)
+
+            # Extract subject ID from filename (dr_stage1_subjectXXXXXXX.txt)
+            filename = fp.stem
+            if filename.startswith("dr_stage1_subject"):
+                subject_id = filename.replace("dr_stage1_subject", "")
+            else:
+                subject_id = filename
+            subject_ids.append(subject_id)
+
+            if node_names is None:
+                node_names = names
+
+        if concatenate:
+            return np.vstack(all_data), node_names, subject_ids
+
+        return all_data, node_names, subject_ids
+
+    @staticmethod
+    def find_abide_files(
+        base_dir: Path,
+        site: Optional[str] = None,
+        version: Optional[str] = None,
+    ) -> List[Path]:
+        """
+        Find ABIDE dual-regression files in a directory structure.
+
+        Expected structure: base_dir/ABIDE/{ABIDE_I,ABIDE_II}/site/dr_stage1_*.txt
+
+        Args:
+            base_dir: Base directory containing ABIDE folder
+            site: Optional site filter (e.g., "NYU", "UCLA")
+            version: Optional version filter ("ABIDE_I" or "ABIDE_II")
+
+        Returns:
+            List of paths to dr_stage1_*.txt files
+        """
+        pattern_parts = ["ABIDE"]
+
+        if version:
+            pattern_parts.append(version)
+        else:
+            pattern_parts.append("*")
+
+        if site:
+            pattern_parts.append(f"*{site}*")
+        else:
+            pattern_parts.append("*")
+
+        pattern_parts.append("dr_stage1_subject*.txt")
+
+        pattern = "/".join(pattern_parts)
+        return sorted(base_dir.glob(pattern))
 
     @staticmethod
     def parse_timeseries_csv(
@@ -423,6 +641,67 @@ class CAVProcessor:
         self._data: Optional[np.ndarray] = None
         self._node_names: Optional[List[str]] = None
         self._processed_matrices: Optional[np.ndarray] = None
+        self._subject_ids: Optional[List[str]] = None
+        self._subject_data: Optional[List[np.ndarray]] = None
+
+    def load_abide_file(
+        self,
+        filepath: Path,
+        rsn_only: bool = True,
+        use_short_names: bool = True,
+    ) -> "CAVProcessor":
+        """
+        Load an ABIDE dual-regression time series file.
+
+        Args:
+            filepath: Path to dr_stage1_subjectXXXXXXX.txt file
+            rsn_only: If True, only include the 14 identified RSN components
+            use_short_names: If True, use short names (e.g., "aDMN", "V1")
+
+        Returns:
+            Self for method chaining
+        """
+        self._data, self._node_names = CAVParser.parse_abide_dr_file(
+            filepath, rsn_only=rsn_only, use_short_names=use_short_names
+        )
+        self._processed_matrices = None
+        return self
+
+    def load_abide_files(
+        self,
+        filepaths: List[Path],
+        rsn_only: bool = True,
+        use_short_names: bool = True,
+        concatenate: bool = True,
+    ) -> "CAVProcessor":
+        """
+        Load multiple ABIDE dual-regression files and optionally concatenate.
+
+        Args:
+            filepaths: List of paths to dr_stage1_*.txt files
+            rsn_only: If True, only include the 14 identified RSN components
+            use_short_names: If True, use short names
+            concatenate: If True, concatenate all subjects' data into one
+
+        Returns:
+            Self for method chaining
+        """
+        result, self._node_names, self._subject_ids = CAVParser.parse_abide_subject_files(
+            filepaths,
+            rsn_only=rsn_only,
+            use_short_names=use_short_names,
+            concatenate=concatenate,
+        )
+
+        if concatenate:
+            self._data = result
+            self._subject_data = None
+        else:
+            self._data = None
+            self._subject_data = result  # List of arrays per subject
+
+        self._processed_matrices = None
+        return self
 
     def load_timeseries(
         self,
@@ -739,6 +1018,47 @@ def process_timeseries_to_csv(
     processor.to_csv(output_path)
 
 
+def process_abide_to_csv(
+    input_path: Path,
+    output_path: Path,
+    window_size: int = 30,
+    step_size: int = 1,
+    method: str = "pearson",
+    threshold: Optional[float] = 0.1,
+    rsn_only: bool = True,
+    use_short_names: bool = True,
+) -> None:
+    """
+    Quick function to process an ABIDE DR file to pipeline-compatible CSV.
+
+    Args:
+        input_path: Path to input dr_stage1_*.txt file
+        output_path: Path for output edges CSV
+        window_size: Sliding window size (default 30 TRs)
+        step_size: Step between windows
+        method: Correlation method
+        threshold: Optional correlation threshold
+        rsn_only: If True, only include the 14 identified RSN components
+        use_short_names: If True, use short names
+    """
+    config = CAVConfig(
+        window_size=window_size,
+        step_size=step_size,
+        threshold=threshold,
+    )
+
+    processor = CAVProcessor(config)
+    processor.load_abide_file(
+        input_path, rsn_only=rsn_only, use_short_names=use_short_names
+    )
+    processor.compute_correlations(method=method)
+
+    if threshold:
+        processor.apply_threshold()
+
+    processor.to_csv(output_path)
+
+
 def generate_sample_timeseries(
     n_nodes: int = 10,
     n_timepoints: int = 200,
@@ -783,12 +1103,59 @@ def generate_sample_timeseries(
     return data, node_names
 
 
+def generate_sample_abide_file(
+    output_path: Path,
+    n_timepoints: int = 200,
+    seed: Optional[int] = None,
+) -> None:
+    """
+    Generate a sample ABIDE-like DR file for testing.
+
+    Creates a file with 32 columns (ICA components) and specified timepoints.
+
+    Args:
+        output_path: Path to save the generated file
+        n_timepoints: Number of timepoints (TRs)
+        seed: Random seed
+    """
+    if seed is not None:
+        np.random.seed(seed)
+
+    # Generate 32 ICA component time series
+    data = np.random.randn(n_timepoints, 32)
+
+    # Add correlations within some RSN pairs
+    # DMN components (1 and 6) should be correlated
+    common_dmn = np.random.randn(n_timepoints)
+    data[:, 0] += 0.6 * common_dmn  # aDMN (component 1)
+    data[:, 5] += 0.6 * common_dmn  # pDMN (component 6)
+
+    # Visual components correlated
+    common_vis = np.random.randn(n_timepoints)
+    data[:, 1] += 0.5 * common_vis  # Primary Visual
+    data[:, 12] += 0.5 * common_vis  # Lateral Visual
+    data[:, 26] += 0.5 * common_vis  # Occipital Visual
+
+    # Frontoparietal networks correlated
+    common_fpn = np.random.randn(n_timepoints)
+    data[:, 8] += 0.4 * common_fpn  # Left FPN
+    data[:, 11] += 0.4 * common_fpn  # Right FPN
+
+    # Save as space-separated file
+    np.savetxt(output_path, data, fmt="%.8f", delimiter="  ")
+
+
 if __name__ == "__main__":
+    import tempfile
+
     # Example usage
     print("CAV Processing Module - Example Usage")
     print("=" * 50)
 
-    # Generate sample data
+    # Example 1: Generate sample data and process
+    print("\n1. Processing synthetic time series data:")
+    print("-" * 40)
+
     data, node_names = generate_sample_timeseries(
         n_nodes=8,
         n_timepoints=100,
@@ -796,7 +1163,6 @@ if __name__ == "__main__":
     )
     print(f"Generated sample data: {data.shape[0]} timepoints, {data.shape[1]} nodes")
 
-    # Process with Pearson correlation
     config = CAVConfig(
         window_size=20,
         step_size=5,
@@ -816,7 +1182,47 @@ if __name__ == "__main__":
         print(f"First frame has {len(frames[0].edges)} edges")
         print(f"Sample edges: {frames[0].edges[:3]}")
 
-    # Export to DataFrame
-    df = processor.to_dataframe()
-    print(f"\nDataFrame shape: {df.shape}")
-    print(df.head(10))
+    # Example 2: Generate and process ABIDE-like data
+    print("\n2. Processing ABIDE-format dual-regression data:")
+    print("-" * 40)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Generate sample ABIDE file
+        sample_file = Path(tmpdir) / "dr_stage1_subject0051234.txt"
+        generate_sample_abide_file(sample_file, n_timepoints=150, seed=42)
+        print(f"Generated sample ABIDE file: {sample_file.name}")
+
+        # Process the file
+        config = CAVConfig(
+            window_size=30,
+            step_size=5,
+            correlation_type=CorrelationType.PEARSON,
+            threshold=0.2,
+        )
+
+        processor = CAVProcessor(config)
+        processor.load_abide_file(sample_file, rsn_only=True, use_short_names=True)
+        processor.compute_correlations()
+        processor.apply_threshold()
+
+        frames = processor.get_frames()
+        print(f"Generated {len(frames)} frames from ABIDE data")
+        print(f"Nodes (RSN networks): {processor.get_node_names()}")
+
+        if frames:
+            print(f"First frame edges: {len(frames[0].edges)}")
+            print("Sample edges (network connectivity):")
+            for edge in frames[0].edges[:5]:
+                print(f"  {edge[0]} <-> {edge[1]}: {edge[2]:.1f}")
+
+        # Export to DataFrame
+        df = processor.to_dataframe()
+        print(f"\nExported DataFrame shape: {df.shape}")
+        print(df.head(10))
+
+    # Show RSN information
+    print("\n3. Available RSN Components:")
+    print("-" * 40)
+    for idx, name in RSN_COMPONENTS.items():
+        short = RSN_SHORT_NAMES[idx]
+        print(f"  Component {idx:2d}: {short:8s} - {name}")
