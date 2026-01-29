@@ -162,7 +162,7 @@ def get_abide_data(
                     "source": "abide",
                     "file": file_path,
                     "method": method,
-                    "window_size": window_size,
+                    "window_size": str(window_size),
                 },
             )
         )
