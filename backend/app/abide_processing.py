@@ -4,15 +4,17 @@ ABIDE Dual-Regression Processing Module
 Linear pipeline: parse → transform → export
 
 Stage 1: CONSTANTS  - RSN network mappings
-Stage 2: PARSERS    - Load files to numpy arrays
-Stage 3: TRANSFORMS - Correlation computations (array → array)
-Stage 4: EXPORTERS  - Convert to CSV format
+Stage 2: ENUMS      - Correlation methods and parameters
+Stage 3: PARSERS    - Load files to numpy arrays
+Stage 4: TRANSFORMS - Correlation computations (array → array)
+Stage 5: API        - Entry point for backend
 """
 
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional
 import numpy as np
-import pandas as pd
 from scipy import stats
 
 
@@ -20,7 +22,6 @@ from scipy import stats
 # STAGE 1: CONSTANTS
 # =============================================================================
 
-# RSN component indices (1-indexed, matching melodic_ic output)
 RSN_INDICES = [1, 2, 5, 6, 7, 9, 12, 13, 14, 15, 18, 19, 21, 27]
 
 RSN_NAMES = {
@@ -59,7 +60,28 @@ RSN_SHORT = {
 
 
 # =============================================================================
-# STAGE 2: PARSERS
+# STAGE 2: ENUMS
+# =============================================================================
+
+class CorrelationMethod(str, Enum):
+    """Available correlation methods."""
+    PEARSON = "pearson"
+    SPEARMAN = "spearman"
+    PARTIAL = "partial"
+
+
+@dataclass
+class CorrelationParams:
+    """Parameters for correlation computation."""
+    method: CorrelationMethod = CorrelationMethod.PEARSON
+    window_size: int = 30
+    step: int = 1
+    threshold: Optional[float] = None
+    fisher_transform: bool = False
+
+
+# =============================================================================
+# STAGE 3: PARSERS
 # =============================================================================
 
 def parse_dr_file(filepath: Path) -> np.ndarray:
@@ -82,7 +104,7 @@ def filter_rsn_columns(data: np.ndarray) -> np.ndarray:
     Input: ndarray [timepoints x 32]
     Output: ndarray [timepoints x 14]
     """
-    indices = [i - 1 for i in RSN_INDICES]  # Convert to 0-indexed
+    indices = [i - 1 for i in RSN_INDICES]
     return data[:, indices]
 
 
@@ -92,179 +114,203 @@ def get_rsn_labels(short: bool = True) -> List[str]:
     return [names[i] for i in RSN_INDICES]
 
 
+def list_subject_files(data_dir: Path) -> List[dict]:
+    """
+    List all available subject files in the data directory.
+
+    Returns list of {path, subject_id, site, version} dicts.
+    """
+    files = []
+
+    for txt_file in data_dir.rglob("dr_stage1_subject*.txt"):
+        parts = txt_file.relative_to(data_dir).parts
+
+        subject_id = txt_file.stem.replace("dr_stage1_subject", "")
+        site = parts[-2] if len(parts) >= 2 else "unknown"
+        version = parts[-3] if len(parts) >= 3 else "unknown"
+
+        files.append({
+            "path": str(txt_file.relative_to(data_dir)),
+            "subject_id": subject_id,
+            "site": site,
+            "version": version,
+        })
+
+    return sorted(files, key=lambda x: (x["version"], x["site"], x["subject_id"]))
+
+
 # =============================================================================
-# STAGE 3: TRANSFORMS
+# STAGE 4: TRANSFORMS
 # =============================================================================
 
 def pearson_matrix(data: np.ndarray) -> np.ndarray:
-    """
-    Compute Pearson correlation matrix.
-
-    Input: ndarray [timepoints x nodes]
-    Output: ndarray [nodes x nodes]
-    """
+    """Pearson correlation matrix. Input: [T x N], Output: [N x N]"""
     return np.corrcoef(data.T)
 
 
 def spearman_matrix(data: np.ndarray) -> np.ndarray:
-    """
-    Compute Spearman correlation matrix.
-
-    Input: ndarray [timepoints x nodes]
-    Output: ndarray [nodes x nodes]
-    """
-    n_nodes = data.shape[1]
-    matrix = np.zeros((n_nodes, n_nodes))
-    for i in range(n_nodes):
-        for j in range(i, n_nodes):
+    """Spearman correlation matrix. Input: [T x N], Output: [N x N]"""
+    n = data.shape[1]
+    matrix = np.zeros((n, n))
+    for i in range(n):
+        for j in range(i, n):
             r, _ = stats.spearmanr(data[:, i], data[:, j])
-            matrix[i, j] = r
-            matrix[j, i] = r
+            matrix[i, j] = matrix[j, i] = r if not np.isnan(r) else 0.0
     return matrix
+
+
+def partial_correlation_matrix(data: np.ndarray) -> np.ndarray:
+    """Partial correlation matrix. Input: [T x N], Output: [N x N]"""
+    cov = np.cov(data.T)
+    try:
+        precision = np.linalg.inv(cov)
+    except np.linalg.LinAlgError:
+        precision = np.linalg.pinv(cov)
+
+    n = precision.shape[0]
+    partial = np.zeros((n, n))
+
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                partial[i, j] = 1.0
+            else:
+                denom = np.sqrt(precision[i, i] * precision[j, j])
+                partial[i, j] = -precision[i, j] / denom if denom > 0 else 0.0
+
+    return partial
+
+
+def compute_correlation(data: np.ndarray, method: CorrelationMethod) -> np.ndarray:
+    """Compute correlation matrix using specified method."""
+    if method == CorrelationMethod.PEARSON:
+        return pearson_matrix(data)
+    elif method == CorrelationMethod.SPEARMAN:
+        return spearman_matrix(data)
+    elif method == CorrelationMethod.PARTIAL:
+        return partial_correlation_matrix(data)
+    else:
+        raise ValueError(f"Unknown method: {method}")
 
 
 def windowed_correlation(
     data: np.ndarray,
+    method: CorrelationMethod,
     window_size: int,
     step: int = 1,
-    method: str = "pearson"
 ) -> np.ndarray:
     """
     Compute correlation matrices over sliding windows.
 
-    Input: ndarray [timepoints x nodes]
-    Output: ndarray [n_windows x nodes x nodes]
+    Input: ndarray [T x N]
+    Output: ndarray [F x N x N] where F = number of frames
     """
-    n_timepoints, n_nodes = data.shape
-    n_windows = (n_timepoints - window_size) // step + 1
+    n_timepoints = data.shape[0]
+    n_frames = (n_timepoints - window_size) // step + 1
 
-    corr_func = pearson_matrix if method == "pearson" else spearman_matrix
+    if n_frames <= 0:
+        raise ValueError(f"Window size {window_size} too large for {n_timepoints} timepoints")
 
-    matrices = np.zeros((n_windows, n_nodes, n_nodes))
-    for w in range(n_windows):
-        start = w * step
+    n_nodes = data.shape[1]
+    matrices = np.zeros((n_frames, n_nodes, n_nodes))
+
+    for f in range(n_frames):
+        start = f * step
         end = start + window_size
-        matrices[w] = corr_func(data[start:end])
+        matrices[f] = compute_correlation(data[start:end], method)
 
     return matrices
 
 
 def fisher_z(matrices: np.ndarray) -> np.ndarray:
-    """
-    Apply Fisher z-transform to correlation matrices.
-
-    Input: ndarray [... x nodes x nodes] with values in [-1, 1]
-    Output: ndarray [... x nodes x nodes] with values in (-inf, inf)
-    """
+    """Apply Fisher z-transform. Input: [-1,1], Output: (-inf, inf)"""
     clipped = np.clip(matrices, -0.9999, 0.9999)
     return 0.5 * np.log((1 + clipped) / (1 - clipped))
 
 
-def threshold_matrices(matrices: np.ndarray, threshold: float) -> np.ndarray:
-    """
-    Zero out correlations below threshold.
-
-    Input: ndarray [... x nodes x nodes]
-    Output: ndarray [... x nodes x nodes]
-    """
+def apply_threshold(matrices: np.ndarray, threshold: float) -> np.ndarray:
+    """Zero out correlations below threshold."""
     result = matrices.copy()
     result[np.abs(result) < threshold] = 0.0
     return result
 
 
-def normalize_to_range(
-    matrices: np.ndarray,
-    out_min: float = 0.0,
-    out_max: float = 255.0
+def normalize_to_255(matrices: np.ndarray) -> np.ndarray:
+    """Normalize from [-1, 1] to [0, 255]."""
+    return ((matrices + 1) / 2) * 255
+
+
+# =============================================================================
+# STAGE 5: API
+# =============================================================================
+
+def compute_correlation_matrices(
+    filepath: Path,
+    params: CorrelationParams,
 ) -> np.ndarray:
     """
-    Normalize correlation values from [-1, 1] to [out_min, out_max].
+    Main API function: file → NxNxF correlation matrices.
 
-    Input: ndarray with values in [-1, 1]
-    Output: ndarray with values in [out_min, out_max]
-    """
-    normalized = (matrices + 1) / 2  # [-1, 1] → [0, 1]
-    return out_min + normalized * (out_max - out_min)
+    Args:
+        filepath: Path to dr_stage1_subjectXXXXXXX.txt file
+        params: Correlation parameters
 
-
-# =============================================================================
-# STAGE 4: EXPORTERS
-# =============================================================================
-
-def matrices_to_edge_list(
-    matrices: np.ndarray,
-    node_labels: List[str]
-) -> List[Tuple[int, str, str, float]]:
-    """
-    Convert correlation matrices to edge list.
-
-    Input: ndarray [n_windows x nodes x nodes], list of node labels
-    Output: list of (timestamp, source, target, weight) tuples
-    """
-    edges = []
-    n_windows, n_nodes, _ = matrices.shape
-
-    for t in range(n_windows):
-        for i in range(n_nodes):
-            for j in range(i + 1, n_nodes):
-                weight = matrices[t, i, j]
-                if weight != 0.0:
-                    edges.append((t, node_labels[i], node_labels[j], weight))
-
-    return edges
-
-
-def edges_to_dataframe(
-    edges: List[Tuple[int, str, str, float]]
-) -> pd.DataFrame:
-    """
-    Convert edge list to DataFrame.
-
-    Output columns: timestamp, source, target, weight
-    """
-    return pd.DataFrame(edges, columns=["timestamp", "source", "target", "weight"])
-
-
-def save_edges_csv(edges: List[Tuple[int, str, str, float]], filepath: Path) -> None:
-    """Save edge list to CSV file."""
-    df = edges_to_dataframe(edges)
-    df.to_csv(filepath, index=False)
-
-
-# =============================================================================
-# PIPELINE HELPERS
-# =============================================================================
-
-def process_subject(
-    filepath: Path,
-    window_size: int = 30,
-    step: int = 1,
-    method: str = "pearson",
-    threshold: Optional[float] = None,
-    normalize: bool = True,
-) -> pd.DataFrame:
-    """
-    Full pipeline for a single subject file.
-
-    parse → filter → correlate → (threshold) → (normalize) → export
+    Returns:
+        ndarray [F x N x N] - F frames of NxN correlation matrices
     """
     # Parse
     data = parse_dr_file(filepath)
     data = filter_rsn_columns(data)
-    labels = get_rsn_labels(short=True)
 
     # Transform
-    matrices = windowed_correlation(data, window_size, step, method)
+    matrices = windowed_correlation(data, params.method, params.window_size, params.step)
 
-    if threshold is not None:
-        matrices = threshold_matrices(matrices, threshold)
+    if params.fisher_transform:
+        matrices = fisher_z(matrices)
 
-    if normalize:
-        matrices = normalize_to_range(matrices)
+    if params.threshold is not None:
+        matrices = apply_threshold(matrices, params.threshold)
 
-    # Export
-    edges = matrices_to_edge_list(matrices, labels)
-    return edges_to_dataframe(edges)
+    # Normalize to [0, 255] for visualization
+    matrices = normalize_to_255(matrices)
+
+    return matrices
+
+
+def get_method_info() -> List[dict]:
+    """Return info about available correlation methods and their parameters."""
+    return [
+        {
+            "id": CorrelationMethod.PEARSON.value,
+            "name": "Pearson Correlation",
+            "description": "Linear correlation coefficient",
+            "params": [
+                {"name": "window_size", "type": "int", "default": 30, "min": 5, "max": 100},
+                {"name": "step", "type": "int", "default": 1, "min": 1, "max": 10},
+                {"name": "threshold", "type": "float", "default": None, "min": 0, "max": 1},
+            ],
+        },
+        {
+            "id": CorrelationMethod.SPEARMAN.value,
+            "name": "Spearman Correlation",
+            "description": "Rank-based correlation (robust to outliers)",
+            "params": [
+                {"name": "window_size", "type": "int", "default": 30, "min": 5, "max": 100},
+                {"name": "step", "type": "int", "default": 1, "min": 1, "max": 10},
+                {"name": "threshold", "type": "float", "default": None, "min": 0, "max": 1},
+            ],
+        },
+        {
+            "id": CorrelationMethod.PARTIAL.value,
+            "name": "Partial Correlation",
+            "description": "Correlation controlling for other variables",
+            "params": [
+                {"name": "window_size", "type": "int", "default": 30, "min": 5, "max": 100},
+                {"name": "step", "type": "int", "default": 1, "min": 1, "max": 10},
+                {"name": "threshold", "type": "float", "default": None, "min": 0, "max": 1},
+            ],
+        },
+    ]
 
 
 if __name__ == "__main__":
@@ -273,46 +319,36 @@ if __name__ == "__main__":
     print("ABIDE Processing Module - Test")
     print("=" * 50)
 
-    # Generate test data
+    # Generate test file
     with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as f:
         test_data = np.random.randn(100, 32)
-        # Add correlation between DMN components
         signal = np.random.randn(100)
-        test_data[:, 0] += 0.6 * signal  # Component 1 (aDMN)
-        test_data[:, 5] += 0.6 * signal  # Component 6 (pDMN)
+        test_data[:, 0] += 0.6 * signal
+        test_data[:, 5] += 0.6 * signal
         np.savetxt(f.name, test_data, fmt="%.8f")
         test_file = Path(f.name)
 
-    print(f"\n1. Parse: {test_file.name}")
-    data = parse_dr_file(test_file)
-    print(f"   Shape: {data.shape}")
+    print(f"\nTest file: {test_file}")
 
-    print("\n2. Filter RSN columns")
-    rsn_data = filter_rsn_columns(data)
-    print(f"   Shape: {rsn_data.shape}")
-    print(f"   Labels: {get_rsn_labels()}")
+    # Test API function
+    params = CorrelationParams(
+        method=CorrelationMethod.PEARSON,
+        window_size=30,
+        step=5,
+        threshold=0.2,
+    )
 
-    print("\n3. Windowed correlation (window=30, step=5)")
-    matrices = windowed_correlation(rsn_data, window_size=30, step=5)
-    print(f"   Shape: {matrices.shape}")
+    matrices = compute_correlation_matrices(test_file, params)
+    print(f"\nResult shape: {matrices.shape}")
+    print(f"  Frames: {matrices.shape[0]}")
+    print(f"  Nodes: {matrices.shape[1]}")
+    print(f"  Value range: [{matrices.min():.1f}, {matrices.max():.1f}]")
 
-    print("\n4. Apply threshold (0.2)")
-    matrices = threshold_matrices(matrices, 0.2)
+    print(f"\nRSN Labels: {get_rsn_labels()}")
 
-    print("\n5. Normalize to [0, 255]")
-    matrices = normalize_to_range(matrices)
-
-    print("\n6. Export to edges")
-    edges = matrices_to_edge_list(matrices, get_rsn_labels())
-    print(f"   Total edges: {len(edges)}")
-
-    df = edges_to_dataframe(edges)
-    print(f"\n   DataFrame:\n{df.head(10)}")
+    print("\nAvailable methods:")
+    for m in get_method_info():
+        print(f"  - {m['name']}: {m['description']}")
 
     # Cleanup
     test_file.unlink()
-
-    print("\n" + "=" * 50)
-    print("RSN Networks:")
-    for idx in RSN_INDICES:
-        print(f"  {RSN_SHORT[idx]:8s} - {RSN_NAMES[idx]}")

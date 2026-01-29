@@ -1,44 +1,65 @@
-import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import GraphCanvas from "./vis/GraphCanvas";
 import { Timeline } from "./ui/Timeline";
 import { ControlsBar } from "./ui/ControlsBar";
-import { useGraphData, SmoothingAlgorithm, InterpolationAlgorithm } from "./vis/useGraphData";
+import {
+  useAbideData,
+  useAbideFiles,
+  useCorrelationMethods,
+  SmoothingAlgorithm,
+  InterpolationAlgorithm,
+  CorrelationMethod,
+  AbideFile,
+} from "./vis/useGraphData";
 import { useVideoExport } from "./vis/useVideoExport";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
-
-type GraphMetadata = {
-  num_nodes: number;
-  node_names: string[];
-  description: string;
-};
-
 function App() {
+  // ABIDE file selection
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const filesQuery = useAbideFiles();
+  const methodsQuery = useCorrelationMethods();
+
+  // Correlation parameters
+  const [method, setMethod] = useState<CorrelationMethod>("pearson");
+  const [windowSize, setWindowSize] = useState<number>(30);
+  const [windowSizeInput, setWindowSizeInput] = useState<string>("30");
+  const [step, setStep] = useState<number>(1);
+  const [stepInput, setStepInput] = useState<string>("1");
+  const [threshold, setThreshold] = useState<number | null>(null);
+  const [thresholdInput, setThresholdInput] = useState<string>("");
+
+  // Processing parameters
   const [smoothing, setSmoothing] = useState<SmoothingAlgorithm>("none");
   const [interpolation, setInterpolation] = useState<InterpolationAlgorithm>("none");
   const [interpolationFactor, setInterpolationFactor] = useState<number>(2);
   const [factorInput, setFactorInput] = useState<string>("2");
+
+  // Playback
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
   const [edgeThreshold, setEdgeThreshold] = useState<number>(0);
   const [hiddenNodes, setHiddenNodes] = useState<Set<string>>(new Set());
-  const { frame, allFrames, isLoading, error, refetch, setTime, meta, time } = useGraphData(smoothing, interpolation, interpolationFactor);
   const [isPlaying, setIsPlaying] = useState(false);
   const intervalRef = useRef<number | null>(null);
-  const prevParamsRef = useRef<{ smoothing: SmoothingAlgorithm; interpolation: InterpolationAlgorithm; interpolationFactor: number } | null>(null);
 
-  const metadataQuery = useQuery<GraphMetadata>({
-    queryKey: ["graphMetadata"],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/graph/metadata`);
-      if (!res.ok) {
-        throw new Error(`Metadata fetch failed (${res.status})`);
-      }
-      return res.json();
-    },
+  // Data fetching
+  const { frame, allFrames, isLoading, isFetching, error, refetch, setTime, meta, time } = useAbideData({
+    filePath: selectedFile,
+    method,
+    windowSize,
+    step,
+    threshold,
+    smoothing,
+    interpolation,
+    interpolationFactor,
   });
+
+  // Get node names from frame data
+  const nodeNames = useMemo(() => {
+    if (!frame?.nodes) return [];
+    return frame.nodes.map((n) => n.label || n.id);
+  }, [frame]);
 
   const {
     state: exportState,
@@ -47,13 +68,14 @@ function App() {
   } = useVideoExport({
     frames: allFrames,
     playbackSpeed,
-    nodeNames: metadataQuery.data?.node_names,
+    nodeNames,
     edgeThreshold,
     hiddenNodes,
     smoothing,
     interpolation,
   });
 
+  // Playback loop
   useEffect(() => {
     if (isPlaying && meta.available_timestamps.length > 0) {
       const baseInterval = 500;
@@ -78,10 +100,7 @@ function App() {
     };
   }, [isPlaying, meta.available_timestamps, time, setTime, playbackSpeed]);
 
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-  };
-
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space" || e.key === " ") {
@@ -95,30 +114,28 @@ function App() {
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Reset playback when parameters change
   useEffect(() => {
-    const prev = prevParamsRef.current;
-    if (prev === null) {
-      prevParamsRef.current = { smoothing, interpolation, interpolationFactor };
-      return;
+    setTime(0);
+    setIsPlaying(false);
+  }, [selectedFile, method, windowSize, step, threshold, smoothing, interpolation, interpolationFactor, setTime]);
+
+  // Group files by site for better display
+  const groupedFiles = useMemo(() => {
+    if (!filesQuery.data?.files) return {};
+    const grouped: Record<string, AbideFile[]> = {};
+    for (const file of filesQuery.data.files) {
+      const key = `${file.version}/${file.site}`;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(file);
     }
-    
-    const hasChanged =
-      prev.smoothing !== smoothing ||
-      prev.interpolation !== interpolation ||
-      prev.interpolationFactor !== interpolationFactor;
-    
-    if (hasChanged) {
-      setTime(0);
-      setIsPlaying(false);
-      prevParamsRef.current = { smoothing, interpolation, interpolationFactor };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [smoothing, interpolation, interpolationFactor]);
+    return grouped;
+  }, [filesQuery.data]);
+
+  const handlePlayPause = () => setIsPlaying(!isPlaying);
 
   return (
     <div className="dark h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col overflow-hidden">
@@ -131,18 +148,169 @@ function App() {
           <CardContent className="p-0 h-full">
             <div className="relative h-full">
               {error && (
-                <div className="absolute top-4 left-4 z-10 bg-destructive text-destructive-foreground px-4 py-2 rounded-md text-sm shadow-md">
-                  Failed to load data: {String(error)}
+                <div className="absolute top-4 left-4 z-10 bg-destructive text-destructive-foreground px-4 py-2 rounded-md text-sm shadow-md max-w-md">
+                  {String(error)}
                 </div>
               )}
-              <GraphCanvas frame={frame} isLoading={isLoading} edgeThreshold={edgeThreshold} hiddenNodes={hiddenNodes} />
+              {!selectedFile && !error && (
+                <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                  Select a subject file to begin
+                </div>
+              )}
+              <GraphCanvas frame={frame} isLoading={isLoading || isFetching} edgeThreshold={edgeThreshold} hiddenNodes={hiddenNodes} />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="w-64 flex-shrink-0">
+        <Card className="w-72 flex-shrink-0 overflow-y-auto">
           <CardContent className="p-4 space-y-4">
+            {/* Data Source Section */}
             <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">Data Source</h3>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">Subject File</label>
+                <select
+                  value={selectedFile ?? ""}
+                  onChange={(e) => setSelectedFile(e.target.value || null)}
+                  className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
+                >
+                  <option value="">-- Select Subject --</option>
+                  {Object.entries(groupedFiles).map(([group, files]) => (
+                    <optgroup key={group} label={group}>
+                      {files.map((f) => (
+                        <option key={f.path} value={f.path}>
+                          {f.subject_id}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                {selectedFile && (
+                  <div className="text-[10px] text-muted-foreground truncate">
+                    {selectedFile}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Correlation Section */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">Correlation</h3>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">Method</label>
+                <Select
+                  value={method}
+                  onChange={(e) => setMethod(e.target.value as CorrelationMethod)}
+                  options={
+                    methodsQuery.data?.methods.map((m) => ({
+                      value: m.id,
+                      label: m.name,
+                    })) ?? [
+                      { value: "pearson", label: "Pearson" },
+                      { value: "spearman", label: "Spearman" },
+                      { value: "partial", label: "Partial" },
+                    ]
+                  }
+                  className="w-full"
+                />
+                {methodsQuery.data?.methods.find((m) => m.id === method)?.description && (
+                  <div className="text-[10px] text-muted-foreground">
+                    {methodsQuery.data.methods.find((m) => m.id === method)?.description}
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-foreground">Window Size</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={windowSizeInput}
+                    onChange={(e) => setWindowSizeInput(e.target.value.replace(/\D/g, ""))}
+                    onBlur={() => {
+                      const val = parseInt(windowSizeInput);
+                      if (isNaN(val) || val < 5) {
+                        setWindowSizeInput("5");
+                        setWindowSize(5);
+                      } else if (val > 100) {
+                        setWindowSizeInput("100");
+                        setWindowSize(100);
+                      } else {
+                        setWindowSizeInput(String(val));
+                        setWindowSize(val);
+                      }
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                    className="w-full h-8 rounded-md border border-input bg-background px-2 py-1 text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-foreground">Step</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={stepInput}
+                    onChange={(e) => setStepInput(e.target.value.replace(/\D/g, ""))}
+                    onBlur={() => {
+                      const val = parseInt(stepInput);
+                      if (isNaN(val) || val < 1) {
+                        setStepInput("1");
+                        setStep(1);
+                      } else if (val > 10) {
+                        setStepInput("10");
+                        setStep(10);
+                      } else {
+                        setStepInput(String(val));
+                        setStep(val);
+                      }
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                    className="w-full h-8 rounded-md border border-input bg-background px-2 py-1 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">Threshold (0-1, empty = none)</label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={thresholdInput}
+                  placeholder="e.g. 0.2"
+                  onChange={(e) => setThresholdInput(e.target.value)}
+                  onBlur={() => {
+                    if (thresholdInput.trim() === "") {
+                      setThreshold(null);
+                      return;
+                    }
+                    const val = parseFloat(thresholdInput);
+                    if (isNaN(val)) {
+                      setThresholdInput("");
+                      setThreshold(null);
+                    } else if (val < 0) {
+                      setThresholdInput("0");
+                      setThreshold(0);
+                    } else if (val > 1) {
+                      setThresholdInput("1");
+                      setThreshold(1);
+                    } else {
+                      setThresholdInput(val.toString());
+                      setThreshold(val);
+                    }
+                  }}
+                  onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                  className="w-full h-8 rounded-md border border-input bg-background px-2 py-1 text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Processing Section */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">Processing</h3>
+
               <div className="space-y-1">
                 <label className="text-xs font-medium text-foreground">Smoothing</label>
                 <Select
@@ -157,6 +325,7 @@ function App() {
                   className="w-full"
                 />
               </div>
+
               <div className="space-y-1">
                 <label className="text-xs font-medium text-foreground">Interpolation</label>
                 <Select
@@ -172,6 +341,7 @@ function App() {
                   className="w-full"
                 />
               </div>
+
               {interpolation !== "none" && (
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-foreground">Factor (2-10)</label>
@@ -193,15 +363,17 @@ function App() {
                         setInterpolationFactor(val);
                       }
                     }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        (e.target as HTMLInputElement).blur();
-                      }
-                    }}
-                    className="w-full h-9 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                    className="w-full h-8 rounded-md border border-input bg-background px-2 py-1 text-sm"
                   />
                 </div>
               )}
+            </div>
+
+            {/* Playback Section */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">Playback</h3>
+
               <div className="space-y-1">
                 <label className="text-xs font-medium text-foreground">Speed</label>
                 <Select
@@ -217,6 +389,7 @@ function App() {
                   className="w-full"
                 />
               </div>
+
               <div className="space-y-1">
                 <label className="text-xs font-medium text-foreground">
                   Edge Threshold: {edgeThreshold.toFixed(1)}
@@ -235,59 +408,59 @@ function App() {
                   <span>{meta.edge_weight_max.toFixed(1)}</span>
                 </div>
               </div>
-              {metadataQuery.data?.node_names && metadataQuery.data.node_names.length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-foreground">Nodes</label>
-                    <button
-                      onClick={() => {
-                        if (hiddenNodes.size === 0) {
-                          setHiddenNodes(new Set(metadataQuery.data!.node_names.map((_, i) => String.fromCharCode(65 + i))));
-                        } else {
-                          setHiddenNodes(new Set());
-                        }
-                      }}
-                      className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {hiddenNodes.size === 0 ? "Hide All" : "Show All"}
-                    </button>
-                  </div>
-                  <div className="space-y-1">
-                    {metadataQuery.data.node_names.map((name, idx) => {
-                      const nodeId = String.fromCharCode(65 + idx);
-                      const isHidden = hiddenNodes.has(nodeId);
-                      const colors = ["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab"];
-                      const color = colors[idx % colors.length];
-                      return (
-                        <button
-                          key={nodeId}
-                          onClick={() => {
-                            setHiddenNodes((prev) => {
-                              const next = new Set(prev);
-                              if (isHidden) {
-                                next.delete(nodeId);
-                              } else {
-                                next.add(nodeId);
-                              }
-                              return next;
-                            });
-                          }}
-                          className="w-full flex items-center gap-2 px-2 py-1 rounded text-left transition-all hover:bg-white/10"
-                        >
-                          <span
-                            className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isHidden ? "grayscale" : ""}`}
-                            style={{ backgroundColor: color }}
-                          />
-                          <span className={`text-xs truncate ${isHidden ? "line-through text-muted-foreground" : "text-foreground"}`}>
-                            {name}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
+
+            {/* Nodes Section */}
+            {nodeNames.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">Nodes</h3>
+                  <button
+                    onClick={() => {
+                      if (hiddenNodes.size === 0) {
+                        setHiddenNodes(new Set(frame?.nodes?.map((n) => n.id) ?? []));
+                      } else {
+                        setHiddenNodes(new Set());
+                      }
+                    }}
+                    className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {hiddenNodes.size === 0 ? "Hide All" : "Show All"}
+                  </button>
+                </div>
+                <div className="space-y-1 max-h-48 overflow-y-auto">
+                  {frame?.nodes?.map((node, idx) => {
+                    const nodeId = node.id;
+                    const isHidden = hiddenNodes.has(nodeId);
+                    const colors = ["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab", "#8cd17d", "#b6992d", "#499894", "#e15759"];
+                    const color = colors[idx % colors.length];
+                    return (
+                      <button
+                        key={nodeId}
+                        onClick={() => {
+                          setHiddenNodes((prev) => {
+                            const next = new Set(prev);
+                            if (isHidden) next.delete(nodeId);
+                            else next.add(nodeId);
+                            return next;
+                          });
+                        }}
+                        className="w-full flex items-center gap-2 px-2 py-1 rounded text-left transition-all hover:bg-white/10"
+                      >
+                        <span
+                          className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isHidden ? "grayscale" : ""}`}
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className={`text-xs truncate ${isHidden ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                          {node.label || nodeId}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="pt-2 border-t border-border">
               <ControlsBar
                 isPlaying={isPlaying}

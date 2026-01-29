@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -8,7 +9,19 @@ from scipy.interpolate import interp1d, UnivariateSpline, make_interp_spline
 
 from app.analytics.community import simple_components
 from app.models import Edge, GraphFrame, GraphMeta, Node
+from app.abide_processing import (
+    CorrelationMethod,
+    CorrelationParams,
+    compute_correlation_matrices,
+    get_method_info,
+    get_rsn_labels,
+    list_subject_files,
+)
 
+# Data directory (relative to project root)
+DATA_DIR = Path(__file__).parent.parent.parent / "data"
+
+# Default random data (fallback)
 np.random.seed(42)
 NUM_NODES = 6
 NUM_FRAMES = 200
@@ -37,6 +50,143 @@ app.add_middleware(
 @app.get("/health")
 def healthcheck() -> dict:
     return {"status": "ok"}
+
+
+# =============================================================================
+# ABIDE Data Endpoints
+# =============================================================================
+
+@app.get("/abide/files")
+def list_abide_files() -> dict:
+    """List all available ABIDE subject files."""
+    files = list_subject_files(DATA_DIR)
+    return {"files": files, "data_dir": str(DATA_DIR)}
+
+
+@app.get("/abide/methods")
+def list_correlation_methods() -> dict:
+    """List available correlation methods and their parameters."""
+    return {"methods": get_method_info()}
+
+
+@app.get("/abide/data")
+def get_abide_data(
+    file_path: str = Query(..., description="Relative path to subject file"),
+    method: str = Query(default="pearson", description="Correlation method: pearson, spearman, partial"),
+    window_size: int = Query(default=30, ge=5, le=100, description="Sliding window size"),
+    step: int = Query(default=1, ge=1, le=10, description="Step between windows"),
+    threshold: Optional[float] = Query(default=None, ge=0, le=1, description="Correlation threshold"),
+    smoothing: Optional[str] = Query(default="none", description="Smoothing algorithm"),
+    interpolation: Optional[str] = Query(default="none", description="Interpolation algorithm"),
+    interpolation_factor: Optional[int] = Query(default=2, description="Interpolation factor"),
+) -> dict:
+    """
+    Get graph data from an ABIDE subject file with correlation analysis.
+    """
+    # Validate file path
+    full_path = DATA_DIR / file_path
+    if not full_path.exists():
+        raise HTTPException(status_code=404, detail=f"File not found: {file_path}")
+
+    # Parse correlation method
+    try:
+        corr_method = CorrelationMethod(method)
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Invalid method: {method}")
+
+    # Compute correlation matrices
+    params = CorrelationParams(
+        method=corr_method,
+        window_size=window_size,
+        step=step,
+        threshold=threshold,
+    )
+
+    try:
+        matrices_array = compute_correlation_matrices(full_path, params)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # Convert to list for processing
+    matrices = [matrices_array[i] for i in range(matrices_array.shape[0])]
+
+    # Apply interpolation/smoothing
+    if interpolation and interpolation != "none":
+        matrices = apply_interpolation(matrices, interpolation, interpolation_factor)
+    if smoothing and smoothing != "none":
+        matrices = apply_smoothing(matrices, smoothing)
+
+    # Get node labels
+    node_labels = get_rsn_labels(short=True)
+
+    # Build frames
+    processed_frames = []
+    for timestamp, matrix in enumerate(matrices):
+        n = matrix.shape[0]
+        node_ids = node_labels
+
+        edges = []
+        degree_map: dict[str, int] = {nid: 0 for nid in node_ids}
+
+        for i in range(n):
+            for j in range(n):
+                weight = float(matrix[i, j])
+                if weight > 0:
+                    edges.append(
+                        Edge(
+                            source=node_ids[i],
+                            target=node_ids[j],
+                            weight=weight,
+                        )
+                    )
+                    degree_map[node_ids[i]] += 1
+
+        communities = simple_components(edges)
+
+        nodes = [
+            Node(
+                id=node_id,
+                label=node_id,
+                degree=degree_map[node_id],
+                group=str(communities.get(node_id, 0)),
+            )
+            for node_id in node_ids
+        ]
+
+        processed_frames.append(
+            GraphFrame(
+                timestamp=timestamp,
+                nodes=nodes,
+                edges=edges,
+                metadata={
+                    "source": "abide",
+                    "file": file_path,
+                    "method": method,
+                    "window_size": window_size,
+                },
+            )
+        )
+
+    # Calculate edge weight range
+    all_weights = []
+    for matrix in matrices:
+        all_weights.extend(matrix.flatten().tolist())
+    edge_weight_min = float(min(all_weights)) if all_weights else 0.0
+    edge_weight_max = float(max(all_weights)) if all_weights else 255.0
+
+    meta = GraphMeta(
+        available_timestamps=list(range(len(matrices))),
+        node_attributes=["label", "group", "degree"],
+        edge_attributes=["weight"],
+        edge_weight_min=edge_weight_min,
+        edge_weight_max=edge_weight_max,
+        description=f"ABIDE data: {file_path} ({method} correlation)",
+    )
+
+    return {
+        "frames": [frame.model_dump() for frame in processed_frames],
+        "meta": meta.model_dump(),
+    }
 
 
 @app.get("/graph/metadata")
