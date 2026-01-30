@@ -17,6 +17,7 @@ import { useVideoExport } from "./vis/useVideoExport";
 
 function App() {
   // ABIDE file selection
+  const [selectedSite, setSelectedSite] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const filesQuery = useAbideFiles();
   const methodsQuery = useCorrelationMethods();
@@ -124,17 +125,27 @@ function App() {
     setIsPlaying(false);
   }, [selectedFile, method, windowSize, step, threshold, smoothing, interpolation, interpolationFactor, setTime]);
 
-  // Group files by site for better display
-  const groupedFiles = useMemo(() => {
-    if (!filesQuery.data?.files) return {};
+  // Group files by site for selection
+  const { sites, subjectsForSite } = useMemo(() => {
+    if (!filesQuery.data?.files) return { sites: [], subjectsForSite: [] };
+
     const grouped: Record<string, AbideFile[]> = {};
     for (const file of filesQuery.data.files) {
       const key = `${file.version}/${file.site}`;
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(file);
     }
-    return grouped;
-  }, [filesQuery.data]);
+
+    const siteList = Object.keys(grouped).sort();
+    const subjects = selectedSite ? (grouped[selectedSite] ?? []) : [];
+
+    return { sites: siteList, subjectsForSite: subjects };
+  }, [filesQuery.data, selectedSite]);
+
+  // Reset subject when site changes
+  useEffect(() => {
+    setSelectedFile(null);
+  }, [selectedSite]);
 
   const handlePlayPause = () => setIsPlaying(!isPlaying);
 
@@ -155,8 +166,8 @@ function App() {
               )}
               {(!selectedFile || !method) && !error && (
                 <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                  {!selectedFile && !method && "Select a subject file and correlation method to begin"}
-                  {!selectedFile && method && "Select a subject file to begin"}
+                  {!selectedSite && "Select a site, subject, and correlation method to begin"}
+                  {selectedSite && !selectedFile && "Select a subject and correlation method to begin"}
                   {selectedFile && !method && "Select a correlation method to begin"}
                 </div>
               )}
@@ -172,28 +183,36 @@ function App() {
               <h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">Data Source</h3>
 
               <div className="space-y-1">
-                <label className="text-xs font-medium text-foreground">Subject File</label>
+                <label className="text-xs font-medium text-foreground">Site</label>
+                <select
+                  value={selectedSite ?? ""}
+                  onChange={(e) => setSelectedSite(e.target.value || null)}
+                  className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
+                >
+                  <option value="">-- Select Site --</option>
+                  {sites.map((site) => (
+                    <option key={site} value={site}>
+                      {site}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">Subject</label>
                 <select
                   value={selectedFile ?? ""}
                   onChange={(e) => setSelectedFile(e.target.value || null)}
-                  className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
+                  disabled={!selectedSite}
+                  className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm disabled:opacity-50"
                 >
                   <option value="">-- Select Subject --</option>
-                  {Object.entries(groupedFiles).map(([group, files]) => (
-                    <optgroup key={group} label={group}>
-                      {files.map((f) => (
-                        <option key={f.path} value={f.path}>
-                          {f.subject_id}
-                        </option>
-                      ))}
-                    </optgroup>
+                  {subjectsForSite.map((f) => (
+                    <option key={f.path} value={f.path}>
+                      {f.subject_id}
+                    </option>
                   ))}
                 </select>
-                {selectedFile && (
-                  <div className="text-[10px] text-muted-foreground truncate">
-                    {selectedFile}
-                  </div>
-                )}
               </div>
             </div>
 
