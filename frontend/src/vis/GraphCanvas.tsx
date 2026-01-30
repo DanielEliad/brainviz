@@ -9,9 +9,10 @@ type Props = {
   isLoading?: boolean;
   edgeThreshold?: number;
   hiddenNodes?: Set<string>;
+  symmetric?: boolean;
 };
 
-export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0, hiddenNodes = new Set() }: Props) {
+export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0, hiddenNodes = new Set(), symmetric = true }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -94,8 +95,9 @@ export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0, hidde
       activeNodeId,
       connectedNodes,
       selectedNode,
+      symmetric,
     });
-  }, [filteredFrame, nodePositions, size.height, size.width, selectedNode, hoveredNode, connectedNodes, edgeThreshold, activeNodeId]);
+  }, [filteredFrame, nodePositions, size.height, size.width, selectedNode, hoveredNode, connectedNodes, edgeThreshold, activeNodeId, symmetric]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

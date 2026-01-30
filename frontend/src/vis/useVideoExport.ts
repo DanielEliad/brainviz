@@ -11,6 +11,7 @@ type UseVideoExportOptions = {
   hiddenNodes?: Set<string>;
   smoothing?: string;
   interpolation?: string;
+  symmetric?: boolean;
   width?: number;
   height?: number;
 };
@@ -23,6 +24,7 @@ export function useVideoExport({
   hiddenNodes,
   smoothing = "none",
   interpolation = "none",
+  symmetric = true,
   width = 1920,
   height = 1080,
 }: UseVideoExportOptions) {
@@ -93,10 +95,11 @@ export function useVideoExport({
       hiddenNodes: hiddenNodes ? Array.from(hiddenNodes) : [],
       smoothing,
       interpolation,
+      symmetric,
       width,
       height,
     });
-  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, smoothing, interpolation, width, height]);
+  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, smoothing, interpolation, symmetric, width, height]);
 
   const cancel = useCallback(() => {
     if (workerRef.current) {

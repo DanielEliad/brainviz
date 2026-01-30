@@ -15,6 +15,7 @@ from app.abide_processing import (
     compute_correlation_matrices,
     get_method_info,
     get_rsn_labels,
+    is_symmetric,
     list_subject_files,
 )
 
@@ -167,6 +168,7 @@ def get_abide_data(
     return {
         "frames": [frame.model_dump() for frame in processed_frames],
         "meta": meta.model_dump(),
+        "symmetric": is_symmetric(corr_method),
     }
 
 

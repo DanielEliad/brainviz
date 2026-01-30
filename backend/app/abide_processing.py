@@ -278,6 +278,17 @@ def compute_correlation_matrices(
     return [matrices[i] for i in range(matrices.shape[0])]
 
 
+def is_symmetric(method: CorrelationMethod) -> bool:
+    """Return whether a correlation method produces symmetric matrices."""
+    # All current correlation methods are symmetric
+    # Future asymmetric methods (e.g., Granger causality) would return False
+    return method in {
+        CorrelationMethod.PEARSON,
+        CorrelationMethod.SPEARMAN,
+        CorrelationMethod.PARTIAL,
+    }
+
+
 def get_method_info() -> List[dict]:
     """Return info about available correlation methods and their parameters."""
     return [
@@ -285,6 +296,7 @@ def get_method_info() -> List[dict]:
             "id": CorrelationMethod.PEARSON.value,
             "name": "Pearson Correlation",
             "description": "Linear correlation coefficient",
+            "symmetric": True,
             "params": [
                 {"name": "window_size", "type": "int", "default": 30, "min": 5, "max": 100},
                 {"name": "step", "type": "int", "default": 1, "min": 1, "max": 10},
@@ -295,6 +307,7 @@ def get_method_info() -> List[dict]:
             "id": CorrelationMethod.SPEARMAN.value,
             "name": "Spearman Correlation",
             "description": "Rank-based correlation (robust to outliers)",
+            "symmetric": True,
             "params": [
                 {"name": "window_size", "type": "int", "default": 30, "min": 5, "max": 100},
                 {"name": "step", "type": "int", "default": 1, "min": 1, "max": 10},
@@ -305,6 +318,7 @@ def get_method_info() -> List[dict]:
             "id": CorrelationMethod.PARTIAL.value,
             "name": "Partial Correlation",
             "description": "Correlation controlling for other variables",
+            "symmetric": True,
             "params": [
                 {"name": "window_size", "type": "int", "default": 30, "min": 5, "max": 100},
                 {"name": "step", "type": "int", "default": 1, "min": 1, "max": 10},

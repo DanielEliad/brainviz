@@ -40,6 +40,7 @@ export type DrawOptions = {
   activeNodeId?: string | null;
   connectedNodes?: Set<string>;
   selectedNode?: string | null;
+  symmetric?: boolean;
   infoBox?: {
     smoothing: string;
     interpolation: string;
@@ -57,7 +58,7 @@ export function drawFrame(
   height: number,
   options: DrawOptions = {}
 ): void {
-  const { edgeThreshold = 0, activeNodeId, connectedNodes, selectedNode, infoBox } = options;
+  const { edgeThreshold = 0, activeNodeId, connectedNodes, selectedNode, symmetric = true, infoBox } = options;
 
   const positions = computeNodePositions(frame.nodes.length, width, height);
   const nodePositions = new Map<string, Point>();
@@ -73,7 +74,12 @@ export function drawFrame(
     return edge.source === activeNodeId || edge.target === activeNodeId;
   };
 
-  frame.edges.forEach((edge) => {
+  // For symmetric correlations, deduplicate edges (only draw once per pair)
+  const edgesToDraw = symmetric
+    ? frame.edges.filter((edge) => edge.source < edge.target)
+    : frame.edges;
+
+  edgesToDraw.forEach((edge) => {
     const source = nodePositions.get(edge.source);
     const target = nodePositions.get(edge.target);
     if (!source || !target || edge.weight <= 0 || edge.weight < edgeThreshold) return;
@@ -88,65 +94,77 @@ export function drawFrame(
       ? `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${opacity})`
       : baseColor;
     const thickness = thicknessScale(weight);
-    const pair = [edge.source, edge.target].sort();
-    const [sourceId, targetId] = pair;
-    const curveDirection = edge.source === sourceId ? 1 : -1;
 
-    const sourcePos = nodePositions.get(sourceId)!;
-    const targetPos = nodePositions.get(targetId)!;
-    const dx = targetPos.x - sourcePos.x;
-    const dy = targetPos.y - sourcePos.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const perpX = -dy / dist;
-    const perpY = dx / dist;
+    if (symmetric) {
+      // Symmetric: draw straight line without arrows
+      ctx.beginPath();
+      ctx.moveTo(source.x, source.y);
+      ctx.lineTo(target.x, target.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = thickness;
+      ctx.stroke();
+    } else {
+      // Asymmetric: draw curved line with directional arrows
+      const pair = [edge.source, edge.target].sort();
+      const [sourceId, targetId] = pair;
+      const curveDirection = edge.source === sourceId ? 1 : -1;
 
-    const curveOffset = curveDirection * 30;
-    const midX = (source.x + target.x) / 2 + perpX * curveOffset;
-    const midY = (source.y + target.y) / 2 + perpY * curveOffset;
+      const sourcePos = nodePositions.get(sourceId)!;
+      const targetPos = nodePositions.get(targetId)!;
+      const dx = targetPos.x - sourcePos.x;
+      const dy = targetPos.y - sourcePos.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const perpX = -dy / dist;
+      const perpY = dx / dist;
 
-    ctx.beginPath();
-    ctx.moveTo(source.x, source.y);
-    ctx.quadraticCurveTo(midX, midY, target.x, target.y);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = thickness;
-    ctx.stroke();
-
-    const arrowSize = Math.max(4, thickness * 2.2);
-    const arrowSpacing = 40;
-    const numArrows = Math.max(1, Math.floor(dist / arrowSpacing));
-
-    ctx.fillStyle = color;
-    for (let i = 1; i <= numArrows; i++) {
-      const t = i / (numArrows + 1);
-      const curveX =
-        (1 - t) * (1 - t) * source.x + 2 * (1 - t) * t * midX + t * t * target.x;
-      const curveY =
-        (1 - t) * (1 - t) * source.y + 2 * (1 - t) * t * midY + t * t * target.y;
-
-      const tNext = (i + 0.1) / (numArrows + 1);
-      const nextX =
-        (1 - tNext) * (1 - tNext) * source.x +
-        2 * (1 - tNext) * tNext * midX +
-        tNext * tNext * target.x;
-      const nextY =
-        (1 - tNext) * (1 - tNext) * source.y +
-        2 * (1 - tNext) * tNext * midY +
-        tNext * tNext * target.y;
-
-      const arrowAngle = Math.atan2(nextY - curveY, nextX - curveX);
+      const curveOffset = curveDirection * 30;
+      const midX = (source.x + target.x) / 2 + perpX * curveOffset;
+      const midY = (source.y + target.y) / 2 + perpY * curveOffset;
 
       ctx.beginPath();
-      ctx.moveTo(curveX, curveY);
-      ctx.lineTo(
-        curveX - arrowSize * Math.cos(arrowAngle - Math.PI / 6),
-        curveY - arrowSize * Math.sin(arrowAngle - Math.PI / 6)
-      );
-      ctx.lineTo(
-        curveX - arrowSize * Math.cos(arrowAngle + Math.PI / 6),
-        curveY - arrowSize * Math.sin(arrowAngle + Math.PI / 6)
-      );
-      ctx.closePath();
-      ctx.fill();
+      ctx.moveTo(source.x, source.y);
+      ctx.quadraticCurveTo(midX, midY, target.x, target.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = thickness;
+      ctx.stroke();
+
+      const arrowSize = Math.max(4, thickness * 2.2);
+      const arrowSpacing = 40;
+      const numArrows = Math.max(1, Math.floor(dist / arrowSpacing));
+
+      ctx.fillStyle = color;
+      for (let i = 1; i <= numArrows; i++) {
+        const t = i / (numArrows + 1);
+        const curveX =
+          (1 - t) * (1 - t) * source.x + 2 * (1 - t) * t * midX + t * t * target.x;
+        const curveY =
+          (1 - t) * (1 - t) * source.y + 2 * (1 - t) * t * midY + t * t * target.y;
+
+        const tNext = (i + 0.1) / (numArrows + 1);
+        const nextX =
+          (1 - tNext) * (1 - tNext) * source.x +
+          2 * (1 - tNext) * tNext * midX +
+          tNext * tNext * target.x;
+        const nextY =
+          (1 - tNext) * (1 - tNext) * source.y +
+          2 * (1 - tNext) * tNext * midY +
+          tNext * tNext * target.y;
+
+        const arrowAngle = Math.atan2(nextY - curveY, nextX - curveX);
+
+        ctx.beginPath();
+        ctx.moveTo(curveX, curveY);
+        ctx.lineTo(
+          curveX - arrowSize * Math.cos(arrowAngle - Math.PI / 6),
+          curveY - arrowSize * Math.sin(arrowAngle - Math.PI / 6)
+        );
+        ctx.lineTo(
+          curveX - arrowSize * Math.cos(arrowAngle + Math.PI / 6),
+          curveY - arrowSize * Math.sin(arrowAngle + Math.PI / 6)
+        );
+        ctx.closePath();
+        ctx.fill();
+      }
     }
   });
 

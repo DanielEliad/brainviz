@@ -11,6 +11,7 @@ type WorkerMessage = {
   hiddenNodes?: string[];
   smoothing?: string;
   interpolation?: string;
+  symmetric?: boolean;
   width: number;
   height: number;
 };
@@ -36,7 +37,8 @@ async function encodeVideo(
   edgeThreshold: number = 0,
   hiddenNodes: string[] = [],
   smoothing: string = "none",
-  interpolation: string = "none"
+  interpolation: string = "none",
+  symmetric: boolean = true
 ) {
   const hiddenSet = new Set(hiddenNodes);
   const frameDurationMs = BASE_INTERVAL_MS / playbackSpeed;
@@ -101,8 +103,8 @@ async function encodeVideo(
     const drawStart = performance.now();
     const frame = filterFrame(frames[i], hiddenSet);
     drawFrame(ctx, frame, width, height, {
-      nodeNames,
       edgeThreshold,
+      symmetric,
       infoBox: {
         smoothing,
         interpolation,
@@ -159,7 +161,8 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
         e.data.edgeThreshold ?? 0,
         e.data.hiddenNodes ?? [],
         e.data.smoothing ?? "none",
-        e.data.interpolation ?? "none"
+        e.data.interpolation ?? "none",
+        e.data.symmetric ?? true
       );
       self.postMessage({ type: "done", buffer }, [buffer]);
     } catch (err) {

@@ -44,7 +44,7 @@ function App() {
   const intervalRef = useRef<number | null>(null);
 
   // Data fetching
-  const { frame, allFrames, isLoading, isFetching, error, refetch, setTime, meta, time } = useAbideData({
+  const { frame, allFrames, isLoading, isFetching, error, refetch, setTime, meta, time, symmetric } = useAbideData({
     filePath: selectedFile,
     method,
     windowSize,
@@ -73,6 +73,7 @@ function App() {
     hiddenNodes,
     smoothing,
     interpolation,
+    symmetric,
   });
 
   // Playback loop
@@ -157,7 +158,7 @@ function App() {
                   Select a subject file to begin
                 </div>
               )}
-              <GraphCanvas frame={frame} isLoading={isLoading || isFetching} edgeThreshold={edgeThreshold} hiddenNodes={hiddenNodes} />
+              <GraphCanvas frame={frame} isLoading={isLoading || isFetching} edgeThreshold={edgeThreshold} hiddenNodes={hiddenNodes} symmetric={symmetric} />
             </div>
           </CardContent>
         </Card>
