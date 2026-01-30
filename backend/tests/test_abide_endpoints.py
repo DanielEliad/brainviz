@@ -348,3 +348,59 @@ class TestGetAbideData:
         frames_interp = len(response_interp.json()["frames"])
 
         assert frames_interp > frames_none
+
+    def test_get_data_combined_processing_pipeline(self, test_client: TestClient):
+        """Test correlation + interpolation + smoothing work together."""
+        files = test_client.get("/abide/files").json()["files"]
+        file_path = files[0]["path"]
+
+        # Test full pipeline: pearson correlation + linear interpolation + gaussian smoothing
+        response = test_client.get(
+            "/abide/data",
+            params={
+                "file_path": file_path,
+                "method": "pearson",
+                "window_size": 30,
+                "step": 5,
+                "threshold": 0.2,
+                "interpolation": "linear",
+                "interpolation_factor": 2,
+                "smoothing": "gaussian",
+            }
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+
+        # Verify structure
+        assert "frames" in data
+        assert "meta" in data
+        assert "symmetric" in data
+
+        # Check frames exist
+        frames = data["frames"]
+        assert len(frames) > 0
+
+        # Verify nodes and edges are present
+        frame = frames[0]
+        assert len(frame["nodes"]) == 14  # RSN nodes
+        assert "edges" in frame
+
+        # Verify symmetric field matches pearson (symmetric method)
+        assert data["symmetric"] is True
+
+    def test_get_data_all_interpolation_methods(self, test_client: TestClient):
+        """Test all interpolation methods work."""
+        files = test_client.get("/abide/files").json()["files"]
+        file_path = files[0]["path"]
+
+        interpolation_methods = ["none", "linear", "cubic_spline", "b_spline", "univariate_spline"]
+
+        for interp in interpolation_methods:
+            params = {"file_path": file_path, "window_size": 30}
+            if interp != "none":
+                params["interpolation"] = interp
+                params["interpolation_factor"] = 2
+
+            response = test_client.get("/abide/data", params=params)
+            assert response.status_code == 200, f"Interpolation {interp} failed"

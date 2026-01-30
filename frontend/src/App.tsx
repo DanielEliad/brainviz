@@ -313,21 +313,6 @@ function App() {
               <h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">Processing</h3>
 
               <div className="space-y-1">
-                <label className="text-xs font-medium text-foreground">Smoothing</label>
-                <Select
-                  value={smoothing}
-                  onChange={(e) => setSmoothing(e.target.value as SmoothingAlgorithm)}
-                  options={[
-                    { value: "none", label: "None" },
-                    { value: "moving_average", label: "Moving Average" },
-                    { value: "exponential", label: "Exponential" },
-                    { value: "gaussian", label: "Gaussian" },
-                  ]}
-                  className="w-full"
-                />
-              </div>
-
-              <div className="space-y-1">
                 <label className="text-xs font-medium text-foreground">Interpolation</label>
                 <Select
                   value={interpolation}
@@ -369,6 +354,21 @@ function App() {
                   />
                 </div>
               )}
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-foreground">Smoothing</label>
+                <Select
+                  value={smoothing}
+                  onChange={(e) => setSmoothing(e.target.value as SmoothingAlgorithm)}
+                  options={[
+                    { value: "none", label: "None" },
+                    { value: "moving_average", label: "Moving Average" },
+                    { value: "exponential", label: "Exponential" },
+                    { value: "gaussian", label: "Gaussian" },
+                  ]}
+                  className="w-full"
+                />
+              </div>
             </div>
 
             {/* Playback Section */}
