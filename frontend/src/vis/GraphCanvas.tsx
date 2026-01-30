@@ -6,13 +6,13 @@ import { drawFrame, computeNodePositions, thicknessScale, Point } from "./drawFr
 
 type Props = {
   frame?: GraphFrame;
+  symmetric: boolean;
   isLoading?: boolean;
   edgeThreshold?: number;
   hiddenNodes?: Set<string>;
-  symmetric?: boolean;
 };
 
-export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0, hiddenNodes = new Set(), symmetric = true }: Props) {
+export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold = 0, hiddenNodes = new Set() }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });

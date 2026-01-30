@@ -36,11 +36,11 @@ export function computeNodePositions(
 }
 
 export type DrawOptions = {
+  symmetric: boolean;
   edgeThreshold?: number;
   activeNodeId?: string | null;
   connectedNodes?: Set<string>;
   selectedNode?: string | null;
-  symmetric?: boolean;
   infoBox?: {
     smoothing: string;
     interpolation: string;
@@ -56,9 +56,9 @@ export function drawFrame(
   frame: GraphFrame,
   width: number,
   height: number,
-  options: DrawOptions = {}
+  options: DrawOptions
 ): void {
-  const { edgeThreshold = 0, activeNodeId, connectedNodes, selectedNode, symmetric = true, infoBox } = options;
+  const { symmetric, edgeThreshold = 0, activeNodeId, connectedNodes, selectedNode, infoBox } = options;
 
   const positions = computeNodePositions(frame.nodes.length, width, height);
   const nodePositions = new Map<string, Point>();

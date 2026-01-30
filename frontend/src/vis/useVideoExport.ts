@@ -6,12 +6,12 @@ type ExportState = "idle" | "exporting" | "done" | "error";
 type UseVideoExportOptions = {
   frames: GraphFrame[];
   playbackSpeed: number;
+  symmetric: boolean;
   nodeNames?: string[];
   edgeThreshold?: number;
   hiddenNodes?: Set<string>;
   smoothing?: string;
   interpolation?: string;
-  symmetric?: boolean;
   width?: number;
   height?: number;
 };
@@ -19,12 +19,12 @@ type UseVideoExportOptions = {
 export function useVideoExport({
   frames,
   playbackSpeed,
+  symmetric,
   nodeNames,
   edgeThreshold = 0,
   hiddenNodes,
   smoothing = "none",
   interpolation = "none",
-  symmetric = true,
   width = 1920,
   height = 1080,
 }: UseVideoExportOptions) {

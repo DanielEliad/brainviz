@@ -6,14 +6,14 @@ type WorkerMessage = {
   type: "start";
   frames: GraphFrame[];
   playbackSpeed: number;
+  symmetric: boolean;
+  width: number;
+  height: number;
   nodeNames?: string[];
   edgeThreshold?: number;
   hiddenNodes?: string[];
   smoothing?: string;
   interpolation?: string;
-  symmetric?: boolean;
-  width: number;
-  height: number;
 };
 
 const BASE_INTERVAL_MS = 500;
@@ -31,14 +31,13 @@ function filterFrame(frame: GraphFrame, hiddenNodes: Set<string>): GraphFrame {
 async function encodeVideo(
   frames: GraphFrame[],
   playbackSpeed: number,
+  symmetric: boolean,
   width: number,
   height: number,
-  nodeNames?: string[],
   edgeThreshold: number = 0,
   hiddenNodes: string[] = [],
   smoothing: string = "none",
-  interpolation: string = "none",
-  symmetric: boolean = true
+  interpolation: string = "none"
 ) {
   const hiddenSet = new Set(hiddenNodes);
   const frameDurationMs = BASE_INTERVAL_MS / playbackSpeed;
@@ -155,14 +154,13 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
       const buffer = await encodeVideo(
         e.data.frames,
         e.data.playbackSpeed,
+        e.data.symmetric,
         e.data.width,
         e.data.height,
-        e.data.nodeNames,
         e.data.edgeThreshold ?? 0,
         e.data.hiddenNodes ?? [],
         e.data.smoothing ?? "none",
-        e.data.interpolation ?? "none",
-        e.data.symmetric ?? true
+        e.data.interpolation ?? "none"
       );
       self.postMessage({ type: "done", buffer }, [buffer]);
     } catch (err) {
