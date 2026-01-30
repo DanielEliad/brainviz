@@ -36,7 +36,6 @@ export function computeNodePositions(
 }
 
 export type DrawOptions = {
-  nodeNames?: string[];
   edgeThreshold?: number;
   activeNodeId?: string | null;
   connectedNodes?: Set<string>;
@@ -58,7 +57,7 @@ export function drawFrame(
   height: number,
   options: DrawOptions = {}
 ): void {
-  const { nodeNames, edgeThreshold = 0, activeNodeId, connectedNodes, selectedNode, infoBox } = options;
+  const { edgeThreshold = 0, activeNodeId, connectedNodes, selectedNode, infoBox } = options;
 
   const positions = computeNodePositions(frame.nodes.length, width, height);
   const nodePositions = new Map<string, Point>();
@@ -193,20 +192,11 @@ export function drawFrame(
     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Get display name: prefer nodeNames lookup for legacy single-letter IDs, else use node.label
-    let displayName = node.label;
-    if (nodeNames && node.id.length === 1) {
-      const nameIndex = node.id.charCodeAt(0) - "A".charCodeAt(0);
-      if (nameIndex >= 0 && nameIndex < nodeNames.length) {
-        displayName = nodeNames[nameIndex];
-      }
-    }
-
     ctx.font = "500 12px system-ui, -apple-system, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     ctx.fillStyle = isNodeConnected ? "white" : `rgba(255, 255, 255, ${opacity})`;
-    ctx.fillText(displayName, pos.x, pos.y - radius - 6);
+    ctx.fillText(node.label, pos.x, pos.y - radius - 6);
 
     ctx.globalAlpha = 1;
   });
