@@ -65,7 +65,7 @@ export function useCorrelationMethods() {
 // Parameters for ABIDE data fetching
 export type AbideParams = {
   filePath: string | null;
-  method: CorrelationMethod;
+  method: CorrelationMethod | null;
   windowSize: number;
   step: number;
   threshold: number | null;
@@ -76,7 +76,7 @@ export type AbideParams = {
 
 const DEFAULT_ABIDE_PARAMS: AbideParams = {
   filePath: null,
-  method: "pearson",
+  method: null,
   windowSize: 30,
   step: 1,
   threshold: null,
@@ -95,6 +95,9 @@ export function useAbideData(params: Partial<AbideParams> = {}) {
     queryFn: async () => {
       if (!p.filePath) {
         throw new Error("No file selected");
+      }
+      if (!p.method) {
+        throw new Error("No correlation method selected");
       }
 
       const url = new URL(`${API_URL}/abide/data`);
@@ -121,7 +124,7 @@ export function useAbideData(params: Partial<AbideParams> = {}) {
       }
       return res.json();
     },
-    enabled: !!p.filePath,
+    enabled: !!p.filePath && !!p.method,
     retry: 1,
   });
 

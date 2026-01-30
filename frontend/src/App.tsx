@@ -22,7 +22,7 @@ function App() {
   const methodsQuery = useCorrelationMethods();
 
   // Correlation parameters
-  const [method, setMethod] = useState<CorrelationMethod>("pearson");
+  const [method, setMethod] = useState<CorrelationMethod | null>(null);
   const [windowSize, setWindowSize] = useState<number>(30);
   const [windowSizeInput, setWindowSizeInput] = useState<string>("30");
   const [step, setStep] = useState<number>(1);
@@ -153,9 +153,11 @@ function App() {
                   {String(error)}
                 </div>
               )}
-              {!selectedFile && !error && (
+              {(!selectedFile || !method) && !error && (
                 <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                  Select a subject file to begin
+                  {!selectedFile && !method && "Select a subject file and correlation method to begin"}
+                  {!selectedFile && method && "Select a subject file to begin"}
+                  {selectedFile && !method && "Select a correlation method to begin"}
                 </div>
               )}
               <GraphCanvas frame={frame} isLoading={isLoading || isFetching} edgeThreshold={edgeThreshold} hiddenNodes={hiddenNodes} symmetric={symmetric} />
@@ -201,22 +203,21 @@ function App() {
 
               <div className="space-y-1">
                 <label className="text-xs font-medium text-foreground">Method</label>
-                <Select
-                  value={method}
-                  onChange={(e) => setMethod(e.target.value as CorrelationMethod)}
-                  options={
-                    methodsQuery.data?.methods.map((m) => ({
-                      value: m.id,
-                      label: m.name,
-                    })) ?? [
-                      { value: "pearson", label: "Pearson" },
-                      { value: "spearman", label: "Spearman" },
-                      { value: "partial", label: "Partial" },
-                    ]
-                  }
-                  className="w-full"
-                />
-                {methodsQuery.data?.methods.find((m) => m.id === method)?.description && (
+                <select
+                  value={method ?? ""}
+                  onChange={(e) => setMethod(e.target.value ? e.target.value as CorrelationMethod : null)}
+                  className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
+                >
+                  <option value="">-- Select Method --</option>
+                  {(methodsQuery.data?.methods ?? [
+                    { id: "pearson", name: "Pearson" },
+                    { id: "spearman", name: "Spearman" },
+                    { id: "partial", name: "Partial" },
+                  ]).map((m) => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+                {method && methodsQuery.data?.methods.find((m) => m.id === method)?.description && (
                   <div className="text-[10px] text-muted-foreground">
                     {methodsQuery.data.methods.find((m) => m.id === method)?.description}
                   </div>

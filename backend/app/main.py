@@ -57,7 +57,7 @@ def list_correlation_methods() -> dict:
 @app.get("/abide/data")
 def get_abide_data(
     file_path: str = Query(..., description="Relative path to subject file"),
-    method: str = Query(default="pearson", description="Correlation method: pearson, spearman, partial"),
+    method: str = Query(..., description="Correlation method: pearson, spearman, partial"),
     window_size: int = Query(default=30, ge=5, le=100, description="Sliding window size"),
     step: int = Query(default=1, ge=1, le=10, description="Step between windows"),
     threshold: Optional[float] = Query(default=None, ge=0, le=1, description="Correlation threshold"),

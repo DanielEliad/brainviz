@@ -118,7 +118,7 @@ class TestGetAbideData:
 
         response = test_client.get(
             "/abide/data",
-            params={"file_path": file_path}
+            params={"file_path": file_path, "method": "pearson"}
         )
 
         assert response.status_code == 200
@@ -133,7 +133,7 @@ class TestGetAbideData:
 
         response = test_client.get(
             "/abide/data",
-            params={"file_path": file_path, "window_size": 30, "step": 5}
+            params={"file_path": file_path, "method": "pearson", "window_size": 30, "step": 5}
         )
 
         data = response.json()
@@ -155,7 +155,7 @@ class TestGetAbideData:
 
         response = test_client.get(
             "/abide/data",
-            params={"file_path": file_path}
+            params={"file_path": file_path, "method": "pearson"}
         )
 
         frames = response.json()["frames"]
@@ -190,13 +190,13 @@ class TestGetAbideData:
         # Without threshold
         response_no_thresh = test_client.get(
             "/abide/data",
-            params={"file_path": file_path, "window_size": 30}
+            params={"file_path": file_path, "method": "pearson", "window_size": 30}
         )
 
         # With high threshold
         response_high_thresh = test_client.get(
             "/abide/data",
-            params={"file_path": file_path, "window_size": 30, "threshold": 0.8}
+            params={"file_path": file_path, "method": "pearson", "window_size": 30, "threshold": 0.8}
         )
 
         assert response_no_thresh.status_code == 200
@@ -213,13 +213,13 @@ class TestGetAbideData:
         # Smaller window = more frames
         response_small = test_client.get(
             "/abide/data",
-            params={"file_path": file_path, "window_size": 20, "step": 1}
+            params={"file_path": file_path, "method": "pearson", "window_size": 20, "step": 1}
         )
 
         # Larger window = fewer frames
         response_large = test_client.get(
             "/abide/data",
-            params={"file_path": file_path, "window_size": 50, "step": 1}
+            params={"file_path": file_path, "method": "pearson", "window_size": 50, "step": 1}
         )
 
         frames_small = len(response_small.json()["frames"])
@@ -235,13 +235,13 @@ class TestGetAbideData:
         # Step 1
         response_step1 = test_client.get(
             "/abide/data",
-            params={"file_path": file_path, "window_size": 30, "step": 1}
+            params={"file_path": file_path, "method": "pearson", "window_size": 30, "step": 1}
         )
 
         # Step 5
         response_step5 = test_client.get(
             "/abide/data",
-            params={"file_path": file_path, "window_size": 30, "step": 5}
+            params={"file_path": file_path, "method": "pearson", "window_size": 30, "step": 5}
         )
 
         frames_step1 = len(response_step1.json()["frames"])
@@ -253,7 +253,7 @@ class TestGetAbideData:
         """Test 404 for non-existent file."""
         response = test_client.get(
             "/abide/data",
-            params={"file_path": "nonexistent/file.txt"}
+            params={"file_path": "nonexistent/file.txt", "method": "pearson"}
         )
 
         assert response.status_code == 404
@@ -291,7 +291,7 @@ class TestGetAbideData:
 
         response = test_client.get(
             "/abide/data",
-            params={"file_path": file_path}
+            params={"file_path": file_path, "method": "pearson"}
         )
 
         meta = response.json()["meta"]
@@ -315,7 +315,7 @@ class TestGetAbideData:
         for smoothing in ["none", "moving_average", "exponential", "gaussian"]:
             response = test_client.get(
                 "/abide/data",
-                params={"file_path": file_path, "smoothing": smoothing}
+                params={"file_path": file_path, "method": "pearson", "smoothing": smoothing}
             )
             assert response.status_code == 200, f"Smoothing {smoothing} failed"
 
@@ -327,7 +327,7 @@ class TestGetAbideData:
         # Without interpolation
         response_none = test_client.get(
             "/abide/data",
-            params={"file_path": file_path, "interpolation": "none"}
+            params={"file_path": file_path, "method": "pearson", "interpolation": "none"}
         )
 
         # With linear interpolation factor 2
@@ -335,6 +335,7 @@ class TestGetAbideData:
             "/abide/data",
             params={
                 "file_path": file_path,
+                "method": "pearson",
                 "interpolation": "linear",
                 "interpolation_factor": 2
             }
@@ -397,10 +398,23 @@ class TestGetAbideData:
         interpolation_methods = ["none", "linear", "cubic_spline", "b_spline", "univariate_spline"]
 
         for interp in interpolation_methods:
-            params = {"file_path": file_path, "window_size": 30}
+            params = {"file_path": file_path, "method": "pearson", "window_size": 30}
             if interp != "none":
                 params["interpolation"] = interp
                 params["interpolation_factor"] = 2
 
             response = test_client.get("/abide/data", params=params)
             assert response.status_code == 200, f"Interpolation {interp} failed"
+
+    def test_get_data_method_required(self, test_client: TestClient):
+        """Test that method parameter is required."""
+        files = test_client.get("/abide/files").json()["files"]
+        file_path = files[0]["path"]
+
+        # Request without method should fail with 422
+        response = test_client.get(
+            "/abide/data",
+            params={"file_path": file_path}
+        )
+
+        assert response.status_code == 422
