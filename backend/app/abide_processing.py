@@ -247,16 +247,16 @@ def normalize_to_255(matrices: np.ndarray) -> np.ndarray:
 def compute_correlation_matrices(
     filepath: Path,
     params: CorrelationParams,
-) -> np.ndarray:
+) -> List[np.ndarray]:
     """
-    Main API function: file → NxNxF correlation matrices.
+    Main API function: file → list of NxN correlation matrices.
 
     Args:
         filepath: Path to dr_stage1_subjectXXXXXXX.txt file
         params: Correlation parameters
 
     Returns:
-        ndarray [F x N x N] - F frames of NxN correlation matrices
+        List of NxN matrices (one per frame), normalized to [0, 255]
     """
     # Parse
     data = parse_dr_file(filepath)
@@ -274,7 +274,8 @@ def compute_correlation_matrices(
     # Normalize to [0, 255] for visualization
     matrices = normalize_to_255(matrices)
 
-    return matrices
+    # Return as list of 2D matrices for easier downstream processing
+    return [matrices[i] for i in range(matrices.shape[0])]
 
 
 def get_method_info() -> List[dict]:

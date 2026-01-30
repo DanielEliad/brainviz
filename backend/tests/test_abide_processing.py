@@ -265,10 +265,9 @@ class TestAPIFunction:
 
         matrices = compute_correlation_matrices(single_abide_file, params)
 
-        assert isinstance(matrices, np.ndarray)
-        assert matrices.ndim == 3
-        assert matrices.shape[1] == 14  # RSN nodes
-        assert matrices.shape[2] == 14
+        assert isinstance(matrices, list)
+        assert len(matrices) > 0
+        assert matrices[0].shape == (14, 14)  # RSN nodes
 
     def test_compute_correlation_matrices_with_threshold(self, single_abide_file: Path):
         """Test API function with threshold."""
@@ -288,10 +287,14 @@ class TestAPIFunction:
         matrices_no_thresh = compute_correlation_matrices(single_abide_file, params_no_thresh)
         matrices_with_thresh = compute_correlation_matrices(single_abide_file, params_with_thresh)
 
+        # Convert lists to arrays for comparison
+        arr_no_thresh = np.array(matrices_no_thresh)
+        arr_with_thresh = np.array(matrices_with_thresh)
+
         # Threshold sets low correlations to 0, which normalizes to 127.5
         # Count how many values are exactly 127.5 (the neutral point)
-        neutral_count_no_thresh = np.sum(np.isclose(matrices_no_thresh, 127.5, atol=0.1))
-        neutral_count_with_thresh = np.sum(np.isclose(matrices_with_thresh, 127.5, atol=0.1))
+        neutral_count_no_thresh = np.sum(np.isclose(arr_no_thresh, 127.5, atol=0.1))
+        neutral_count_with_thresh = np.sum(np.isclose(arr_with_thresh, 127.5, atol=0.1))
 
         # With threshold, more values should be at the neutral point
         assert neutral_count_with_thresh >= neutral_count_no_thresh
@@ -305,9 +308,10 @@ class TestAPIFunction:
         )
 
         matrices = compute_correlation_matrices(single_abide_file, params)
+        arr = np.array(matrices)
 
-        assert matrices.min() >= 0.0
-        assert matrices.max() <= 255.0
+        assert arr.min() >= 0.0
+        assert arr.max() <= 255.0
 
 
 class TestMethodInfo:

@@ -193,15 +193,20 @@ export function drawFrame(
     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
     ctx.stroke();
 
-    if (nodeNames) {
+    // Get display name: prefer nodeNames lookup for legacy single-letter IDs, else use node.label
+    let displayName = node.label;
+    if (nodeNames && node.id.length === 1) {
       const nameIndex = node.id.charCodeAt(0) - "A".charCodeAt(0);
-      const name = nodeNames[nameIndex] ?? node.id;
-      ctx.font = "500 12px system-ui, -apple-system, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "bottom";
-      ctx.fillStyle = isNodeConnected ? "white" : `rgba(255, 255, 255, ${opacity})`;
-      ctx.fillText(name, pos.x, pos.y - radius - 6);
+      if (nameIndex >= 0 && nameIndex < nodeNames.length) {
+        displayName = nodeNames[nameIndex];
+      }
     }
+
+    ctx.font = "500 12px system-ui, -apple-system, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillStyle = isNodeConnected ? "white" : `rgba(255, 255, 255, ${opacity})`;
+    ctx.fillText(displayName, pos.x, pos.y - radius - 6);
 
     ctx.globalAlpha = 1;
   });

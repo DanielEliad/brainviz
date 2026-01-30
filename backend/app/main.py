@@ -103,12 +103,9 @@ def get_abide_data(
     )
 
     try:
-        matrices_array = compute_correlation_matrices(full_path, params)
+        matrices = compute_correlation_matrices(full_path, params)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-    # Convert to list for processing
-    matrices = [matrices_array[i] for i in range(matrices_array.shape[0])]
 
     # Apply interpolation/smoothing
     if interpolation and interpolation != "none":

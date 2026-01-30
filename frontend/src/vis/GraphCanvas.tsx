@@ -237,6 +237,9 @@ export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0, hidde
   }, [filteredFrame, nodePositions, selectedNode]);
 
   const getNodeName = (nodeId: string): string => {
+    // For ABIDE data (non-single-letter IDs), the ID is already the label
+    if (nodeId.length > 1) return nodeId;
+    // For legacy data (single-letter IDs), lookup from metadata
     if (!metadataQuery.data?.node_names) return nodeId;
     const index = nodeId.charCodeAt(0) - "A".charCodeAt(0);
     return metadataQuery.data.node_names[index] ?? nodeId;
