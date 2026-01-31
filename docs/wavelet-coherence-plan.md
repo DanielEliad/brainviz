@@ -164,83 +164,171 @@ FREQ_BAND_PRESETS = {
 
 ### Per Window/Timestep Output
 
-For each time window (or continuous time), for each pair of nodes, we get:
+For each time window, for each pair of nodes (i, j where i < j), we compute:
 
 ```python
 @dataclass
 class WaveletCoherenceResult:
-    # Coherence values per frequency band
-    coherence: Dict[str, float]  # {"slow-5": 0.75, "slow-4": 0.82, ...}
+    # Mean coherence across all frequencies (0-1)
+    mean_coherence: float
 
-    # Phase angle per frequency band (radians, -π to π)
-    phase: Dict[str, float]  # {"slow-5": 0.3, "slow-4": -1.2, ...}
+    # Leading value: proportion of frequencies showing lead/lag (0-1)
+    leading_value: float
 
-    # Dominant frequency band (highest coherence)
-    dominant_band: str  # "slow-4"
+    # Optional: coherence at each frequency for detailed analysis
+    coherence_spectrum: np.ndarray  # shape: (num_frequencies,)
 
-    # Lead/lag direction at dominant frequency
-    lead_direction: str  # "source_leads" | "target_leads" | "in_phase" | "anti_phase"
+    # Optional: phase angles at each frequency
+    phase_spectrum: np.ndarray  # shape: (num_frequencies,)
 ```
 
-### Simplified Edge Representation
+### Edge Weight Calculation
 
-For visualization, we need to collapse the frequency dimension. Proposed approach:
+The edge weight combines coherence and leading:
 
 ```python
-@dataclass
-class WaveletEdge:
-    source: str
-    target: str
+def compute_edge_weight(mean_coherence: float, leading_value: float) -> float:
+    """
+    Combine coherence and leading into a single edge weight.
 
-    # Primary coherence (from dominant frequency band)
-    weight: float  # 0-255 normalized
-
-    # Which node leads (based on phase at dominant frequency)
-    leader: str | None  # node_id or None if in-phase/anti-phase
-
-    # Dominant frequency band
-    frequency_band: str
-
-    # Full coherence spectrum (for detailed view)
-    coherence_spectrum: Dict[str, float]
+    Options:
+    1. Use mean coherence only (ignore leading)
+    2. Use leading value only
+    3. Weighted combination: α * coherence + (1-α) * leading
+    4. Product: coherence * leading (high only when both high)
+    """
+    # Option 4: Product approach - edge is strong only when
+    # there's both high coherence AND significant phase leading
+    return mean_coherence * leading_value
 ```
 
-## User's Requirement: Lead Assumption
+### Symmetric Matrix Output
 
-> "Let's show the lead and assume that they can't lead and lag in different frequencies at the same time."
+Since this is symmetric like Pearson:
 
-**Interpretation:**
-- For each node pair, determine the **dominant frequency band** (highest coherence)
-- Use the phase at that frequency to determine lead/lag
-- If phase is near 0° or 180°, there's no clear leader
-- If phase is near ±90°, one node leads the other
+```python
+def compute_wavelet_coherence_matrix(
+    time_series: np.ndarray,  # shape: (num_timepoints, num_nodes)
+    frequencies: np.ndarray,  # hardcoded frequency spectrum
+    dt: float,  # sampling period (TR)
+    phase_threshold: float = np.pi/4,
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Compute symmetric wavelet coherence matrices.
+
+    Returns:
+        coherence_matrix: shape (num_nodes, num_nodes), symmetric
+        leading_matrix: shape (num_nodes, num_nodes), symmetric
+    """
+    num_nodes = time_series.shape[1]
+    coherence_matrix = np.zeros((num_nodes, num_nodes))
+    leading_matrix = np.zeros((num_nodes, num_nodes))
+
+    for i in range(num_nodes):
+        for j in range(i + 1, num_nodes):
+            # Compute wavelet coherence between node i and j
+            coherence_spectrum, phase_spectrum = wavelet_coherence(
+                time_series[:, i],
+                time_series[:, j],
+                frequencies,
+                dt
+            )
+
+            # Mean coherence across frequencies
+            mean_coh = np.mean(coherence_spectrum)
+
+            # Leading value
+            leading_val = compute_leading_value(phase_spectrum, phase_threshold)
+
+            # Fill symmetric matrix
+            coherence_matrix[i, j] = mean_coh
+            coherence_matrix[j, i] = mean_coh
+            leading_matrix[i, j] = leading_val
+            leading_matrix[j, i] = leading_val
+
+    return coherence_matrix, leading_matrix
+```
+
+## User's Requirement: Symmetric Leading Value
+
+The wavelet coherence output should be **symmetric** (like Pearson), providing a single "leading value" per node pair per time window.
+
+**Specification:**
+1. Use a **hardcoded frequency spectrum** (fixed set of frequencies to analyze)
+2. Per window, for each node pair, compute phase angles at all frequencies
+3. For each frequency, determine if phase indicates "leading" (not in-phase/anti-phase)
+4. Calculate: `leading_value = num_leading_frequencies / total_frequencies`
+
+**Result:**
+- Value between 0 and 1
+- 0 = no leading at any frequency (all in-phase or anti-phase)
+- 1 = leading at all frequencies
+- Symmetric: A→B same as B→A
 
 **Implementation:**
 
 ```python
-def determine_lead(phase_angle: float, threshold: float = np.pi/4) -> str:
+# Hardcoded frequency spectrum for fMRI (0.01-0.1 Hz range)
+FREQUENCY_SPECTRUM = np.array([
+    0.010,  # 100s period
+    0.015,  # 67s period
+    0.020,  # 50s period
+    0.027,  # 37s period (slow-5/slow-4 boundary)
+    0.035,  # 29s period
+    0.045,  # 22s period
+    0.055,  # 18s period
+    0.065,  # 15s period
+    0.074,  # 14s period (slow-4/slow-3 boundary)
+    0.085,  # 12s period
+    0.100,  # 10s period
+])  # 11 frequencies
+
+
+def is_leading(phase_angle: float, threshold: float = np.pi/4) -> bool:
     """
-    Determine lead/lag from phase angle.
+    Determine if phase angle indicates leading (not in-phase or anti-phase).
 
     Args:
         phase_angle: Phase in radians (-π to π)
-        threshold: Angle threshold for determining lead (default π/4 = 45°)
+        threshold: Angle threshold for in-phase/anti-phase (default π/4 = 45°)
 
     Returns:
-        "source_leads" | "target_leads" | "in_phase" | "anti_phase"
+        True if leading (phase not near 0° or 180°), False otherwise
     """
     # Normalize to -π to π
     phase = np.arctan2(np.sin(phase_angle), np.cos(phase_angle))
 
-    if abs(phase) < threshold:
-        return "in_phase"
-    elif abs(phase - np.pi) < threshold or abs(phase + np.pi) < threshold:
-        return "anti_phase"
-    elif phase > 0:
-        return "target_leads"  # Y leads X (arrow up)
-    else:
-        return "source_leads"  # X leads Y (arrow down)
+    # Check if in-phase (near 0) or anti-phase (near ±π)
+    is_in_phase = abs(phase) < threshold
+    is_anti_phase = abs(abs(phase) - np.pi) < threshold
+
+    # Leading = not in-phase and not anti-phase
+    return not (is_in_phase or is_anti_phase)
+
+
+def compute_leading_value(phase_angles: np.ndarray, threshold: float = np.pi/4) -> float:
+    """
+    Compute the leading value for a node pair.
+
+    Args:
+        phase_angles: Array of phase angles at each frequency (shape: num_frequencies)
+        threshold: Angle threshold for determining leading
+
+    Returns:
+        Leading value between 0 and 1
+    """
+    num_frequencies = len(phase_angles)
+    num_leading = sum(1 for phase in phase_angles if is_leading(phase, threshold))
+    return num_leading / num_frequencies
 ```
+
+**Example:**
+- If phase angles at 11 frequencies are: [0.1, 0.2, 1.5, -1.3, 0.05, 2.9, 0.8, -0.7, 0.15, 1.1, -1.0]
+- With threshold π/4 ≈ 0.785:
+  - In-phase (|phase| < 0.785): 0.1, 0.2, 0.05, 0.15 → 4 frequencies
+  - Anti-phase (|phase| near π): 2.9 → 1 frequency
+  - Leading: 1.5, -1.3, 0.8, -0.7, 1.1, -1.0 → 6 frequencies
+- Leading value = 6/11 ≈ 0.545
 
 ## Integration with Existing Codebase
 
@@ -262,16 +350,15 @@ def determine_lead(phase_angle: float, threshold: float = np.pi/4) -> str:
 ### Frontend Changes
 
 1. **Update:** `frontend/src/vis/useGraphData.ts`
-   - Add wavelet coherence parameters
-   - Handle frequency band data
+   - Add wavelet coherence parameters (TR, phase threshold)
+   - Handle wavelet-specific response data
 
 2. **Update:** `frontend/src/App.tsx`
-   - Add frequency band selector (when wavelet coherence selected)
-   - Add TR input field
+   - Add TR input field (when wavelet coherence selected)
+   - Add phase threshold input (optional)
 
 3. **Update:** `frontend/src/vis/drawFrame.ts`
-   - Draw edges with lead/lag indicators (arrows showing direction)
-   - Color coding by frequency band (optional)
+   - No changes needed (symmetric = straight lines, already supported)
 
 ### API Response Extension
 
@@ -279,17 +366,13 @@ def determine_lead(phase_angle: float, threshold: float = np.pi/4) -> str:
 interface WaveletCoherenceResponse {
   frames: GraphFrame[];
   meta: GraphMeta;
-  symmetric: false;  // Wavelet coherence is directional
+  symmetric: true;  // Wavelet coherence IS symmetric (leading value, not direction)
 
   // Wavelet-specific metadata
   wavelet_info: {
-    frequency_bands: Array<{
-      name: string;
-      min_freq: number;
-      max_freq: number;
-    }>;
+    frequencies: number[];  // The hardcoded frequency spectrum used
     tr: number;
-    dominant_band: string;  // Most commonly dominant across all edges
+    phase_threshold: number;  // Threshold used for leading classification
   };
 }
 ```
@@ -298,16 +381,12 @@ interface WaveletCoherenceResponse {
 
 ### Edge Rendering for Wavelet Coherence
 
-Since wavelet coherence provides directional (lead/lag) information:
+Since wavelet coherence is **symmetric** (like Pearson):
 
-1. **Always use curved arrows** (not straight lines like symmetric correlations)
-2. **Arrow direction** indicates which node leads:
-   - Arrow from A→B means A leads B
-   - For in-phase/anti-phase, show bidirectional or straight line
-3. **Color coding options:**
-   - By coherence strength (current approach)
-   - By frequency band (new option)
-4. **Optional frequency band indicator** on edges
+1. **Use straight lines** (same as Pearson/Spearman)
+2. **Color coding** by combined weight (coherence × leading)
+3. **Edge thickness** could represent leading value
+4. Rendered the same way as other symmetric correlations
 
 ### UI Controls
 
@@ -319,16 +398,18 @@ Since wavelet coherence provides directional (lead/lag) information:
 │                                     │
 │ TR (seconds): [2.0    ]             │
 │                                     │
-│ Frequency Band: [Slow-4 (0.027-0.074 Hz) ▼] │
-│   ○ Full (0.01-0.1 Hz)              │
-│   ○ Slow-5 (0.01-0.027 Hz)          │
-│   ● Slow-4 (0.027-0.074 Hz)         │
-│   ○ Slow-3 (0.074-0.199 Hz)         │
-│   ○ Auto (dominant per edge)        │
-│                                     │
-│ Show Lead/Lag: [✓]                  │
+│ Phase Threshold: [45°  ]            │
+│ (angle to classify as leading)      │
 └─────────────────────────────────────┘
 ```
+
+### Edge Weight Options
+
+The user can choose how to combine coherence and leading:
+
+1. **Coherence only**: Show mean coherence (ignore phase)
+2. **Leading only**: Show leading value (ignore coherence magnitude)
+3. **Combined** (default): coherence × leading (strong only when both high)
 
 ## Dependencies to Add
 
@@ -343,52 +424,50 @@ dependencies = [
 ## Implementation Phases
 
 ### Phase 1: Core Wavelet Coherence Computation
-1. Add `pycwt` dependency
-2. Create `wavelet_coherence.py` module
-3. Implement coherence computation for a single node pair
-4. Add unit tests
+1. Add `pycwt` dependency to `pyproject.toml`
+2. Create `backend/app/wavelet_coherence.py` module with:
+   - Hardcoded `FREQUENCY_SPECTRUM` array
+   - `compute_wavelet_coherence(signal1, signal2, dt, frequencies)` function
+   - `is_leading(phase_angle, threshold)` helper
+   - `compute_leading_value(phase_angles, threshold)` function
+3. Add unit tests for wavelet coherence functions
 
 ### Phase 2: Integration with Processing Pipeline
-1. Add `WAVELET_COHERENCE` to `CorrelationMethod` enum
-2. Implement windowed wavelet coherence (or continuous)
-3. Compute coherence for all node pairs
-4. Return results in expected format
+1. Add `WAVELET_COHERENCE = "wavelet_coherence"` to `CorrelationMethod` enum
+2. Add `is_symmetric()` return `True` for wavelet coherence
+3. Implement windowed wavelet coherence matrix computation
+4. Return symmetric matrix (like Pearson)
 
 ### Phase 3: API Updates
-1. Add wavelet-specific query parameters
-2. Update response format for wavelet data
-3. Add frequency band endpoint/info
+1. Add `tr` query parameter (required when method=wavelet_coherence)
+2. Add `phase_threshold` query parameter (optional, default=π/4)
+3. Update `/abide/methods` to include wavelet_coherence with its params
 
 ### Phase 4: Frontend Updates
-1. Add TR input field
-2. Add frequency band selector
-3. Update edge rendering for lead/lag
-4. Handle wavelet-specific response data
+1. Add TR input field (shown when wavelet_coherence selected)
+2. Handle new method in useGraphData
 
 ### Phase 5: Testing & Refinement
-1. Integration tests with real ABIDE data
-2. Performance optimization (wavelet computation can be slow)
-3. UI/UX refinement based on feedback
+1. Integration tests with ABIDE data
+2. Performance optimization if needed
+3. Verify symmetric rendering works correctly
 
 ## Open Questions
 
 Before implementation, please clarify:
 
-1. **TR Value:** What is the TR (repetition time) of the ABIDE dual-regression data? This is critical for correct frequency band calculation.
+1. **TR Value:** What is the TR (repetition time) of the ABIDE data in seconds? This is critical for correct frequency calculation.
 
-2. **Windowing:** Should wavelet coherence be computed:
-   - Over the entire time series (producing a time-frequency map)?
-   - In sliding windows (like current correlation methods)?
-   - Both options available?
+2. **Windowing:** Should wavelet coherence be computed in sliding windows (like current methods) or over the entire time series?
 
-3. **Frequency Display:** When multiple frequency bands have high coherence, how should this be visualized?
-   - Show only dominant band?
-   - Allow switching between bands?
-   - Show all bands with different visual encodings?
+3. **Performance:** Wavelet coherence is more computationally intensive. Is server-side caching acceptable?
 
-4. **Performance:** Wavelet coherence is more computationally intensive than Pearson/Spearman. Is server-side caching acceptable, or should we optimize for real-time computation?
+## Resolved Design Decisions
 
-5. **Statistical Significance:** Should we implement significance testing (Monte Carlo) for wavelet coherence, or just show raw coherence values?
+- **Frequency spectrum:** Hardcoded (11 frequencies from 0.01-0.1 Hz)
+- **Output type:** Symmetric (leading value = ratio of frequencies showing lead)
+- **Edge rendering:** Straight lines (same as Pearson since symmetric)
+- **Edge weight:** Combines coherence magnitude with leading value
 
 ## References
 
