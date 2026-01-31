@@ -411,6 +411,40 @@ The user can choose how to combine coherence and leading:
 2. **Leading only**: Show leading value (ignore coherence magnitude)
 3. **Combined** (default): coherence × leading (strong only when both high)
 
+## Available Python Libraries
+
+### 1. PyCWT (Recommended)
+- **Repository:** https://github.com/regeirk/pycwt
+- **Docs:** https://pycwt.readthedocs.io/
+- **Features:** CWT, cross-wavelet transform, wavelet coherence, significance testing
+- **Dependencies:** numpy, scipy, tqdm
+- **Note:** Most complete and well-documented option
+
+```python
+import pycwt as wavelet
+
+# Wavelet coherence between two signals
+WCT, aWCT, coi, freq, sig = wavelet.wct(
+    signal1, signal2,
+    dt=2.0,  # TR in seconds
+    dj=1/12,
+    s0=2*2.0,
+    J=-1,
+    mother=wavelet.Morlet(6)
+)
+# WCT = coherence magnitude (scales × time)
+# aWCT = phase angle (scales × time)
+```
+
+### 2. PIWavelet
+- **Docs:** https://duducosmos.github.io/PIWavelet/
+- **Note:** Python interface to MATLAB wavelet package
+- **Caveat:** Requires GNU Octave installed
+
+### 3. Custom Implementation with PyWavelets
+- Can use `pywt.cwt()` for continuous wavelet transform
+- Would need to implement coherence calculation manually
+
 ## Dependencies to Add
 
 ```toml
@@ -420,6 +454,13 @@ dependencies = [
     "pycwt>=0.3.0a22",  # Wavelet coherence
 ]
 ```
+
+## Future: Matlab Code Translation
+
+The implementation will be kept in a separate file (`backend/app/wavelet_coherence.py`) to facilitate:
+1. Easy refactoring as requirements evolve
+2. Future translation of Matlab reference code to Python
+3. Potential swap of underlying library if needed
 
 ## Implementation Phases
 
@@ -452,22 +493,19 @@ dependencies = [
 2. Performance optimization if needed
 3. Verify symmetric rendering works correctly
 
-## Open Questions
-
-Before implementation, please clarify:
-
-1. **TR Value:** What is the TR (repetition time) of the ABIDE data in seconds? This is critical for correct frequency calculation.
-
-2. **Windowing:** Should wavelet coherence be computed in sliding windows (like current methods) or over the entire time series?
-
-3. **Performance:** Wavelet coherence is more computationally intensive. Is server-side caching acceptable?
-
 ## Resolved Design Decisions
 
+- **TR (sampling period):** 2 seconds
+- **Windowing:** Sliding windows (like current correlation methods)
 - **Frequency spectrum:** Hardcoded (11 frequencies from 0.01-0.1 Hz)
 - **Output type:** Symmetric (leading value = ratio of frequencies showing lead)
 - **Edge rendering:** Straight lines (same as Pearson since symmetric)
 - **Edge weight:** Combines coherence magnitude with leading value
+- **Code organization:** Separate file (`wavelet_coherence.py`) for ease of refactoring
+
+## Open Questions
+
+1. **Performance:** Wavelet coherence is more computationally intensive. Is server-side caching acceptable?
 
 ## References
 
