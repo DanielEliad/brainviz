@@ -1,5 +1,5 @@
 import { Muxer, ArrayBufferTarget } from "mp4-muxer";
-import { drawFrame } from "./drawFrame";
+import { drawFrame, DataRange } from "./drawFrame";
 import { GraphFrame } from "./types";
 
 type WorkerMessage = {
@@ -9,6 +9,7 @@ type WorkerMessage = {
   symmetric: boolean;
   width: number;
   height: number;
+  dataRange: DataRange;  // Required - from meta.edge_weight_min/max
   nodeNames?: string[];
   edgeThreshold?: number;
   hiddenNodes?: string[];
@@ -34,6 +35,7 @@ async function encodeVideo(
   symmetric: boolean,
   width: number,
   height: number,
+  dataRange: DataRange,
   edgeThreshold: number = 0,
   hiddenNodes: string[] = [],
   smoothing: string = "none",
@@ -104,6 +106,7 @@ async function encodeVideo(
     drawFrame(ctx, frame, width, height, {
       edgeThreshold,
       symmetric,
+      dataRange,
       infoBox: {
         smoothing,
         interpolation,
@@ -157,6 +160,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
         e.data.symmetric,
         e.data.width,
         e.data.height,
+        e.data.dataRange,
         e.data.edgeThreshold ?? 0,
         e.data.hiddenNodes ?? [],
         e.data.smoothing ?? "none",

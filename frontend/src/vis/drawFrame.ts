@@ -6,17 +6,38 @@ export type Point = { x: number; y: number };
 export const palette = d3.schemeTableau10;
 export const PADDING_RATIO = 0.08; // 8% of smaller dimension
 
-export const colorScale = d3
-  .scaleLinear<string>()
-  .domain([0, 255])
-  .range(["rgb(220, 38, 38)", "rgb(59, 130, 246)"]);
+// Data range type - must be provided from actual data, never hardcoded
+export type DataRange = {
+  min: number;
+  max: number;
+};
 
-export const thicknessScale = d3.scaleLinear().domain([0, 255]).range([0.5, 8]);
+export function getAbsoluteRange(range: DataRange): {
+  min: number;
+  max: number;
+} {
+  return { min: Math.max(0, range.min), max: Math.max(range.max, 0) };
+}
+
+// Scale factory functions - create scales based on absolute value range
+// These expect |correlation| as input, not raw correlation
+export function createColorScale(range: DataRange) {
+  const absRange = getAbsoluteRange(range);
+  return d3
+    .scaleLinear<string>()
+    .domain([absRange.min, absRange.max])
+    .range(["rgb(59, 130, 246)", "rgb(220, 38, 38)"]);
+}
+
+export function createThicknessScale(range: DataRange) {
+  const absRange = getAbsoluteRange(range);
+  return d3.scaleLinear().domain([absRange.min, absRange.max]).range([0.5, 8]);
+}
 
 export function computeNodePositions(
   nodesLength: number,
   width: number,
-  height: number
+  height: number,
 ): Point[] {
   const cx = width / 2;
   const cy = height / 2;
@@ -37,6 +58,7 @@ export function computeNodePositions(
 
 export type DrawOptions = {
   symmetric: boolean;
+  dataRange: DataRange; // Required - must come from actual data (meta.edge_weight_min/max)
   edgeThreshold?: number;
   activeNodeId?: string | null;
   connectedNodes?: Set<string>;
@@ -49,16 +71,30 @@ export type DrawOptions = {
   };
 };
 
-type AnyCanvasContext = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+type AnyCanvasContext =
+  | CanvasRenderingContext2D
+  | OffscreenCanvasRenderingContext2D;
 
 export function drawFrame(
   ctx: AnyCanvasContext,
   frame: GraphFrame,
   width: number,
   height: number,
-  options: DrawOptions
+  options: DrawOptions,
 ): void {
-  const { symmetric, edgeThreshold = 0, activeNodeId, connectedNodes, selectedNode, infoBox } = options;
+  const {
+    symmetric,
+    dataRange,
+    edgeThreshold = 0,
+    activeNodeId,
+    connectedNodes,
+    selectedNode,
+    infoBox,
+  } = options;
+
+  // Create scales based on actual data range - never use hardcoded values
+  const colorScale = createColorScale(dataRange);
+  const thicknessScale = createThicknessScale(dataRange);
 
   const positions = computeNodePositions(frame.nodes.length, width, height);
   const nodePositions = new Map<string, Point>();
@@ -82,10 +118,13 @@ export function drawFrame(
   edgesToDraw.forEach((edge) => {
     const source = nodePositions.get(edge.source);
     const target = nodePositions.get(edge.target);
-    if (!source || !target || edge.weight <= 0 || edge.weight < edgeThreshold) return;
+    // Use absolute value for threshold comparison and visualization
+    const absWeight = Math.abs(edge.weight);
+    if (!source || !target || absWeight === 0 || absWeight <= edgeThreshold)
+      return;
 
-    const weight = Math.max(0, Math.min(255, edge.weight));
-    const baseColor = colorScale(weight);
+    // Use absolute value for color/thickness - scales expect |correlation|
+    const baseColor = colorScale(absWeight);
     const edgeIsConnected = isEdgeConnected(edge);
     const opacity = edgeIsConnected ? 1 : 0.15;
 
@@ -93,16 +132,41 @@ export function drawFrame(
     const color = rgbMatch
       ? `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${opacity})`
       : baseColor;
-    const thickness = thicknessScale(weight);
+    const thickness = thicknessScale(absWeight);
+
+    // Calculate direction vector for arrows
+    const dx = target.x - source.x;
+    const dy = target.y - source.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
 
     if (symmetric) {
-      // Symmetric: draw straight line without arrows
+      // Symmetric: draw straight line with arrow to show correlation direction
       ctx.beginPath();
       ctx.moveTo(source.x, source.y);
       ctx.lineTo(target.x, target.y);
       ctx.strokeStyle = color;
       ctx.lineWidth = thickness;
       ctx.stroke();
+
+      // Add arrow at midpoint to show direction
+      const arrowSize = Math.max(4, thickness * 2.2);
+      const midX = (source.x + target.x) / 2;
+      const midY = (source.y + target.y) / 2;
+      const arrowAngle = Math.atan2(dy, dx);
+
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(midX, midY);
+      ctx.lineTo(
+        midX - arrowSize * Math.cos(arrowAngle - Math.PI / 6),
+        midY - arrowSize * Math.sin(arrowAngle - Math.PI / 6),
+      );
+      ctx.lineTo(
+        midX - arrowSize * Math.cos(arrowAngle + Math.PI / 6),
+        midY - arrowSize * Math.sin(arrowAngle + Math.PI / 6),
+      );
+      ctx.closePath();
+      ctx.fill();
     } else {
       // Asymmetric: draw curved line with directional arrows
       const pair = [edge.source, edge.target].sort();
@@ -136,9 +200,13 @@ export function drawFrame(
       for (let i = 1; i <= numArrows; i++) {
         const t = i / (numArrows + 1);
         const curveX =
-          (1 - t) * (1 - t) * source.x + 2 * (1 - t) * t * midX + t * t * target.x;
+          (1 - t) * (1 - t) * source.x +
+          2 * (1 - t) * t * midX +
+          t * t * target.x;
         const curveY =
-          (1 - t) * (1 - t) * source.y + 2 * (1 - t) * t * midY + t * t * target.y;
+          (1 - t) * (1 - t) * source.y +
+          2 * (1 - t) * t * midY +
+          t * t * target.y;
 
         const tNext = (i + 0.1) / (numArrows + 1);
         const nextX =
@@ -156,11 +224,11 @@ export function drawFrame(
         ctx.moveTo(curveX, curveY);
         ctx.lineTo(
           curveX - arrowSize * Math.cos(arrowAngle - Math.PI / 6),
-          curveY - arrowSize * Math.sin(arrowAngle - Math.PI / 6)
+          curveY - arrowSize * Math.sin(arrowAngle - Math.PI / 6),
         );
         ctx.lineTo(
           curveX - arrowSize * Math.cos(arrowAngle + Math.PI / 6),
-          curveY - arrowSize * Math.sin(arrowAngle + Math.PI / 6)
+          curveY - arrowSize * Math.sin(arrowAngle + Math.PI / 6),
         );
         ctx.closePath();
         ctx.fill();
@@ -213,7 +281,9 @@ export function drawFrame(
     ctx.font = "500 12px system-ui, -apple-system, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
-    ctx.fillStyle = isNodeConnected ? "white" : `rgba(255, 255, 255, ${opacity})`;
+    ctx.fillStyle = isNodeConnected
+      ? "white"
+      : `rgba(255, 255, 255, ${opacity})`;
     ctx.fillText(node.label, pos.x, pos.y - radius - 6);
 
     ctx.globalAlpha = 1;

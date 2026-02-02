@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { GraphFrame } from "./types";
-import { drawFrame, computeNodePositions, thicknessScale, Point } from "./drawFrame";
+import { drawFrame, computeNodePositions, createThicknessScale, Point, DataRange } from "./drawFrame";
 
 type Props = {
   frame?: GraphFrame;
@@ -10,9 +10,10 @@ type Props = {
   isLoading?: boolean;
   edgeThreshold?: number;
   hiddenNodes?: Set<string>;
+  dataRange: DataRange;  // Required - from meta.edge_weight_min/max
 };
 
-export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold = 0, hiddenNodes = new Set() }: Props) {
+export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold = 0, hiddenNodes = new Set(), dataRange }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -96,8 +97,9 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
       connectedNodes,
       selectedNode,
       symmetric,
+      dataRange,
     });
-  }, [filteredFrame, nodePositions, size.height, size.width, selectedNode, hoveredNode, connectedNodes, edgeThreshold, activeNodeId, symmetric]);
+  }, [filteredFrame, nodePositions, size.height, size.width, selectedNode, hoveredNode, connectedNodes, edgeThreshold, activeNodeId, symmetric, dataRange]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -145,8 +147,8 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
           const midX = (source.x + target.x) / 2 + perpX * curveOffset;
           const midY = (source.y + target.y) / 2 + perpY * curveOffset;
 
-          const weight = Math.max(0, Math.min(255, edge.weight));
-          const thickness = thicknessScale(weight);
+          const thicknessScale = createThicknessScale(dataRange);
+          const thickness = thicknessScale(Math.abs(edge.weight));
           const hitRadius = Math.max(8, thickness + 5);
 
           const curveBounds = {

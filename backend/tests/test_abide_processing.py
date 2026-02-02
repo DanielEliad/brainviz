@@ -13,16 +13,13 @@ from app.abide_processing import (
     RSN_INDICES,
     RSN_NAMES,
     RSN_SHORT,
-    apply_threshold,
     compute_correlation,
     compute_correlation_matrices,
     filter_rsn_columns,
     fisher_z,
     get_method_info,
     get_rsn_labels,
-    normalize_to_255,
     parse_dr_file,
-    partial_correlation_matrix,
     pearson_matrix,
     spearman_matrix,
     windowed_correlation,
@@ -142,18 +139,6 @@ class TestCorrelationMethods:
 
         np.testing.assert_array_almost_equal(matrix, matrix.T)
 
-    def test_partial_correlation_matrix_shape(self, sample_data):
-        """Test partial correlation matrix shape."""
-        matrix = partial_correlation_matrix(sample_data)
-
-        assert matrix.shape == (14, 14)
-
-    def test_partial_correlation_matrix_symmetric(self, sample_data):
-        """Test partial correlation matrix is symmetric."""
-        matrix = partial_correlation_matrix(sample_data)
-
-        np.testing.assert_array_almost_equal(matrix, matrix.T, decimal=10)
-
     def test_compute_correlation_pearson(self, sample_data):
         """Test compute_correlation with Pearson."""
         matrix = compute_correlation(sample_data, CorrelationMethod.PEARSON)
@@ -167,14 +152,6 @@ class TestCorrelationMethods:
         expected = spearman_matrix(sample_data)
 
         np.testing.assert_array_almost_equal(matrix, expected)
-
-    def test_compute_correlation_partial(self, sample_data):
-        """Test compute_correlation with partial."""
-        matrix = compute_correlation(sample_data, CorrelationMethod.PARTIAL)
-        expected = partial_correlation_matrix(sample_data)
-
-        np.testing.assert_array_almost_equal(matrix, expected)
-
 
 class TestWindowedCorrelation:
     """Tests for windowed correlation computation."""
@@ -232,26 +209,6 @@ class TestTransforms:
         # Should not produce inf
         assert np.isfinite(transformed).all()
 
-    def test_apply_threshold(self):
-        """Test threshold application."""
-        matrices = np.array([[[0.1, 0.5], [0.3, 0.8]]])
-        thresholded = apply_threshold(matrices, threshold=0.4)
-
-        assert thresholded[0, 0, 0] == 0.0  # 0.1 < 0.4
-        assert thresholded[0, 0, 1] == 0.5  # 0.5 >= 0.4
-        assert thresholded[0, 1, 0] == 0.0  # 0.3 < 0.4
-        assert thresholded[0, 1, 1] == 0.8  # 0.8 >= 0.4
-
-    def test_normalize_to_255(self):
-        """Test normalization to [0, 255] range."""
-        matrices = np.array([[[-1.0, 0.0], [0.0, 1.0]]])
-        normalized = normalize_to_255(matrices)
-
-        assert normalized[0, 0, 0] == 0.0  # -1 -> 0
-        assert normalized[0, 0, 1] == 127.5  # 0 -> 127.5
-        assert normalized[0, 1, 1] == 255.0  # 1 -> 255
-
-
 class TestAPIFunction:
     """Tests for the main API function."""
 
@@ -269,38 +226,8 @@ class TestAPIFunction:
         assert len(matrices) > 0
         assert matrices[0].shape == (14, 14)  # RSN nodes
 
-    def test_compute_correlation_matrices_with_threshold(self, single_abide_file: Path):
-        """Test API function with threshold."""
-        params_no_thresh = CorrelationParams(
-            method=CorrelationMethod.PEARSON,
-            window_size=30,
-            step=5,
-            threshold=None,
-        )
-        params_with_thresh = CorrelationParams(
-            method=CorrelationMethod.PEARSON,
-            window_size=30,
-            step=5,
-            threshold=0.3,
-        )
-
-        matrices_no_thresh = compute_correlation_matrices(single_abide_file, params_no_thresh)
-        matrices_with_thresh = compute_correlation_matrices(single_abide_file, params_with_thresh)
-
-        # Convert lists to arrays for comparison
-        arr_no_thresh = np.array(matrices_no_thresh)
-        arr_with_thresh = np.array(matrices_with_thresh)
-
-        # Threshold sets low correlations to 0, which normalizes to 127.5
-        # Count how many values are exactly 127.5 (the neutral point)
-        neutral_count_no_thresh = np.sum(np.isclose(arr_no_thresh, 127.5, atol=0.1))
-        neutral_count_with_thresh = np.sum(np.isclose(arr_with_thresh, 127.5, atol=0.1))
-
-        # With threshold, more values should be at the neutral point
-        assert neutral_count_with_thresh >= neutral_count_no_thresh
-
-    def test_compute_correlation_matrices_normalized(self, single_abide_file: Path):
-        """Test that output is normalized to [0, 255]."""
+    def test_compute_correlation_matrices_range(self, single_abide_file: Path):
+        """Test that output contains raw correlation values in [-1, 1] range."""
         params = CorrelationParams(
             method=CorrelationMethod.PEARSON,
             window_size=30,
@@ -310,8 +237,9 @@ class TestAPIFunction:
         matrices = compute_correlation_matrices(single_abide_file, params)
         arr = np.array(matrices)
 
-        assert arr.min() >= 0.0
-        assert arr.max() <= 255.0
+        # Raw correlation values should be in [-1, 1]
+        assert arr.min() >= -1.0
+        assert arr.max() <= 1.0
 
 
 class TestMethodInfo:
@@ -322,7 +250,7 @@ class TestMethodInfo:
         info = get_method_info()
 
         assert isinstance(info, list)
-        assert len(info) == 3  # pearson, spearman, partial
+        assert len(info) == 2  # pearson, spearman
 
     def test_get_method_info_structure(self):
         """Test method info structure."""

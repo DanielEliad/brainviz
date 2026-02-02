@@ -77,7 +77,6 @@ class TestListCorrelationMethods:
         method_ids = [m["id"] for m in methods]
         assert "pearson" in method_ids
         assert "spearman" in method_ids
-        assert "partial" in method_ids
 
     def test_methods_have_required_fields(self, test_client: TestClient):
         """Test that each method has required fields."""
@@ -175,35 +174,12 @@ class TestGetAbideData:
         files = test_client.get("/abide/files").json()["files"]
         file_path = files[0]["path"]
 
-        for method in ["pearson", "spearman", "partial"]:
+        for method in ["pearson", "spearman"]:
             response = test_client.get(
                 "/abide/data",
                 params={"file_path": file_path, "method": method, "window_size": 20}
             )
             assert response.status_code == 200, f"Method {method} failed"
-
-    def test_get_data_with_threshold(self, test_client: TestClient):
-        """Test correlation threshold parameter."""
-        files = test_client.get("/abide/files").json()["files"]
-        file_path = files[0]["path"]
-
-        # Without threshold
-        response_no_thresh = test_client.get(
-            "/abide/data",
-            params={"file_path": file_path, "method": "pearson", "window_size": 30}
-        )
-
-        # With high threshold
-        response_high_thresh = test_client.get(
-            "/abide/data",
-            params={"file_path": file_path, "method": "pearson", "window_size": 30, "threshold": 0.8}
-        )
-
-        assert response_no_thresh.status_code == 200
-        assert response_high_thresh.status_code == 200
-
-        # High threshold should result in fewer non-zero edges
-        # (actual comparison depends on data, but both should work)
 
     def test_get_data_window_size_affects_frames(self, test_client: TestClient):
         """Test that window size affects number of frames."""
@@ -303,9 +279,9 @@ class TestGetAbideData:
         assert "edge_weight_max" in meta
         assert "description" in meta
 
-        # Edge weights should be in [0, 255] range after normalization
-        assert meta["edge_weight_min"] >= 0
-        assert meta["edge_weight_max"] <= 255
+        # Edge weights are raw correlation values in [-1, 1] range
+        assert meta["edge_weight_min"] >= -1.0
+        assert meta["edge_weight_max"] <= 1.0
 
     def test_get_data_with_smoothing(self, test_client: TestClient):
         """Test smoothing parameter."""
@@ -363,7 +339,6 @@ class TestGetAbideData:
                 "method": "pearson",
                 "window_size": 30,
                 "step": 5,
-                "threshold": 0.2,
                 "interpolation": "linear",
                 "interpolation_factor": 2,
                 "smoothing": "gaussian",

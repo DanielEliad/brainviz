@@ -20,7 +20,7 @@ from app.abide_processing import (
 )
 
 # Data directory (relative to project root)
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
+DATA_DIR = Path(__file__).parent.parent.parent / "data" / "ABIDE"
 
 app = FastAPI(title="BrainViz Graph Backend", version="0.1.0")
 app.add_middleware(
@@ -41,6 +41,7 @@ def healthcheck() -> dict:
 # ABIDE Data Endpoints
 # =============================================================================
 
+
 @app.get("/abide/files")
 def list_abide_files() -> dict:
     """List all available ABIDE subject files."""
@@ -57,13 +58,20 @@ def list_correlation_methods() -> dict:
 @app.get("/abide/data")
 def get_abide_data(
     file_path: str = Query(..., description="Relative path to subject file"),
-    method: str = Query(..., description="Correlation method: pearson, spearman, partial"),
-    window_size: int = Query(default=30, ge=5, le=100, description="Sliding window size"),
+    method: str = Query(
+        ..., description="Correlation method: pearson, spearman"
+    ),
+    window_size: int = Query(
+        default=30, ge=5, le=100, description="Sliding window size"
+    ),
     step: int = Query(default=1, ge=1, le=10, description="Step between windows"),
-    threshold: Optional[float] = Query(default=None, ge=0, le=1, description="Correlation threshold"),
     smoothing: Optional[str] = Query(default="none", description="Smoothing algorithm"),
-    interpolation: Optional[str] = Query(default="none", description="Interpolation algorithm"),
-    interpolation_factor: Optional[int] = Query(default=2, description="Interpolation factor"),
+    interpolation: Optional[str] = Query(
+        default="none", description="Interpolation algorithm"
+    ),
+    interpolation_factor: Optional[int] = Query(
+        default=2, description="Interpolation factor"
+    ),
 ) -> dict:
     """
     Get graph data from an ABIDE subject file with correlation analysis.
@@ -84,7 +92,6 @@ def get_abide_data(
         method=corr_method,
         window_size=window_size,
         step=step,
-        threshold=threshold,
     )
 
     try:
@@ -149,12 +156,22 @@ def get_abide_data(
             )
         )
 
-    # Calculate edge weight range
+    # Calculate edge weight range from actual data
+    # Values are raw correlation coefficients (typically [-1, 1] for Pearson/Spearman)
+    # Frontend must use these values to scale visualizations - never assume a fixed range
     all_weights = []
     for matrix in matrices:
         all_weights.extend(matrix.flatten().tolist())
-    edge_weight_min = float(min(all_weights)) if all_weights else 0.0
-    edge_weight_max = float(max(all_weights)) if all_weights else 255.0
+
+    if not all_weights:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid data file: no correlation matrices could be computed. "
+                   "The file may be empty, corrupted, or have insufficient data points."
+        )
+
+    edge_weight_min = float(min(all_weights))
+    edge_weight_max = float(max(all_weights))
 
     meta = GraphMeta(
         available_timestamps=list(range(len(matrices))),
@@ -187,7 +204,9 @@ def apply_smoothing(matrices: list[np.ndarray], algorithm: str) -> list[np.ndarr
 
             if algorithm == "moving_average":
                 window_size = min(3, num_frames)
-                smoothed = np.convolve(time_series, np.ones(window_size) / window_size, mode="same")
+                smoothed = np.convolve(
+                    time_series, np.ones(window_size) / window_size, mode="same"
+                )
             elif algorithm == "exponential":
                 alpha = 0.5
                 smoothed = np.zeros_like(time_series)
@@ -212,7 +231,9 @@ def apply_smoothing(matrices: list[np.ndarray], algorithm: str) -> list[np.ndarr
     return result
 
 
-def apply_interpolation(matrices: list[np.ndarray], algorithm: str, factor: int = 2) -> list[np.ndarray]:
+def apply_interpolation(
+    matrices: list[np.ndarray], algorithm: str, factor: int = 2
+) -> list[np.ndarray]:
     if algorithm == "none" or len(matrices) == 0 or factor <= 1:
         return matrices
 
@@ -230,16 +251,24 @@ def apply_interpolation(matrices: list[np.ndarray], algorithm: str, factor: int 
             time_series = np.array([m[i, j] for m in matrices])
 
             if algorithm == "linear":
-                interp_func = interp1d(original_times, time_series, kind="linear", fill_value="extrapolate")
+                interp_func = interp1d(
+                    original_times, time_series, kind="linear", fill_value="extrapolate"
+                )
                 interpolated = interp_func(new_times)
             elif algorithm == "cubic_spline":
-                interp_func = interp1d(original_times, time_series, kind="cubic", fill_value="extrapolate")
+                interp_func = interp1d(
+                    original_times, time_series, kind="cubic", fill_value="extrapolate"
+                )
                 interpolated = interp_func(new_times)
             elif algorithm == "b_spline":
-                spl = make_interp_spline(original_times, time_series, k=min(3, num_frames - 1))
+                spl = make_interp_spline(
+                    original_times, time_series, k=min(3, num_frames - 1)
+                )
                 interpolated = spl(new_times)
             elif algorithm == "univariate_spline":
-                spl = UnivariateSpline(original_times, time_series, k=min(3, num_frames - 1), s=0)
+                spl = UnivariateSpline(
+                    original_times, time_series, k=min(3, num_frames - 1), s=0
+                )
                 interpolated = spl(new_times)
             else:
                 interpolated = time_series

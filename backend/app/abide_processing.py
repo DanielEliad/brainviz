@@ -63,26 +63,28 @@ RSN_SHORT = {
 # STAGE 2: ENUMS
 # =============================================================================
 
+
 class CorrelationMethod(str, Enum):
     """Available correlation methods."""
+
     PEARSON = "pearson"
     SPEARMAN = "spearman"
-    PARTIAL = "partial"
 
 
 @dataclass
 class CorrelationParams:
     """Parameters for correlation computation."""
+
     method: CorrelationMethod = CorrelationMethod.PEARSON
     window_size: int = 30
     step: int = 1
-    threshold: Optional[float] = None
     fisher_transform: bool = False
 
 
 # =============================================================================
 # STAGE 3: PARSERS
 # =============================================================================
+
 
 def parse_dr_file(filepath: Path) -> np.ndarray:
     """
@@ -122,19 +124,21 @@ def list_subject_files(data_dir: Path) -> List[dict]:
     """
     files = []
 
-    for txt_file in data_dir.rglob("dr_stage1_subject*.txt"):
+    for txt_file in data_dir.rglob("*.txt"):
         parts = txt_file.relative_to(data_dir).parts
 
         subject_id = txt_file.stem.replace("dr_stage1_subject", "")
         site = parts[-2] if len(parts) >= 2 else "unknown"
         version = parts[-3] if len(parts) >= 3 else "unknown"
 
-        files.append({
-            "path": str(txt_file.relative_to(data_dir)),
-            "subject_id": subject_id,
-            "site": site,
-            "version": version,
-        })
+        files.append(
+            {
+                "path": str(txt_file.relative_to(data_dir)),
+                "subject_id": subject_id,
+                "site": site,
+                "version": version,
+            }
+        )
 
     return sorted(files, key=lambda x: (x["version"], x["site"], x["subject_id"]))
 
@@ -142,6 +146,7 @@ def list_subject_files(data_dir: Path) -> List[dict]:
 # =============================================================================
 # STAGE 4: TRANSFORMS
 # =============================================================================
+
 
 def pearson_matrix(data: np.ndarray) -> np.ndarray:
     """Pearson correlation matrix. Input: [T x N], Output: [N x N]"""
@@ -159,36 +164,12 @@ def spearman_matrix(data: np.ndarray) -> np.ndarray:
     return matrix
 
 
-def partial_correlation_matrix(data: np.ndarray) -> np.ndarray:
-    """Partial correlation matrix. Input: [T x N], Output: [N x N]"""
-    cov = np.cov(data.T)
-    try:
-        precision = np.linalg.inv(cov)
-    except np.linalg.LinAlgError:
-        precision = np.linalg.pinv(cov)
-
-    n = precision.shape[0]
-    partial = np.zeros((n, n))
-
-    for i in range(n):
-        for j in range(n):
-            if i == j:
-                partial[i, j] = 1.0
-            else:
-                denom = np.sqrt(precision[i, i] * precision[j, j])
-                partial[i, j] = -precision[i, j] / denom if denom > 0 else 0.0
-
-    return partial
-
-
 def compute_correlation(data: np.ndarray, method: CorrelationMethod) -> np.ndarray:
     """Compute correlation matrix using specified method."""
     if method == CorrelationMethod.PEARSON:
         return pearson_matrix(data)
     elif method == CorrelationMethod.SPEARMAN:
         return spearman_matrix(data)
-    elif method == CorrelationMethod.PARTIAL:
-        return partial_correlation_matrix(data)
     else:
         raise ValueError(f"Unknown method: {method}")
 
@@ -209,7 +190,9 @@ def windowed_correlation(
     n_frames = (n_timepoints - window_size) // step + 1
 
     if n_frames <= 0:
-        raise ValueError(f"Window size {window_size} too large for {n_timepoints} timepoints")
+        raise ValueError(
+            f"Window size {window_size} too large for {n_timepoints} timepoints"
+        )
 
     n_nodes = data.shape[1]
     matrices = np.zeros((n_frames, n_nodes, n_nodes))
@@ -228,21 +211,10 @@ def fisher_z(matrices: np.ndarray) -> np.ndarray:
     return 0.5 * np.log((1 + clipped) / (1 - clipped))
 
 
-def apply_threshold(matrices: np.ndarray, threshold: float) -> np.ndarray:
-    """Zero out correlations below threshold."""
-    result = matrices.copy()
-    result[np.abs(result) < threshold] = 0.0
-    return result
-
-
-def normalize_to_255(matrices: np.ndarray) -> np.ndarray:
-    """Normalize from [-1, 1] to [0, 255]."""
-    return ((matrices + 1) / 2) * 255
-
-
 # =============================================================================
 # STAGE 5: API
 # =============================================================================
+
 
 def compute_correlation_matrices(
     filepath: Path,
@@ -256,25 +228,25 @@ def compute_correlation_matrices(
         params: Correlation parameters
 
     Returns:
-        List of NxN matrices (one per frame), normalized to [0, 255]
+        List of NxN matrices (one per frame) with raw correlation values.
+        For standard correlation methods, values are in [-1, 1].
+        For Fisher-transformed values, range is unbounded.
+        The actual data range should be computed from the returned matrices.
     """
     # Parse
     data = parse_dr_file(filepath)
     data = filter_rsn_columns(data)
 
     # Transform
-    matrices = windowed_correlation(data, params.method, params.window_size, params.step)
+    matrices = windowed_correlation(
+        data, params.method, params.window_size, params.step
+    )
 
     if params.fisher_transform:
         matrices = fisher_z(matrices)
 
-    if params.threshold is not None:
-        matrices = apply_threshold(matrices, params.threshold)
-
-    # Normalize to [0, 255] for visualization
-    matrices = normalize_to_255(matrices)
-
     # Return as list of 2D matrices for easier downstream processing
+    # Values are NOT normalized - use actual min/max from data for visualization
     return [matrices[i] for i in range(matrices.shape[0])]
 
 
@@ -285,7 +257,6 @@ def is_symmetric(method: CorrelationMethod) -> bool:
     return method in {
         CorrelationMethod.PEARSON,
         CorrelationMethod.SPEARMAN,
-        CorrelationMethod.PARTIAL,
     }
 
 
@@ -298,9 +269,14 @@ def get_method_info() -> List[dict]:
             "description": "Linear correlation coefficient",
             "symmetric": True,
             "params": [
-                {"name": "window_size", "type": "int", "default": 30, "min": 5, "max": 100},
+                {
+                    "name": "window_size",
+                    "type": "int",
+                    "default": 30,
+                    "min": 5,
+                    "max": 100,
+                },
                 {"name": "step", "type": "int", "default": 1, "min": 1, "max": 10},
-                {"name": "threshold", "type": "float", "default": None, "min": 0, "max": 1},
             ],
         },
         {
@@ -309,20 +285,14 @@ def get_method_info() -> List[dict]:
             "description": "Rank-based correlation (robust to outliers)",
             "symmetric": True,
             "params": [
-                {"name": "window_size", "type": "int", "default": 30, "min": 5, "max": 100},
+                {
+                    "name": "window_size",
+                    "type": "int",
+                    "default": 30,
+                    "min": 5,
+                    "max": 100,
+                },
                 {"name": "step", "type": "int", "default": 1, "min": 1, "max": 10},
-                {"name": "threshold", "type": "float", "default": None, "min": 0, "max": 1},
-            ],
-        },
-        {
-            "id": CorrelationMethod.PARTIAL.value,
-            "name": "Partial Correlation",
-            "description": "Correlation controlling for other variables",
-            "symmetric": True,
-            "params": [
-                {"name": "window_size", "type": "int", "default": 30, "min": 5, "max": 100},
-                {"name": "step", "type": "int", "default": 1, "min": 1, "max": 10},
-                {"name": "threshold", "type": "float", "default": None, "min": 0, "max": 1},
             ],
         },
     ]
@@ -350,7 +320,6 @@ if __name__ == "__main__":
         method=CorrelationMethod.PEARSON,
         window_size=30,
         step=5,
-        threshold=0.2,
     )
 
     matrices = compute_correlation_matrices(test_file, params)
