@@ -1,11 +1,14 @@
 import { useState, useCallback, useRef } from "react";
 import { GraphFrame } from "./types";
+import { DataRange } from "./drawFrame";
 
 type ExportState = "idle" | "exporting" | "done" | "error";
 
 type UseVideoExportOptions = {
   frames: GraphFrame[];
   playbackSpeed: number;
+  symmetric: boolean;
+  dataRange: DataRange;  // Required - from meta.edge_weight_min/max
   nodeNames?: string[];
   edgeThreshold?: number;
   hiddenNodes?: Set<string>;
@@ -18,6 +21,8 @@ type UseVideoExportOptions = {
 export function useVideoExport({
   frames,
   playbackSpeed,
+  symmetric,
+  dataRange,
   nodeNames,
   edgeThreshold = 0,
   hiddenNodes,
@@ -93,10 +98,12 @@ export function useVideoExport({
       hiddenNodes: hiddenNodes ? Array.from(hiddenNodes) : [],
       smoothing,
       interpolation,
+      symmetric,
+      dataRange,
       width,
       height,
     });
-  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, smoothing, interpolation, width, height]);
+  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, smoothing, interpolation, symmetric, dataRange, width, height]);
 
   const cancel = useCallback(() => {
     if (workerRef.current) {

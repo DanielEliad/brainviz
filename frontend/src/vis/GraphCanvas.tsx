@@ -1,27 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import * as d3 from "d3";
 import { Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 
 import { GraphFrame } from "./types";
-import { drawFrame, computeNodePositions, thicknessScale, Point } from "./drawFrame";
-
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
-
-type GraphMetadata = {
-  num_nodes: number;
-  node_names: string[];
-  description: string;
-};
+import { drawFrame, computeNodePositions, createThicknessScale, Point, DataRange } from "./drawFrame";
 
 type Props = {
   frame?: GraphFrame;
+  symmetric: boolean;
   isLoading?: boolean;
   edgeThreshold?: number;
   hiddenNodes?: Set<string>;
+  dataRange: DataRange;  // Required - from meta.edge_weight_min/max
 };
 
-export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0, hiddenNodes = new Set() }: Props) {
+export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold = 0, hiddenNodes = new Set(), dataRange }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -29,17 +21,6 @@ export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0, hidde
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<{ source: string; target: string; weight: number } | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  const metadataQuery = useQuery<GraphMetadata>({
-    queryKey: ["graphMetadata"],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/graph/metadata`);
-      if (!res.ok) {
-        throw new Error(`Metadata fetch failed (${res.status})`);
-      }
-      return res.json();
-    },
-  });
 
   const filteredFrame = useMemo(() => {
     if (!frame) return undefined;
@@ -75,7 +56,7 @@ export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0, hidde
   const connectedNodes = useMemo(() => {
     const activeNode = selectedNode || hoveredNode;
     if (!activeNode || !filteredFrame) return new Set<string>();
-    
+
     const connected = new Set<string>([activeNode]);
     filteredFrame.edges.forEach((edge) => {
       if (edge.source === activeNode) connected.add(edge.target);
@@ -89,7 +70,7 @@ export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0, hidde
   useEffect(() => {
     const canvas = canvasRef.current;
     const dpr = window.devicePixelRatio || 1;
-    
+
     if (!canvas || !filteredFrame || size.width === 0 || size.height === 0) {
       if (canvas && size.width > 0 && size.height > 0) {
         canvas.width = size.width * dpr;
@@ -108,16 +89,17 @@ export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0, hidde
     canvas.height = size.height * dpr;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    
+
     ctx.scale(dpr, dpr);
     drawFrame(ctx, filteredFrame, size.width, size.height, {
-      nodeNames: metadataQuery.data?.node_names,
       edgeThreshold,
       activeNodeId,
       connectedNodes,
       selectedNode,
+      symmetric,
+      dataRange,
     });
-  }, [filteredFrame, nodePositions, size.height, size.width, selectedNode, hoveredNode, connectedNodes, metadataQuery.data, edgeThreshold, activeNodeId]);
+  }, [filteredFrame, nodePositions, size.height, size.width, selectedNode, hoveredNode, connectedNodes, edgeThreshold, activeNodeId, symmetric, dataRange]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -165,8 +147,8 @@ export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0, hidde
           const midX = (source.x + target.x) / 2 + perpX * curveOffset;
           const midY = (source.y + target.y) / 2 + perpY * curveOffset;
 
-          const weight = Math.max(0, Math.min(255, edge.weight));
-          const thickness = thicknessScale(weight);
+          const thicknessScale = createThicknessScale(dataRange);
+          const thickness = thicknessScale(Math.abs(edge.weight));
           const hitRadius = Math.max(8, thickness + 5);
 
           const curveBounds = {
@@ -236,16 +218,11 @@ export default function GraphCanvas({ frame, isLoading, edgeThreshold = 0, hidde
     };
   }, [filteredFrame, nodePositions, selectedNode]);
 
-  const getNodeName = (nodeId: string): string => {
-    if (!metadataQuery.data?.node_names) return nodeId;
-    const index = nodeId.charCodeAt(0) - "A".charCodeAt(0);
-    return metadataQuery.data.node_names[index] ?? nodeId;
-  };
-
-  const nodeName = hoveredNode ? getNodeName(hoveredNode) : null;
+  // Node ID is already the label for ABIDE data
+  const nodeName = hoveredNode;
 
   const edgeLabel = hoveredEdge
-    ? `${getNodeName(hoveredEdge.source)} → ${getNodeName(hoveredEdge.target)} (${hoveredEdge.weight.toFixed(1)})`
+    ? `${hoveredEdge.source} → ${hoveredEdge.target} (${hoveredEdge.weight.toFixed(1)})`
     : null;
 
   return (

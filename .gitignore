@@ -13,3 +13,4 @@ frontend/dist/
 .env.*
 .direnv/
 .DS_Store
+data/

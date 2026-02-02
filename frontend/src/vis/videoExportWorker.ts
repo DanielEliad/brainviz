@@ -1,18 +1,20 @@
 import { Muxer, ArrayBufferTarget } from "mp4-muxer";
-import { drawFrame } from "./drawFrame";
+import { drawFrame, DataRange } from "./drawFrame";
 import { GraphFrame } from "./types";
 
 type WorkerMessage = {
   type: "start";
   frames: GraphFrame[];
   playbackSpeed: number;
+  symmetric: boolean;
+  width: number;
+  height: number;
+  dataRange: DataRange;  // Required - from meta.edge_weight_min/max
   nodeNames?: string[];
   edgeThreshold?: number;
   hiddenNodes?: string[];
   smoothing?: string;
   interpolation?: string;
-  width: number;
-  height: number;
 };
 
 const BASE_INTERVAL_MS = 500;
@@ -30,9 +32,10 @@ function filterFrame(frame: GraphFrame, hiddenNodes: Set<string>): GraphFrame {
 async function encodeVideo(
   frames: GraphFrame[],
   playbackSpeed: number,
+  symmetric: boolean,
   width: number,
   height: number,
-  nodeNames?: string[],
+  dataRange: DataRange,
   edgeThreshold: number = 0,
   hiddenNodes: string[] = [],
   smoothing: string = "none",
@@ -101,8 +104,9 @@ async function encodeVideo(
     const drawStart = performance.now();
     const frame = filterFrame(frames[i], hiddenSet);
     drawFrame(ctx, frame, width, height, {
-      nodeNames,
       edgeThreshold,
+      symmetric,
+      dataRange,
       infoBox: {
         smoothing,
         interpolation,
@@ -153,9 +157,10 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
       const buffer = await encodeVideo(
         e.data.frames,
         e.data.playbackSpeed,
+        e.data.symmetric,
         e.data.width,
         e.data.height,
-        e.data.nodeNames,
+        e.data.dataRange,
         e.data.edgeThreshold ?? 0,
         e.data.hiddenNodes ?? [],
         e.data.smoothing ?? "none",
