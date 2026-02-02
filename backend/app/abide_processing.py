@@ -1,15 +1,3 @@
-"""
-ABIDE Dual-Regression Processing Module
-
-Linear pipeline: parse → transform → export
-
-Stage 1: CONSTANTS  - RSN network mappings
-Stage 2: ENUMS      - Correlation methods and parameters
-Stage 3: PARSERS    - Load files to numpy arrays
-Stage 4: TRANSFORMS - Correlation computations (array → array)
-Stage 5: API        - Entry point for backend
-"""
-
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -78,7 +66,6 @@ class CorrelationParams:
     method: CorrelationMethod = CorrelationMethod.PEARSON
     window_size: int = 30
     step: int = 1
-    fisher_transform: bool = False
 
 
 # =============================================================================
@@ -180,12 +167,6 @@ def windowed_correlation(
     window_size: int,
     step: int = 1,
 ) -> np.ndarray:
-    """
-    Compute correlation matrices over sliding windows.
-
-    Input: ndarray [T x N]
-    Output: ndarray [F x N x N] where F = number of frames
-    """
     n_timepoints = data.shape[0]
     n_frames = (n_timepoints - window_size) // step + 1
 
@@ -205,12 +186,6 @@ def windowed_correlation(
     return matrices
 
 
-def fisher_z(matrices: np.ndarray) -> np.ndarray:
-    """Apply Fisher z-transform. Input: [-1,1], Output: (-inf, inf)"""
-    clipped = np.clip(matrices, -0.9999, 0.9999)
-    return 0.5 * np.log((1 + clipped) / (1 - clipped))
-
-
 # =============================================================================
 # STAGE 5: API
 # =============================================================================
@@ -220,19 +195,6 @@ def compute_correlation_matrices(
     filepath: Path,
     params: CorrelationParams,
 ) -> List[np.ndarray]:
-    """
-    Main API function: file → list of NxN correlation matrices.
-
-    Args:
-        filepath: Path to dr_stage1_subjectXXXXXXX.txt file
-        params: Correlation parameters
-
-    Returns:
-        List of NxN matrices (one per frame) with raw correlation values.
-        For standard correlation methods, values are in [-1, 1].
-        For Fisher-transformed values, range is unbounded.
-        The actual data range should be computed from the returned matrices.
-    """
     # Parse
     data = parse_dr_file(filepath)
     data = filter_rsn_columns(data)
@@ -241,9 +203,6 @@ def compute_correlation_matrices(
     matrices = windowed_correlation(
         data, params.method, params.window_size, params.step
     )
-
-    if params.fisher_transform:
-        matrices = fisher_z(matrices)
 
     # Return as list of 2D matrices for easier downstream processing
     # Values are NOT normalized - use actual min/max from data for visualization
@@ -276,7 +235,7 @@ def get_method_info() -> List[dict]:
                     "min": 5,
                     "max": 100,
                 },
-                {"name": "step", "type": "int", "default": 1, "min": 1, "max": 10},
+                {"name": "step", "type": "int", "default": 1, "min": 1, "max": 100},
             ],
         },
         {
@@ -292,47 +251,7 @@ def get_method_info() -> List[dict]:
                     "min": 5,
                     "max": 100,
                 },
-                {"name": "step", "type": "int", "default": 1, "min": 1, "max": 10},
+                {"name": "step", "type": "int", "default": 1, "min": 1, "max": 100},
             ],
         },
     ]
-
-
-if __name__ == "__main__":
-    import tempfile
-
-    print("ABIDE Processing Module - Test")
-    print("=" * 50)
-
-    # Generate test file
-    with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as f:
-        test_data = np.random.randn(100, 32)
-        signal = np.random.randn(100)
-        test_data[:, 0] += 0.6 * signal
-        test_data[:, 5] += 0.6 * signal
-        np.savetxt(f.name, test_data, fmt="%.8f")
-        test_file = Path(f.name)
-
-    print(f"\nTest file: {test_file}")
-
-    # Test API function
-    params = CorrelationParams(
-        method=CorrelationMethod.PEARSON,
-        window_size=30,
-        step=5,
-    )
-
-    matrices = compute_correlation_matrices(test_file, params)
-    print(f"\nResult shape: {matrices.shape}")
-    print(f"  Frames: {matrices.shape[0]}")
-    print(f"  Nodes: {matrices.shape[1]}")
-    print(f"  Value range: [{matrices.min():.1f}, {matrices.max():.1f}]")
-
-    print(f"\nRSN Labels: {get_rsn_labels()}")
-
-    print("\nAvailable methods:")
-    for m in get_method_info():
-        print(f"  - {m['name']}: {m['description']}")
-
-    # Cleanup
-    test_file.unlink()

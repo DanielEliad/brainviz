@@ -34,6 +34,26 @@ export function createThicknessScale(range: DataRange) {
   return d3.scaleLinear().domain([absRange.min, absRange.max]).range([0.5, 8]);
 }
 
+/**
+ * Unified edge visibility check - use this everywhere to determine if an edge should be shown.
+ *
+ * Filters:
+ * - Zero weight edges (no correlation)
+ * - Edges below the user-controlled threshold
+ * - In symmetric mode: duplicate edges (only show source < target)
+ */
+export function isEdgeVisible(
+  edge: { source: string; target: string; weight: number },
+  edgeThreshold: number,
+  symmetric: boolean,
+): boolean {
+  const absWeight = Math.abs(edge.weight);
+  if (absWeight === 0) return false;
+  if (absWeight <= edgeThreshold) return false;
+  if (symmetric && edge.source >= edge.target) return false;
+  return true;
+}
+
 export function computeNodePositions(
   nodesLength: number,
   width: number,
@@ -63,6 +83,7 @@ export type DrawOptions = {
   activeNodeId?: string | null;
   connectedNodes?: Set<string>;
   selectedNode?: string | null;
+  selectedEdge?: { source: string; target: string } | null;
   infoBox?: {
     smoothing: string;
     interpolation: string;
@@ -89,6 +110,7 @@ export function drawFrame(
     activeNodeId,
     connectedNodes,
     selectedNode,
+    selectedEdge,
     infoBox,
   } = options;
 
@@ -110,23 +132,39 @@ export function drawFrame(
     return edge.source === activeNodeId || edge.target === activeNodeId;
   };
 
-  // For symmetric correlations, deduplicate edges (only draw once per pair)
-  const edgesToDraw = symmetric
-    ? frame.edges.filter((edge) => edge.source < edge.target)
-    : frame.edges;
+  const isEdgeSelected = (edge: { source: string; target: string }) => {
+    if (!selectedEdge) return false;
+    return (
+      (edge.source === selectedEdge.source &&
+        edge.target === selectedEdge.target) ||
+      (edge.source === selectedEdge.target &&
+        edge.target === selectedEdge.source)
+    );
+  };
+
+  // Filter edges using unified visibility check
+  const edgesToDraw = frame.edges.filter((edge) =>
+    isEdgeVisible(edge, edgeThreshold, symmetric),
+  );
 
   edgesToDraw.forEach((edge) => {
     const source = nodePositions.get(edge.source);
     const target = nodePositions.get(edge.target);
-    // Use absolute value for threshold comparison and visualization
+    if (!source || !target) return;
     const absWeight = Math.abs(edge.weight);
-    if (!source || !target || absWeight === 0 || absWeight <= edgeThreshold)
-      return;
 
     // Use absolute value for color/thickness - scales expect |correlation|
     const baseColor = colorScale(absWeight);
     const edgeIsConnected = isEdgeConnected(edge);
-    const opacity = edgeIsConnected ? 1 : 0.15;
+    const edgeIsSelectedCurrent = isEdgeSelected(edge);
+    // Dim edges that are not connected to active node, or when another edge is selected
+    const opacity = selectedEdge
+      ? edgeIsSelectedCurrent
+        ? 1
+        : 0.15
+      : edgeIsConnected
+        ? 1
+        : 0.15;
 
     const rgbMatch = baseColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
     const color = rgbMatch
@@ -141,6 +179,16 @@ export function drawFrame(
 
     if (symmetric) {
       // Symmetric: draw straight line with arrow to show correlation direction
+      // Draw yellow glow behind selected edge
+      if (edgeIsSelectedCurrent) {
+        ctx.beginPath();
+        ctx.moveTo(source.x, source.y);
+        ctx.lineTo(target.x, target.y);
+        ctx.strokeStyle = "#fbbf24";
+        ctx.lineWidth = thickness + 4;
+        ctx.stroke();
+      }
+
       ctx.beginPath();
       ctx.moveTo(source.x, source.y);
       ctx.lineTo(target.x, target.y);
@@ -148,25 +196,29 @@ export function drawFrame(
       ctx.lineWidth = thickness;
       ctx.stroke();
 
-      // Add arrow at midpoint to show direction
-      const arrowSize = Math.max(4, thickness * 2.2);
-      const midX = (source.x + target.x) / 2;
-      const midY = (source.y + target.y) / 2;
+      // Add 3 equally spaced arrows to show direction
+      const arrowSize = Math.max(8, thickness * 2.8);
       const arrowAngle = Math.atan2(dy, dx);
 
       ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(midX, midY);
-      ctx.lineTo(
-        midX - arrowSize * Math.cos(arrowAngle - Math.PI / 6),
-        midY - arrowSize * Math.sin(arrowAngle - Math.PI / 6),
-      );
-      ctx.lineTo(
-        midX - arrowSize * Math.cos(arrowAngle + Math.PI / 6),
-        midY - arrowSize * Math.sin(arrowAngle + Math.PI / 6),
-      );
-      ctx.closePath();
-      ctx.fill();
+
+      for (const t of [0.25, 0.5, 0.75]) {
+        const arrowX = source.x + dx * t;
+        const arrowY = source.y + dy * t;
+
+        ctx.beginPath();
+        ctx.moveTo(arrowX, arrowY);
+        ctx.lineTo(
+          arrowX - arrowSize * Math.cos(arrowAngle - Math.PI / 6),
+          arrowY - arrowSize * Math.sin(arrowAngle - Math.PI / 6),
+        );
+        ctx.lineTo(
+          arrowX - arrowSize * Math.cos(arrowAngle + Math.PI / 6),
+          arrowY - arrowSize * Math.sin(arrowAngle + Math.PI / 6),
+        );
+        ctx.closePath();
+        ctx.fill();
+      }
     } else {
       // Asymmetric: draw curved line with directional arrows
       const pair = [edge.source, edge.target].sort();
@@ -184,6 +236,16 @@ export function drawFrame(
       const curveOffset = curveDirection * 30;
       const midX = (source.x + target.x) / 2 + perpX * curveOffset;
       const midY = (source.y + target.y) / 2 + perpY * curveOffset;
+
+      // Draw yellow glow behind selected edge
+      if (edgeIsSelectedCurrent) {
+        ctx.beginPath();
+        ctx.moveTo(source.x, source.y);
+        ctx.quadraticCurveTo(midX, midY, target.x, target.y);
+        ctx.strokeStyle = "#fbbf24";
+        ctx.lineWidth = thickness + 4;
+        ctx.stroke();
+      }
 
       ctx.beginPath();
       ctx.moveTo(source.x, source.y);
@@ -257,7 +319,7 @@ export function drawFrame(
       }
     }
 
-    const radius = 8 + (node.degree ?? 0) * 0.5;
+    const radius = 10;
     ctx.globalAlpha = opacity;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);

@@ -1,14 +1,22 @@
-# Claude Code Notes for brainviz
+# CLAUDE.md
 
-## Running Tests
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Development Commands
 
 **Always use nix-shell** to run commands in this project:
 
 ```bash
+# Run both backend and frontend in development mode
+./dev.sh
+
 # Run all tests
 ./test.sh
 
-# Or manually:
+# Run single backend test
+nix-shell --run "cd backend && pytest tests/test_abide_processing.py::TestParsers::test_parse_dr_file -v"
+
+# Manual commands
 nix-shell --run "cd backend && pytest tests/ -v --tb=short"
 nix-shell --run "cd frontend && npm run build"
 ```
@@ -19,14 +27,21 @@ Do NOT try to use `uv run pytest` or activate venvs directly - use nix-shell.
 
 - `backend/` - FastAPI Python backend
   - `app/main.py` - API endpoints
+  - `app/models.py` - Pydantic data models (Node, Edge, GraphFrame, GraphMeta)
   - `app/abide_processing.py` - Core correlation computation logic
+  - `app/analytics/community.py` - NetworkX community detection
   - `tests/` - pytest tests
-- `frontend/` - React/TypeScript frontend with Vite
+- `frontend/` - React/TypeScript frontend with Vite (uses TanStack React Query for data fetching, Zustand for state)
   - `src/App.tsx` - Main application component
   - `src/vis/` - Visualization components and hooks
     - `useGraphData.ts` - Data fetching hooks and types
+    - `types.ts` - Shared TypeScript types
     - `GraphCanvas.tsx` - Canvas rendering
     - `drawFrame.ts` - Frame drawing logic
+
+## Domain Context
+
+The data represents **14 RSN (Resting State Networks)** - brain regions that show correlated activity during rest. The visualization shows dynamic functional connectivity between these networks over time.
 
 ## Key Types and Enums
 

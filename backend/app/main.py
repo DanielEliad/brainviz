@@ -44,27 +44,23 @@ def healthcheck() -> dict:
 
 @app.get("/abide/files")
 def list_abide_files() -> dict:
-    """List all available ABIDE subject files."""
     files = list_subject_files(DATA_DIR)
     return {"files": files, "data_dir": str(DATA_DIR)}
 
 
 @app.get("/abide/methods")
 def list_correlation_methods() -> dict:
-    """List available correlation methods and their parameters."""
     return {"methods": get_method_info()}
 
 
 @app.get("/abide/data")
 def get_abide_data(
     file_path: str = Query(..., description="Relative path to subject file"),
-    method: str = Query(
-        ..., description="Correlation method: pearson, spearman"
-    ),
+    method: str = Query(..., description="Correlation method: pearson, spearman"),
     window_size: int = Query(
         default=30, ge=5, le=100, description="Sliding window size"
     ),
-    step: int = Query(default=1, ge=1, le=10, description="Step between windows"),
+    step: int = Query(default=1, ge=1, le=100, description="Step between windows"),
     smoothing: Optional[str] = Query(default="none", description="Smoothing algorithm"),
     interpolation: Optional[str] = Query(
         default="none", description="Interpolation algorithm"
@@ -108,6 +104,10 @@ def get_abide_data(
     # Get node labels
     node_labels = get_rsn_labels(short=True)
 
+    # For symmetric correlations, only create upper triangle edges
+    # to avoid duplicate A→B and B→A edges with same weight
+    symmetric = is_symmetric(corr_method)
+
     # Build frames
     processed_frames = []
     for timestamp, matrix in enumerate(matrices):
@@ -118,17 +118,22 @@ def get_abide_data(
         degree_map: dict[str, int] = {nid: 0 for nid in node_ids}
 
         for i in range(n):
-            for j in range(n):
+            j_start = i + 1 if symmetric else 0
+            for j in range(j_start, n):
+                if i == j:
+                    continue
                 weight = float(matrix[i, j])
-                if weight > 0:
-                    edges.append(
-                        Edge(
-                            source=node_ids[i],
-                            target=node_ids[j],
-                            weight=weight,
-                        )
+                edges.append(
+                    Edge(
+                        source=node_ids[i],
+                        target=node_ids[j],
+                        weight=weight,
                     )
-                    degree_map[node_ids[i]] += 1
+                )
+                # For symmetric edges, both nodes get degree incremented
+                degree_map[node_ids[i]] += 1
+                if symmetric:
+                    degree_map[node_ids[j]] += 1
 
         communities = simple_components(edges)
 
@@ -167,7 +172,7 @@ def get_abide_data(
         raise HTTPException(
             status_code=400,
             detail="Invalid data file: no correlation matrices could be computed. "
-                   "The file may be empty, corrupted, or have insufficient data points."
+            "The file may be empty, corrupted, or have insufficient data points.",
         )
 
     edge_weight_min = float(min(all_weights))
@@ -185,7 +190,7 @@ def get_abide_data(
     return {
         "frames": [frame.model_dump() for frame in processed_frames],
         "meta": meta.model_dump(),
-        "symmetric": is_symmetric(corr_method),
+        "symmetric": symmetric,
     }
 
 

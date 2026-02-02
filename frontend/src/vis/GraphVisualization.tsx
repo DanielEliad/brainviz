@@ -154,15 +154,13 @@ export default function GraphVisualization({
       }
     });
 
-    const interpolatedEdges = Array.from(allEdges.values()).filter(
-      (e) => e.weight > 0.01
-    );
+    const interpolatedEdges = Array.from(allEdges.values());
 
     return {
       timestamp: Math.round(
         currentFrameData.timestamp * (1 - t) + targetFrameData.timestamp * t
       ),
-      nodes: interpolatedNodes.filter((n) => (n.degree || 0) > 0.01),
+      nodes: interpolatedNodes,
       edges: interpolatedEdges,
     };
   }, [currentFrameData, targetFrameData, transitionProgress, interpolation]);

@@ -284,9 +284,9 @@ function App() {
 											if (isNaN(val) || val < 1) {
 												setStepInput("1");
 												setStep(1);
-											} else if (val > 10) {
-												setStepInput("10");
-												setStep(10);
+											} else if (val > 100) {
+												setStepInput("100");
+												setStep(100);
 											} else {
 												setStepInput(String(val));
 												setStep(val);
