@@ -22,15 +22,35 @@ def temp_data_dir() -> Generator[Path, None, None]:
     shutil.rmtree(temp_dir)
 
 
+def create_test_phenotypics(data_dir: Path, subjects: list[tuple[int, str]]) -> Path:
+    """
+    Create a test phenotypics.csv file with the given subjects.
+
+    Args:
+        data_dir: Directory to create the phenotypics.csv file in
+        subjects: List of (subject_id, diagnosis) tuples
+
+    Returns:
+        Path to the created phenotypics.csv file
+    """
+    phenotypics_path = data_dir / "phenotypics.csv"
+    with open(phenotypics_path, "w") as f:
+        f.write("partnum,diagnosis\n")
+        for subject_id, diagnosis in subjects:
+            f.write(f"{subject_id},{diagnosis}\n")
+    return phenotypics_path
+
+
 @pytest.fixture
 def sample_abide_structure(temp_data_dir: Path) -> Path:
     """
-    Create a sample ABIDE directory structure with test files.
+    Create a sample ABIDE directory structure with test files and phenotypics.csv.
 
-    Uses real subject IDs from phenotypics.csv to ensure diagnosis lookup works.
+    Generates its own test data - does not depend on real data files.
 
     Structure:
         temp_dir/
+            phenotypics.csv
             ABIDE/
                 ABIDE_I/
                     NYU/
@@ -38,13 +58,23 @@ def sample_abide_structure(temp_data_dir: Path) -> Path:
                         dr_stage1_subject0050954.txt
                     CMU/
                         dr_stage1_subject0050649.txt
-                ABIDE_I/
                     CMU2/
                         dr_stage1_subject0050659.txt
     """
     np.random.seed(42)
 
-    # Use real subject IDs that exist in phenotypics.csv
+    # Define test subjects with their diagnoses
+    test_subjects = [
+        (50953, "ASD"),
+        (50954, "HC"),
+        (50649, "ASD"),
+        (50659, "HC"),
+    ]
+
+    # Create phenotypics.csv with test subjects
+    create_test_phenotypics(temp_data_dir, test_subjects)
+
+    # Create ABIDE file structure
     sites = [
         ("ABIDE_I", "NYU", ["0050953", "0050954"]),
         ("ABIDE_I", "CMU", ["0050649"]),
@@ -124,25 +154,31 @@ def generate_abide_timeseries(
 @pytest.fixture
 def test_client(sample_abide_structure: Path) -> Generator[TestClient, None, None]:
     """
-    Create a test client with mocked DATA_DIR pointing to temp directory.
+    Create a test client with mocked DATA_DIR and PHENOTYPICS_FILE_PATH pointing to temp directory.
     """
-    # Remove cached module to force reimport with patched DATA_DIR
+    # Remove cached module to force reimport with patched paths
     modules_to_remove = [k for k in sys.modules if k.startswith("app.")]
     for mod in modules_to_remove:
         del sys.modules[mod]
 
     # Patch at import time by modifying the module before importing app
     import app.main as main_module
+    import app.abide_processing as processing_module
+
     original_data_dir = main_module.DATA_DIR
+    original_phenotypics_path = processing_module.PHENOTYPICS_FILE_PATH
+
     main_module.DATA_DIR = sample_abide_structure
+    processing_module.PHENOTYPICS_FILE_PATH = sample_abide_structure / "phenotypics.csv"
 
     from app.main import app
     client = TestClient(app)
 
     yield client
 
-    # Restore original
+    # Restore originals
     main_module.DATA_DIR = original_data_dir
+    processing_module.PHENOTYPICS_FILE_PATH = original_phenotypics_path
 
 
 @pytest.fixture
@@ -150,18 +186,28 @@ def test_client_empty_data(temp_data_dir: Path) -> Generator[TestClient, None, N
     """
     Create a test client with empty data directory.
     """
-    # Remove cached module to force reimport with patched DATA_DIR
+    # Create an empty phenotypics.csv
+    create_test_phenotypics(temp_data_dir, [])
+
+    # Remove cached module to force reimport with patched paths
     modules_to_remove = [k for k in sys.modules if k.startswith("app.")]
     for mod in modules_to_remove:
         del sys.modules[mod]
 
     import app.main as main_module
+    import app.abide_processing as processing_module
+
     original_data_dir = main_module.DATA_DIR
+    original_phenotypics_path = processing_module.PHENOTYPICS_FILE_PATH
+
     main_module.DATA_DIR = temp_data_dir
+    processing_module.PHENOTYPICS_FILE_PATH = temp_data_dir / "phenotypics.csv"
 
     from app.main import app
     client = TestClient(app)
 
     yield client
 
+    # Restore originals
     main_module.DATA_DIR = original_data_dir
+    processing_module.PHENOTYPICS_FILE_PATH = original_phenotypics_path

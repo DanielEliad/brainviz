@@ -4,20 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-**Always use nix-shell** to run commands in this project:
+**Always use the provided shell scripts** for standard tasks:
 
 ```bash
 # Run both backend and frontend in development mode
 ./dev.sh
 
-# Run tests
+# Run tests - ALWAYS use this, never run pytest directly
 ./test.sh
 
-# running a custom command must be through nix-shell to be in the right environment:
+# For custom commands, use nix-shell:
 nix-shell --run "echo hello"
 ```
 
-Do NOT try to use `uv run pytest` or activate venvs directly - use nix-shell.
+**IMPORTANT:**
+- Always use `./test.sh` to run tests - never use `nix-shell --run pytest` or `uv run pytest` directly
+- Do NOT try to activate venvs directly - use the provided scripts
 
 ## Project Structure
 
@@ -61,6 +63,16 @@ The data represents **14 RSN (Resting State Networks)** - brain regions that sho
 - `GET /abide/data` - Get computed correlation data
   - Required: `file_path`, `method`
   - Optional: `window_size`, `step`, `smoothing`, `interpolation`, `interpolation_factor`
+
+## Data Processing Pipeline
+
+The backend processes data in this order (see `main.py:86-102`):
+
+1. **Correlation** - Computes windowed correlation matrices from raw fMRI time series
+2. **Interpolation** - Adds intermediate frames between correlation matrices (e.g., factor=2 doubles frame count)
+3. **Smoothing** - Smooths each edge's correlation value across time
+
+Both interpolation and smoothing operate on the **correlation values over time**, not on the raw fMRI time series data. This means they affect the temporal dynamics of the visualization, not the underlying correlation computation.
 
 ## Common Patterns
 
@@ -160,7 +172,19 @@ type AbideFile = {
 };
 ```
 
-## Video Export Info Box
+## Video Export
+
+Video export renders at 4K resolution (3840×2160) for higher quality output. The `drawFrame.ts` scales all visual elements proportionally based on canvas width using `scale = width / BASE_WIDTH` where `BASE_WIDTH = 1920`.
+
+### Scaling in drawFrame.ts
+All pixel-based measurements scale with the canvas:
+- Node radius, stroke widths, selection glow
+- Font sizes for labels
+- Edge thickness range
+- Arrow sizes and spacing
+- Info box dimensions
+
+### Info Box
 
 The video export displays subject metadata in a compact info box overlay.
 
@@ -204,4 +228,4 @@ type DrawOptions = {
 - Method info returned by `/abide/methods` includes parameter definitions - update `get_method_info()` when changing parameters
 - Fallback method options in `App.tsx` (lines ~228-232) need to match backend methods
 - **Never normalize data in the backend** - let the frontend handle visualization scaling based on actual data ranges
-- **Test fixtures must use real subject IDs** from `phenotypics.csv` - see `backend/tests/conftest.py`
+- **Tests are self-contained** - test fixtures in `backend/tests/conftest.py` generate their own `phenotypics.csv` and ABIDE data files in temp directories, independent of real data
