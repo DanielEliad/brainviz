@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import GraphCanvas from "./vis/GraphCanvas";
 import { Timeline } from "./ui/Timeline";
 import { ControlsBar } from "./ui/ControlsBar";
@@ -11,7 +11,6 @@ import {
 	SmoothingAlgorithm,
 	InterpolationAlgorithm,
 	CorrelationMethod,
-	AbideFile,
 } from "./vis/useGraphData";
 import { useVideoExport } from "./vis/useVideoExport";
 
@@ -59,6 +58,12 @@ function App() {
 		return frame.nodes.map((n) => n.label || n.id);
 	}, [frame]);
 
+	// Track selected file info (guaranteed to have diagnosis for all subjects)
+	const selectedSubjectInfo = useMemo(() => {
+		if (!selectedFile || !filesQuery.data?.files) return null;
+		return filesQuery.data.files.find((f) => f.path === selectedFile) ?? null;
+	}, [selectedFile, filesQuery.data]);
+
 	const {
 		state: exportState,
 		progress: exportProgress,
@@ -71,6 +76,7 @@ function App() {
 		hiddenNodes,
 		smoothing,
 		interpolation,
+		subjectInfo: selectedSubjectInfo,
 		symmetric,
 		dataRange: { min: meta.edge_weight_min, max: meta.edge_weight_max },
 	});
@@ -123,21 +129,28 @@ function App() {
 		setIsPlaying(false);
 	}, [selectedFile, method, windowSize, step, smoothing, interpolation, interpolationFactor, setTime]);
 
-	// Group files by site for selection
-	const { sites, subjectsForSite } = useMemo(() => {
-		if (!filesQuery.data?.files) return { sites: [], subjectsForSite: [] };
-
-		const grouped: Record<string, AbideFile[]> = {};
+	// Site options for searchable dropdown
+	const siteOptions = useMemo(() => {
+		if (!filesQuery.data?.files) return [];
+		const sites = new Set<string>();
 		for (const file of filesQuery.data.files) {
-			const key = `${file.version}/${file.site}`;
-			if (!grouped[key]) grouped[key] = [];
-			grouped[key].push(file);
+			sites.add(`${file.version}/${file.site}`);
 		}
+		return Array.from(sites)
+			.sort()
+			.map((site) => ({ value: site, label: site }));
+	}, [filesQuery.data]);
 
-		const siteList = Object.keys(grouped).sort();
-		const subjects = selectedSite ? (grouped[selectedSite] ?? []) : [];
-
-		return { sites: siteList, subjectsForSite: subjects };
+	// Subject options filtered by selected site
+	const subjectOptions = useMemo(() => {
+		if (!filesQuery.data?.files || !selectedSite) return [];
+		return filesQuery.data.files
+			.filter((file) => `${file.version}/${file.site}` === selectedSite)
+			.map((file) => ({
+				value: file.path,
+				label: `${file.subject_id} (${file.diagnosis})`,
+			}))
+			.sort((a, b) => a.label.localeCompare(b.label));
 	}, [filesQuery.data, selectedSite]);
 
 	// Reset subject when site changes
@@ -164,8 +177,7 @@ function App() {
 							)}
 							{(!selectedFile || !method) && !error && (
 								<div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-									{!selectedSite && "Select a site, subject, and correlation method to begin"}
-									{selectedSite && !selectedFile && "Select a subject and correlation method to begin"}
+									{!selectedFile && "Select a subject and correlation method to begin"}
 									{selectedFile && !method && "Select a correlation method to begin"}
 								</div>
 							)}
@@ -176,6 +188,7 @@ function App() {
 								hiddenNodes={hiddenNodes}
 								symmetric={symmetric}
 								dataRange={{ min: meta.edge_weight_min, max: meta.edge_weight_max }}
+								diagnosis={selectedSubjectInfo?.diagnosis}
 							/>
 						</div>
 					</CardContent>
@@ -185,39 +198,40 @@ function App() {
 					<CardContent className="p-4 space-y-4">
 						{/* Data Source Section */}
 						<div className="space-y-3">
-							<h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">Data Source</h3>
+							<div className="flex items-center justify-between border-b border-border pb-1">
+								<h3 className="text-sm font-semibold text-foreground">Data Source</h3>
+								{selectedSubjectInfo && (
+									<span
+										className={`text-xs px-2 py-0.5 rounded-full ${
+											selectedSubjectInfo.diagnosis === "ASD"
+												? "bg-amber-500/20 text-amber-400"
+												: "bg-emerald-500/20 text-emerald-400"
+										}`}
+									>
+										{selectedSubjectInfo.diagnosis}
+									</span>
+								)}
+							</div>
 
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Site</label>
-								<select
-									value={selectedSite ?? ""}
-									onChange={(e) => setSelectedSite(e.target.value || null)}
-									className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
-								>
-									<option value="">-- Select Site --</option>
-									{sites.map((site) => (
-										<option key={site} value={site}>
-											{site}
-										</option>
-									))}
-								</select>
+								<SearchableSelect
+									options={siteOptions}
+									value={selectedSite}
+									onChange={setSelectedSite}
+									placeholder="Search sites..."
+								/>
 							</div>
 
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Subject</label>
-								<select
-									value={selectedFile ?? ""}
-									onChange={(e) => setSelectedFile(e.target.value || null)}
+								<SearchableSelect
+									options={subjectOptions}
+									value={selectedFile}
+									onChange={setSelectedFile}
+									placeholder="Search subjects..."
 									disabled={!selectedSite}
-									className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm disabled:opacity-50"
-								>
-									<option value="">-- Select Subject --</option>
-									{subjectsForSite.map((f) => (
-										<option key={f.path} value={f.path}>
-											{f.subject_id}
-										</option>
-									))}
-								</select>
+								/>
 							</div>
 						</div>
 
@@ -306,18 +320,17 @@ function App() {
 
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Interpolation</label>
-								<Select
+								<select
 									value={interpolation}
 									onChange={(e) => setInterpolation(e.target.value as InterpolationAlgorithm)}
-									options={[
-										{ value: "none", label: "None" },
-										{ value: "linear", label: "Linear" },
-										{ value: "cubic_spline", label: "Cubic Spline" },
-										{ value: "b_spline", label: "B-Spline" },
-										{ value: "univariate_spline", label: "Univariate Spline" },
-									]}
-									className="w-full"
-								/>
+									className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
+								>
+									<option value="none">None</option>
+									<option value="linear">Linear</option>
+									<option value="cubic_spline">Cubic Spline</option>
+									<option value="b_spline">B-Spline</option>
+									<option value="univariate_spline">Univariate Spline</option>
+								</select>
 							</div>
 
 							{interpolation !== "none" && (
@@ -349,17 +362,16 @@ function App() {
 
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Smoothing</label>
-								<Select
+								<select
 									value={smoothing}
 									onChange={(e) => setSmoothing(e.target.value as SmoothingAlgorithm)}
-									options={[
-										{ value: "none", label: "None" },
-										{ value: "moving_average", label: "Moving Average" },
-										{ value: "exponential", label: "Exponential" },
-										{ value: "gaussian", label: "Gaussian" },
-									]}
-									className="w-full"
-								/>
+									className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
+								>
+									<option value="none">None</option>
+									<option value="moving_average">Moving Average</option>
+									<option value="exponential">Exponential</option>
+									<option value="gaussian">Gaussian</option>
+								</select>
 							</div>
 						</div>
 
@@ -369,18 +381,17 @@ function App() {
 
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Speed</label>
-								<Select
+								<select
 									value={playbackSpeed.toString()}
 									onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
-									options={[
-										{ value: "0.5", label: "0.5x" },
-										{ value: "1", label: "1x" },
-										{ value: "2", label: "2x" },
-										{ value: "4", label: "4x" },
-										{ value: "8", label: "8x" },
-									]}
-									className="w-full"
-								/>
+									className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
+								>
+									<option value="0.5">0.5x</option>
+									<option value="1">1x</option>
+									<option value="2">2x</option>
+									<option value="4">4x</option>
+									<option value="8">8x</option>
+								</select>
 							</div>
 
 							<div className="space-y-1">

@@ -12,6 +12,14 @@ export type DataRange = {
   max: number;
 };
 
+// Subject info for video export info box
+export type SubjectInfo = {
+  subject_id: number;
+  site: string;
+  version: string;
+  diagnosis: "ASD" | "HC";
+};
+
 export function getAbsoluteRange(range: DataRange): {
   min: number;
   max: number;
@@ -89,6 +97,7 @@ export type DrawOptions = {
     interpolation: string;
     speed: number;
     edgeThreshold: number;
+    subjectInfo?: SubjectInfo;
   };
 };
 
@@ -351,34 +360,37 @@ export function drawFrame(
     ctx.globalAlpha = 1;
   });
 
-  // Draw info box if provided
+  // Draw info box if provided (compact wide format)
   if (infoBox) {
-    const padding = 18;
-    const lineHeight = 28;
-    const fontSize = 18;
-    const lines = [
-      `Smoothing: ${infoBox.smoothing}`,
-      `Interpolation: ${infoBox.interpolation}`,
-      `Speed: ${infoBox.speed}x`,
-      `Edge Threshold: ${infoBox.edgeThreshold.toFixed(1)}`,
-    ];
-    const boxWidth = 280;
+    const padding = 14;
+    const lineHeight = 24;
+    const fontSize = 16;
+
+    // Compact two-line format
+    const subjectLine = infoBox.subjectInfo
+      ? `${infoBox.subjectInfo.version} / ${infoBox.subjectInfo.site} / ${infoBox.subjectInfo.subject_id} (${infoBox.subjectInfo.diagnosis})`
+      : "";
+    const paramsLine = `Smooth: ${infoBox.smoothing} | Interp: ${infoBox.interpolation} | Speed: ${infoBox.speed}x | Thresh: ${infoBox.edgeThreshold.toFixed(2)}`;
+
+    const lines = subjectLine ? [subjectLine, paramsLine] : [paramsLine];
+
+    const boxWidth = 500;
     const boxHeight = padding * 2 + lines.length * lineHeight;
     const boxX = 24;
     const boxY = 24;
 
     ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
     ctx.beginPath();
-    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 12);
+    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10);
     ctx.fill();
 
     ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 12);
+    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10);
     ctx.stroke();
 
-    ctx.font = `600 ${fontSize}px system-ui, -apple-system, sans-serif`;
+    ctx.font = `500 ${fontSize}px system-ui, -apple-system, sans-serif`;
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
     ctx.fillStyle = "white";

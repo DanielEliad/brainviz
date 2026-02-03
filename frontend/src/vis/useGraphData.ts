@@ -19,9 +19,10 @@ export type CorrelationMethod = "pearson" | "spearman";
 // ABIDE file info from backend
 export type AbideFile = {
   path: string;
-  subject_id: string;
+  subject_id: number;
   site: string;
   version: string;
+  diagnosis: "ASD" | "HC";
 };
 
 export type CorrelationMethodInfo = {

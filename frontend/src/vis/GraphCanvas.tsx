@@ -11,9 +11,10 @@ type Props = {
   edgeThreshold?: number;
   hiddenNodes?: Set<string>;
   dataRange: DataRange;  // Required - from meta.edge_weight_min/max
+  diagnosis?: string | null;
 };
 
-export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold = 0, hiddenNodes = new Set(), dataRange }: Props) {
+export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold = 0, hiddenNodes = new Set(), dataRange, diagnosis }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -289,8 +290,19 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
         </div>
       )}
       {frame && (
-        <div className="absolute bottom-2 right-3 text-xs text-muted-foreground font-mono">
-          t={frame.timestamp}
+        <div className="absolute bottom-2 right-3 flex items-center gap-2 text-xs font-mono">
+          {diagnosis && (
+            <span
+              className={`px-2 py-0.5 rounded ${
+                diagnosis === "ASD"
+                  ? "bg-amber-500/20 text-amber-400"
+                  : "bg-emerald-500/20 text-emerald-400"
+              }`}
+            >
+              {diagnosis}
+            </span>
+          )}
+          <span className="text-muted-foreground">t={frame.timestamp}</span>
         </div>
       )}
       {(hoveredNode || hoveredEdge) && (

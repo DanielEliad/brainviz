@@ -27,25 +27,28 @@ def sample_abide_structure(temp_data_dir: Path) -> Path:
     """
     Create a sample ABIDE directory structure with test files.
 
+    Uses real subject IDs from phenotypics.csv to ensure diagnosis lookup works.
+
     Structure:
         temp_dir/
             ABIDE/
                 ABIDE_I/
                     NYU/
-                        dr_stage1_subject0051234.txt
-                        dr_stage1_subject0051235.txt
-                    UCLA/
-                        dr_stage1_subject0051456.txt
-                ABIDE_II/
-                    Stanford/
-                        dr_stage1_subject0052001.txt
+                        dr_stage1_subject0050953.txt
+                        dr_stage1_subject0050954.txt
+                    CMU/
+                        dr_stage1_subject0050649.txt
+                ABIDE_I/
+                    CMU2/
+                        dr_stage1_subject0050659.txt
     """
     np.random.seed(42)
 
+    # Use real subject IDs that exist in phenotypics.csv
     sites = [
-        ("ABIDE_I", "NYU", ["0051234", "0051235"]),
-        ("ABIDE_I", "UCLA", ["0051456"]),
-        ("ABIDE_II", "Stanford", ["0052001"]),
+        ("ABIDE_I", "NYU", ["0050953", "0050954"]),
+        ("ABIDE_I", "CMU", ["0050649"]),
+        ("ABIDE_I", "CMU2", ["0050659"]),
     ]
 
     for version, site, subjects in sites:

@@ -10,15 +10,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Run both backend and frontend in development mode
 ./dev.sh
 
-# Run all tests
+# Run tests
 ./test.sh
 
-# Run single backend test
-nix-shell --run "cd backend && pytest tests/test_abide_processing.py::TestParsers::test_parse_dr_file -v"
-
-# Manual commands
-nix-shell --run "cd backend && pytest tests/ -v --tb=short"
-nix-shell --run "cd frontend && npm run build"
+# running a custom command must be through nix-shell to be in the right environment:
+nix-shell --run "echo hello"
 ```
 
 Do NOT try to use `uv run pytest` or activate venvs directly - use nix-shell.
@@ -38,6 +34,11 @@ Do NOT try to use `uv run pytest` or activate venvs directly - use nix-shell.
     - `types.ts` - Shared TypeScript types
     - `GraphCanvas.tsx` - Canvas rendering
     - `drawFrame.ts` - Frame drawing logic
+- `data/` - READ ONLY data directory - must never change
+    - `phenotypics.csv` - labels per subject id (subject_id integer -> ASD/HC label)
+    - `ABIDE/` - ABIDE time series .txt files per subject
+        - `ABIDE_I/` - ABIDE 1 data set with per site directories - per site are subject files (.txt)
+        - `ABIDE_II/` - ABIDE 2 data set with per site directories - per site are subject files (.txt)
 
 ## Domain Context
 
@@ -128,9 +129,79 @@ getAbsoluteRange(range: DataRange)  // converts to [0, max_abs]
 
 **If you see hardcoded 255, 0-255, -1/1 defaults, or similar magic numbers in visualization code, it's a bug.**
 
+## Phenotypic Data
+
+The `data/phenotypics.csv` file contains diagnosis labels (ASD/HC) for each subject.
+
+### Subject ID Matching
+- **Phenotypics CSV**: Uses integer subject IDs without leading zeros (e.g., `50649`)
+- **Filename format**: `dr_stage1_subject0050649.txt` (with leading zeros)
+- **Solution**: Both are parsed as integers for matching (`int(row["partnum"])` and `int(stem.replace(...))`)
+
+### Data Integrity Assertions
+`abide_processing.py` enforces:
+1. **No duplicate subject IDs** in phenotypics - raises `ValueError` if found
+2. **Every subject file must have a diagnosis** - raises `ValueError` if missing from phenotypics
+
+### Types
+```python
+# Backend
+def parse_phenotypics() -> dict[int, str]  # subject_id -> "ASD" | "HC"
+```
+
+```typescript
+// Frontend (useGraphData.ts)
+type AbideFile = {
+  path: string;
+  subject_id: number;
+  site: string;
+  version: string;
+  diagnosis: "ASD" | "HC";  // Required, not optional
+};
+```
+
+## Video Export Info Box
+
+The video export displays subject metadata in a compact info box overlay.
+
+### Data Flow
+1. `App.tsx`: Gets `selectedSubjectInfo: AbideFile` from files query
+2. `useVideoExport`: Passes `subjectInfo` to worker
+3. `videoExportWorker`: Passes to `drawFrame()` via `infoBox.subjectInfo`
+4. `drawFrame.ts`: Renders compact two-line format
+
+### Info Box Format
+```
+ABIDE_I / CMU / 50649 (ASD)
+Smooth: none | Interp: none | Speed: 1x | Thresh: 0.00
+```
+
+### Key Types
+```typescript
+// drawFrame.ts
+type SubjectInfo = {
+  subject_id: number;
+  site: string;
+  version: string;
+  diagnosis: "ASD" | "HC";
+};
+
+type DrawOptions = {
+  // ...
+  infoBox?: {
+    smoothing: string;
+    interpolation: string;
+    speed: number;
+    edgeThreshold: number;
+    subjectInfo?: SubjectInfo;
+  };
+};
+```
+
 ## Gotchas
 
 - The `CorrelationMethod` enum exists in both backend (Python Enum) and frontend (TypeScript union type) - keep them in sync
 - Method info returned by `/abide/methods` includes parameter definitions - update `get_method_info()` when changing parameters
 - Fallback method options in `App.tsx` (lines ~228-232) need to match backend methods
 - **Never normalize data in the backend** - let the frontend handle visualization scaling based on actual data ranges
+- **Test fixtures must use real subject IDs** from `phenotypics.csv` - see `backend/tests/conftest.py`

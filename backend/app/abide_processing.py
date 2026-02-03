@@ -12,6 +12,8 @@ from scipy import stats
 
 RSN_INDICES = [1, 2, 5, 6, 7, 9, 12, 13, 14, 15, 18, 19, 21, 27]
 
+PHENOTYPICS_FILE_PATH = Path(__file__).parent.parent.parent / "data" / "phenotypics.csv"
+
 RSN_NAMES = {
     1: "Anterior Default Mode Network",
     2: "Primary Visual Network",
@@ -103,20 +105,49 @@ def get_rsn_labels(short: bool = True) -> List[str]:
     return [names[i] for i in RSN_INDICES]
 
 
+def parse_phenotypics(filepath: Path = PHENOTYPICS_FILE_PATH) -> dict[int, str]:
+    """
+    Parse phenotypics CSV and return mapping of subject_id -> diagnosis.
+    Raises FileNotFoundError if file not found.
+    Raises ValueError if duplicate subject IDs are found.
+    """
+    if not filepath.exists():
+        raise FileNotFoundError(f"Phenotypics file not found: {filepath}")
+
+    import csv
+
+    diagnosis_map = {}
+    with open(filepath, "r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            subject_id = int(row["partnum"])
+            if subject_id in diagnosis_map:
+                raise ValueError(f"Duplicate subject ID in phenotypics: {subject_id}")
+            diagnosis_map[subject_id] = row["diagnosis"]
+    return diagnosis_map
+
+
 def list_subject_files(data_dir: Path) -> List[dict]:
     """
     List all available subject files in the data directory.
 
-    Returns list of {path, subject_id, site, version} dicts.
+    Returns list of {path, subject_id, site, version, diagnosis} dicts.
+    Raises ValueError if any subject is missing a diagnosis.
     """
+    # Load phenotypics data
+    phenotypics = parse_phenotypics()
+
     files = []
 
     for txt_file in data_dir.rglob("*.txt"):
         parts = txt_file.relative_to(data_dir).parts
 
-        subject_id = txt_file.stem.replace("dr_stage1_subject", "")
+        subject_id = int(txt_file.stem.replace("dr_stage1_subject", ""))
         site = parts[-2] if len(parts) >= 2 else "unknown"
         version = parts[-3] if len(parts) >= 3 else "unknown"
+        diagnosis = phenotypics.get(subject_id)
+        if diagnosis is None:
+            raise ValueError(f"Subject {subject_id} has no diagnosis in phenotypics")
 
         files.append(
             {
@@ -124,6 +155,7 @@ def list_subject_files(data_dir: Path) -> List[dict]:
                 "subject_id": subject_id,
                 "site": site,
                 "version": version,
+                "diagnosis": diagnosis,
             }
         )
 

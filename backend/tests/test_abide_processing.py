@@ -16,7 +16,6 @@ from app.abide_processing import (
     compute_correlation,
     compute_correlation_matrices,
     filter_rsn_columns,
-    fisher_z,
     get_method_info,
     get_rsn_labels,
     parse_dr_file,
@@ -153,6 +152,7 @@ class TestCorrelationMethods:
 
         np.testing.assert_array_almost_equal(matrix, expected)
 
+
 class TestWindowedCorrelation:
     """Tests for windowed correlation computation."""
 
@@ -189,25 +189,6 @@ class TestWindowedCorrelation:
                 sample_data, CorrelationMethod.PEARSON, window_size=150, step=1
             )
 
-
-class TestTransforms:
-    """Tests for transformation functions."""
-
-    def test_fisher_z_range(self):
-        """Test Fisher z-transform output range."""
-        correlations = np.array([[-0.9, 0.0, 0.5], [0.0, 1.0, 0.8], [0.5, 0.8, 1.0]])
-        transformed = fisher_z(correlations)
-
-        # Non-diagonal values should be transformed
-        assert transformed[0, 0] != correlations[0, 0]
-
-    def test_fisher_z_clipping(self):
-        """Test Fisher z handles edge values."""
-        correlations = np.array([[-1.0, 1.0], [1.0, -1.0]])
-        transformed = fisher_z(correlations)
-
-        # Should not produce inf
-        assert np.isfinite(transformed).all()
 
 class TestAPIFunction:
     """Tests for the main API function."""

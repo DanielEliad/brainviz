@@ -44,10 +44,13 @@ class TestListAbideFiles:
         assert len(nyu_files) == 2
         assert all(f["version"] == "ABIDE_I" for f in nyu_files)
 
-        # Find Stanford file
-        stanford_files = [f for f in files if f["site"] == "Stanford"]
-        assert len(stanford_files) == 1
-        assert stanford_files[0]["version"] == "ABIDE_II"
+        # Find CMU file
+        cmu_files = [f for f in files if f["site"] == "CMU"]
+        assert len(cmu_files) == 1
+        assert cmu_files[0]["version"] == "ABIDE_I"
+
+        # Verify diagnosis is present for all files
+        assert all(f["diagnosis"] in ("ASD", "HC") for f in files)
 
     def test_list_files_empty_directory(self, test_client_empty_data: TestClient):
         """Test response when no files exist."""

@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { GraphFrame } from "./types";
 import { DataRange } from "./drawFrame";
+import { AbideFile } from "./useGraphData";
 
 type ExportState = "idle" | "exporting" | "done" | "error";
 
@@ -14,6 +15,7 @@ type UseVideoExportOptions = {
   hiddenNodes?: Set<string>;
   smoothing?: string;
   interpolation?: string;
+  subjectInfo?: AbideFile | null;
   width?: number;
   height?: number;
 };
@@ -28,6 +30,7 @@ export function useVideoExport({
   hiddenNodes,
   smoothing = "none",
   interpolation = "none",
+  subjectInfo,
   width = 1920,
   height = 1080,
 }: UseVideoExportOptions) {
@@ -98,12 +101,13 @@ export function useVideoExport({
       hiddenNodes: hiddenNodes ? Array.from(hiddenNodes) : [],
       smoothing,
       interpolation,
+      subjectInfo: subjectInfo ?? undefined,
       symmetric,
       dataRange,
       width,
       height,
     });
-  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, smoothing, interpolation, symmetric, dataRange, width, height]);
+  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, smoothing, interpolation, subjectInfo, symmetric, dataRange, width, height]);
 
   const cancel = useCallback(() => {
     if (workerRef.current) {
