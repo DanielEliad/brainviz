@@ -64,15 +64,114 @@ The data represents **14 RSN (Resting State Networks)** - brain regions that sho
   - Required: `file_path`, `method`
   - Optional: `window_size`, `step`, `smoothing`, `interpolation`, `interpolation_factor`
 
-## Data Processing Pipeline
+## Data Pipeline (End-to-End)
 
-The backend processes data in this order (see `main.py:86-102`):
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  STAGE 1: Raw ABIDE File                                                    │
+│  File: dr_stage1_subject0050649.txt                                         │
+│  Format: Space-separated floats, 32 columns × ~200 rows                     │
+│  Shape: [timepoints × 32 ICA components]                                    │
+│  Example row: "102.34 -45.67 89.12 ... (32 values)"                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼ parse_dr_file()
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  STAGE 2: Parsed NumPy Array                                                │
+│  Shape: [timepoints × 32]                                                   │
+│  dtype: float64                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼ filter_rsn_columns()
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  STAGE 3: Filtered RSN Data                                                 │
+│  Shape: [timepoints × 14]                                                   │
+│  Only keeps columns at indices [0,1,4,5,6,8,11,12,13,14,17,18,20,26]        │
+│  (RSN_INDICES - 1, since Python is 0-indexed)                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼ windowed_correlation()
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  STAGE 4: Correlation Matrices                                              │
+│  Shape: [n_frames × 14 × 14]                                                │
+│  n_frames = (timepoints - window_size) / step + 1                           │
+│  Values: Correlation coefficients [-1, 1]                                   │
+│  Each matrix[i,j] = correlation between RSN i and RSN j in that window      │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                        ┌─────────────┴─────────────┐
+                        ▼                           ▼
+              (if interpolation != "none")  (if smoothing != "none")
+┌───────────────────────────────────┐  ┌───────────────────────────────────┐
+│  STAGE 5a: Interpolation          │  │  STAGE 5b: Smoothing              │
+│  Increases frame count            │  │  Smooths each edge over time      │
+│  factor=2 → doubles frames        │  │  Algorithms: moving_avg,          │
+│  Algorithms: linear, cubic_spline │  │  exponential, gaussian            │
+│  Shape: [(n-1)*factor+1 × 14×14]  │  │  Shape unchanged                  │
+└───────────────────────────────────┘  └───────────────────────────────────┘
+                        │                           │
+                        └─────────────┬─────────────┘
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  STAGE 6: Build Graph Frames (main.py)                                      │
+│  For each correlation matrix:                                               │
+│    - Create 14 Node objects (one per RSN)                                   │
+│    - Create Edge objects for each (i,j) pair                                │
+│    - If symmetric: only upper triangle (91 edges)                           │
+│    - If asymmetric: all pairs except diagonal (182 edges)                   │
+│    - Compute connected components for node grouping                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  STAGE 7: API Response (JSON)                                               │
+│  {                                                                          │
+│    frames: [{ timestamp, nodes: [...], edges: [...] }, ...],                │
+│    meta: { edge_weight_min, edge_weight_max, ... },                         │
+│    symmetric: true/false                                                    │
+│  }                                                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼ useAbideData() hook
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  STAGE 8: Frontend State (React Query cache)                                │
+│  - allFrames: GraphFrame[]                                                  │
+│  - frame: current GraphFrame (selected by time index)                       │
+│  - meta: GraphMeta with data range                                          │
+│  - symmetric: boolean                                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼ drawFrame()
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  STAGE 9: Canvas Rendering                                                  │
+│  - Nodes: Positioned in circle, colored by group                            │
+│  - Edges: Filtered by threshold, colored/sized by |weight|                  │
+│    - Color: blue (weak) → red (strong)                                      │
+│    - Thickness: thin (weak) → thick (strong)                                │
+│  - Labels: RSN short names (aDMN, V1, SAL, etc.)                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
-1. **Correlation** - Computes windowed correlation matrices from raw fMRI time series
-2. **Interpolation** - Adds intermediate frames between correlation matrices (e.g., factor=2 doubles frame count)
-3. **Smoothing** - Smooths each edge's correlation value across time
+### Key Transformations Summary
 
-Both interpolation and smoothing operate on the **correlation values over time**, not on the raw fMRI time series data. This means they affect the temporal dynamics of the visualization, not the underlying correlation computation.
+| Stage | Location | Input Shape | Output Shape | Key Operation |
+|-------|----------|-------------|--------------|---------------|
+| 1→2 | `parse_dr_file` | .txt file | [T × 32] | `np.loadtxt` |
+| 2→3 | `filter_rsn_columns` | [T × 32] | [T × 14] | Column selection |
+| 3→4 | `windowed_correlation` | [T × 14] | [F × 14 × 14] | Sliding window correlation |
+| 4→5a | `apply_interpolation` | [F × 14 × 14] | [F' × 14 × 14] | Temporal upsampling |
+| 4→5b | `apply_smoothing` | [F × 14 × 14] | [F × 14 × 14] | Temporal smoothing |
+| 5→6 | `main.py` loop | [F × 14 × 14] | GraphFrame[] | Matrix → Node/Edge objects |
+| 7→8 | `useAbideData` | JSON | React state | Fetch + cache |
+| 8→9 | `drawFrame` | GraphFrame | Canvas pixels | d3 scales + canvas API |
+
+### Data Value Ranges
+
+| Stage | Typical Range | Notes |
+|-------|---------------|-------|
+| Raw ABIDE | ~50-150 | BOLD signal values |
+| Correlation | [-1, 1] | Pearson/Spearman coefficients |
+| Edge visualization | [0, max(\|min\|, \|max\|)] | Absolute value for color/thickness |
 
 ## Common Patterns
 
@@ -222,16 +321,304 @@ type DrawOptions = {
 };
 ```
 
-## UI Components
+## UI Framework
 
-### SearchableSelect (`frontend/src/components/ui/searchable-select.tsx`)
+### Overview
 
-A custom dropdown component with search/filter functionality. Key implementation details:
+The UI follows **shadcn/ui patterns** - components are not installed from a package but copied into the codebase and customized. This means you own the code and can modify it freely.
 
-- **Fixed positioning**: Dropdown uses `position: fixed` to escape overflow containers (sidebar)
-- **Right-aligned**: Dropdown aligns to the right edge of the input (`right: window.innerWidth - rect.right`) and expands leftward to avoid clipping off the viewport
-- **Scroll handling**: Closes on external scroll but stays open when scrolling inside the dropdown list (checks `listRef.current?.contains(e.target)`)
-- **Focus management**: Blurs input when closing due to external scroll, so clicking again triggers `onFocus` to reopen
+### File Structure
+```
+frontend/src/
+├── components/ui/     # Reusable UI primitives
+├── ui/                # App-specific UI (Timeline, ControlsBar)
+├── lib/utils.ts       # cn() utility for class merging
+└── styles.css         # CSS variables for theming
+```
+
+### Key Utilities
+
+**`cn()` function** (`@/lib/utils`): Merges Tailwind classes with proper precedence. Always use this for conditional/combined classes:
+```tsx
+import { cn } from "@/lib/utils";
+className={cn("base-classes", conditional && "extra-class", className)}
+```
+
+### Theming
+
+Colors are CSS variables in HSL format (without `hsl()` wrapper) defined in `styles.css`:
+- Light mode: `:root { --primary: 221.2 83.2% 53.3%; }`
+- Dark mode: `.dark { --primary: 217.2 91.2% 59.8%; }`
+
+Use via Tailwind: `bg-primary`, `text-muted-foreground`, `border-input`, etc.
+
+**Core semantic colors**: `background`, `foreground`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, `ring`
+
+### Adding a New Component
+
+1. Create file in `frontend/src/components/ui/`
+2. Import `cn` from `@/lib/utils` for class merging
+3. Use `React.forwardRef` if the component wraps a native element
+4. Export named (not default) for consistency
+5. Use semantic color classes (`bg-primary`, not `bg-blue-500`)
+
+**Template:**
+```tsx
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
+interface MyComponentProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: "default" | "alt";
+}
+
+const MyComponent = React.forwardRef<HTMLDivElement, MyComponentProps>(
+  ({ className, variant = "default", ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        "base-styles",
+        variant === "alt" && "alt-styles",
+        className
+      )}
+      {...props}
+    />
+  )
+);
+MyComponent.displayName = "MyComponent";
+
+export { MyComponent };
+```
+
+### Component Patterns
+
+| Pattern | When to use | Example |
+|---------|-------------|---------|
+| `forwardRef` | Wrapping native elements | Button, Slider, Card |
+| Generic `<T>` | Value can be string or number | SegmentedControl |
+| Controlled only | Complex state/validation | SearchableSelect |
+| CSS `grid-rows` animation | Height transitions | CollapsibleSection |
+| Document event listeners | Drag beyond element bounds | GradientSlider |
+| Fixed positioning | Escape overflow containers | SearchableSelect dropdown |
+
+### Existing Components
+
+**Standard** (shadcn-style):
+- `Button` - variants: `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`; sizes: `default`, `sm`, `lg`, `icon`
+- `Card` - `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`
+- `Slider` - native range input wrapper with `onValueChange`
+- `Tooltip` - hover tooltip, `side`: `top`, `bottom`, `left`, `right`
+
+**Custom**:
+- `SearchableSelect` - filterable dropdown with fixed positioning, right-aligned to avoid viewport overflow
+- `SegmentedControl` - iOS-style picker, sizes: `sm`, `md`
+- `GradientSlider` - colored track slider with floating value badge
+- `CollapsibleSection` - animated accordion with summary and action slot
+
+## Backend Framework
+
+### File Structure
+```
+backend/
+├── app/
+│   ├── main.py              # FastAPI app, endpoints, smoothing/interpolation
+│   ├── models.py            # Pydantic models (Node, Edge, GraphFrame, GraphMeta)
+│   ├── abide_processing.py  # Data parsing, correlation computation
+│   └── analytics/
+│       └── community.py     # NetworkX graph analysis
+└── tests/
+    ├── conftest.py          # Fixtures (temp dirs, synthetic data, test client)
+    ├── test_abide_endpoints.py
+    ├── test_abide_processing.py
+    └── test_health.py
+```
+
+### Module Organization (`abide_processing.py`)
+
+The file is organized into 5 stages:
+
+1. **CONSTANTS** - RSN indices, names, file paths
+2. **ENUMS** - `CorrelationMethod` enum, `CorrelationParams` dataclass
+3. **PARSERS** - File reading (`parse_dr_file`, `parse_phenotypics`, `list_subject_files`)
+4. **TRANSFORMS** - Correlation functions (`pearson_matrix`, `spearman_matrix`, `windowed_correlation`)
+5. **API** - Public interface (`compute_correlation_matrices`, `get_method_info`, `is_symmetric`)
+
+### RSN (Resting State Network) Data
+
+The 14 RSN components are extracted from 32 ICA components:
+```python
+RSN_INDICES = [1, 2, 5, 6, 7, 9, 12, 13, 14, 15, 18, 19, 21, 27]  # 1-indexed
+
+RSN_SHORT = {
+    1: "aDMN", 2: "V1", 5: "SAL", 6: "pDMN", 7: "AUD", 9: "lFPN",
+    12: "rFPN", 13: "latVIS", 14: "latSM", 15: "CER", 18: "SM1",
+    19: "DAN", 21: "LANG", 27: "occVIS"
+}
+```
+
+### Adding a New Correlation Method
+
+1. Add to `CorrelationMethod` enum in `abide_processing.py`
+2. Implement matrix function (e.g., `granger_matrix(data: np.ndarray) -> np.ndarray`)
+3. Add case to `compute_correlation()` dispatcher
+4. Update `is_symmetric()` if the method is asymmetric
+5. Add entry to `get_method_info()` with parameters
+6. Update frontend `CorrelationMethod` type in `useGraphData.ts`
+
+### Adding a New Smoothing/Interpolation Algorithm
+
+Both are in `main.py`. They operate on correlation values over time (not raw fMRI data).
+
+**Smoothing** (`apply_smoothing`):
+- Input: `list[np.ndarray]` of correlation matrices
+- Process: Extract time series for each (i,j) pair, smooth, reconstruct
+- Algorithms: `moving_average`, `exponential`, `gaussian`
+
+**Interpolation** (`apply_interpolation`):
+- Input: `list[np.ndarray]` of correlation matrices
+- Process: Increase frame count by factor (e.g., 2x doubles frames)
+- Algorithms: `linear`, `cubic_spline`, `b_spline`, `univariate_spline`
+
+To add a new algorithm, add an `elif` branch in the respective function.
+
+### Testing Patterns
+
+Tests are **self-contained** - they generate their own data, independent of real ABIDE files.
+
+#### Python Code Style
+
+Keep code clean and linear:
+
+```python
+# GOOD: All imports at top level
+from unittest.mock import patch
+import pytest
+from fastapi.testclient import TestClient
+import app.main as main_module
+from tests.utils import generate_abide_timeseries
+
+# BAD: Imports inside functions
+def test_something():
+    import app.main  # Don't do this
+```
+
+**Rules:**
+- All imports at module top level, never inside functions
+- Use `unittest.mock.patch` for mocking, not manual assignment/restoration
+- Shared utilities go in `tests/utils.py`, not duplicated across files
+- Keep fixtures in `conftest.py` (pytest auto-discovers them)
+- Use simple flat test functions, not test classes
+
+#### Test File Structure
+
+```
+backend/tests/
+├── conftest.py      # Fixtures only (no tests)
+├── utils.py         # Shared helper functions
+├── test_health.py   # Simple endpoint tests
+├── test_abide_endpoints.py  # API integration tests
+└── test_abide_processing.py # Unit tests for processing functions
+```
+
+#### Auto-Use Fixtures for Mocking
+
+Use `autouse=True` fixtures to mock external dependencies for all tests:
+
+```python
+@pytest.fixture(autouse=True)
+def mock_data_paths(tmp_path: Path) -> Generator[None, None, None]:
+    """Runs before EVERY test - mocks file paths to temp directories."""
+    phenotypics_path = tmp_path / "phenotypics.csv"
+    phenotypics_path.write_text("partnum,diagnosis\n")
+
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+
+    with patch.object(processing_module, "PHENOTYPICS_FILE_PATH", phenotypics_path), \
+         patch.object(main_module, "DATA_DIR", data_dir):
+        yield
+```
+
+This ensures tests never depend on real data files existing.
+
+#### Fixture Patterns
+
+**Basic fixtures:**
+```python
+@pytest.fixture
+def temp_data_dir() -> Generator[Path, None, None]:
+    """Create and cleanup a temp directory."""
+    temp_dir = Path(tempfile.mkdtemp())
+    yield temp_dir
+    shutil.rmtree(temp_dir)
+```
+
+**Fixtures that override auto-use mocks:**
+```python
+@pytest.fixture
+def test_client(sample_abide_structure: Path) -> Generator[TestClient, None, None]:
+    """Override the auto-use mock with specific test data."""
+    phenotypics_path = sample_abide_structure / "phenotypics.csv"
+
+    with patch.object(main_module, "DATA_DIR", sample_abide_structure), \
+         patch.object(processing_module, "PHENOTYPICS_FILE_PATH", phenotypics_path):
+        yield TestClient(app)
+```
+
+**Fixtures for reducing test repetition:**
+```python
+@pytest.fixture
+def file_path(test_client: TestClient) -> str:
+    """Get first available file path - avoids repeating this in every test."""
+    response = test_client.get("/abide/files")
+    return response.json()["files"][0]["path"]
+```
+
+#### Test Organization
+
+Use flat functions with comments to group related tests:
+
+```python
+# --- GET /abide/files ---
+
+def test_list_files_returns_expected_structure(test_client: TestClient):
+    response = test_client.get("/abide/files")
+    assert response.status_code == 200
+    ...
+
+def test_list_files_finds_all_fixture_files(test_client: TestClient):
+    ...
+
+# --- GET /abide/data errors ---
+
+def test_get_data_404_for_nonexistent_file(test_client: TestClient):
+    ...
+```
+
+**Test names should be self-documenting** - no docstrings needed:
+
+```python
+# GOOD: Name describes what's being tested
+def test_smaller_window_produces_more_frames(...):
+def test_returns_14_rsn_nodes(...):
+def test_422_for_window_size_out_of_range(...):
+
+# BAD: Vague names
+def test_window_size(...):  # What about window size?
+```
+
+### Pydantic Models (`models.py`)
+
+```python
+Node(id, label?, group?, degree?, attrs={})
+Edge(source, target, weight, directed=False, attrs={})
+GraphFrame(timestamp, nodes, edges, metadata={})
+GraphMeta(available_timestamps, node_attributes, edge_attributes,
+          edge_weight_min, edge_weight_max, description?)
+```
+
+### Graph Analysis (`analytics/community.py`)
+
+Currently contains `simple_components(edges)` which uses NetworkX to find connected components. Returns `Dict[str, int]` mapping node ID to component index.
 
 ## Gotchas
 
