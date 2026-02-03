@@ -48,7 +48,7 @@ The data represents **14 RSN (Resting State Networks)** - brain regions that sho
 
 ### Backend (Python)
 - `CorrelationMethod` enum: `PEARSON`, `SPEARMAN`
-- `CorrelationParams` dataclass: `method`, `window_size`, `step`, `fisher_transform`
+- `CorrelationParams` dataclass: `method`, `window_size`, `step`
 
 ### Frontend (TypeScript)
 - `CorrelationMethod`: `"pearson" | "spearman"`

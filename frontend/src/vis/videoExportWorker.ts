@@ -73,11 +73,20 @@ async function encodeVideo(
     },
   });
 
+  // Select appropriate H.264 level based on resolution
+  // Level 5.1 (640033) supports up to 4K, Level 6.2 (640034) supports up to 8K
+  const codec = width > 3840 ? "avc1.640034" : "avc1.640033";
+
+  // Scale bitrate with resolution (50 Mbps base for 1080p)
+  const pixelCount = width * height;
+  const basePixelCount = 1920 * 1080;
+  const bitrate = Math.min(200_000_000, Math.round(50_000_000 * (pixelCount / basePixelCount)));
+
   encoder.configure({
-    codec: "avc1.640032",
+    codec,
     width,
     height,
-    bitrate: 50_000_000,
+    bitrate,
     framerate: fps,
     latencyMode: "quality",
   });
@@ -179,7 +188,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
         e.data.interpolation ?? "none",
         e.data.subjectInfo,
       );
-      self.postMessage({ type: "done", buffer }, [buffer]);
+      self.postMessage({ type: "done", buffer }, { transfer: [buffer] });
     } catch (err) {
       self.postMessage({
         type: "error",

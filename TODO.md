@@ -1,6 +1,6 @@
 # BUGS
 
-- video higher quality
+- fix the tests (they search for phenotypic.csv but it isn't found make them use their own data dir in the test temp directory and generate your own data)
 
 # FEATURES
 

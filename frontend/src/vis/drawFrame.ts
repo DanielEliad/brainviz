@@ -5,6 +5,7 @@ export type Point = { x: number; y: number };
 
 export const palette = d3.schemeTableau10;
 export const PADDING_RATIO = 0.08; // 8% of smaller dimension
+export const BASE_WIDTH = 1920; // Reference width for scaling
 
 // Data range type - must be provided from actual data, never hardcoded
 export type DataRange = {
@@ -37,9 +38,9 @@ export function createColorScale(range: DataRange) {
     .range(["rgb(59, 130, 246)", "rgb(220, 38, 38)"]);
 }
 
-export function createThicknessScale(range: DataRange) {
+export function createThicknessScale(range: DataRange, scale: number = 1) {
   const absRange = getAbsoluteRange(range);
-  return d3.scaleLinear().domain([absRange.min, absRange.max]).range([0.5, 8]);
+  return d3.scaleLinear().domain([absRange.min, absRange.max]).range([0.5 * scale, 8 * scale]);
 }
 
 /**
@@ -123,9 +124,13 @@ export function drawFrame(
     infoBox,
   } = options;
 
+  // Calculate scale factor based on canvas width relative to base (1920px)
+  // This ensures all elements scale proportionally at higher resolutions
+  const scale = width / BASE_WIDTH;
+
   // Create scales based on actual data range - never use hardcoded values
   const colorScale = createColorScale(dataRange);
-  const thicknessScale = createThicknessScale(dataRange);
+  const thicknessScale = createThicknessScale(dataRange, scale);
 
   const positions = computeNodePositions(frame.nodes.length, width, height);
   const nodePositions = new Map<string, Point>();
@@ -194,7 +199,7 @@ export function drawFrame(
         ctx.moveTo(source.x, source.y);
         ctx.lineTo(target.x, target.y);
         ctx.strokeStyle = "#fbbf24";
-        ctx.lineWidth = thickness + 4;
+        ctx.lineWidth = thickness + 4 * scale;
         ctx.stroke();
       }
 
@@ -206,7 +211,7 @@ export function drawFrame(
       ctx.stroke();
 
       // Add 3 equally spaced arrows to show direction
-      const arrowSize = Math.max(8, thickness * 2.8);
+      const arrowSize = Math.max(8 * scale, thickness * 2.8);
       const arrowAngle = Math.atan2(dy, dx);
 
       ctx.fillStyle = color;
@@ -242,7 +247,7 @@ export function drawFrame(
       const perpX = -dy / dist;
       const perpY = dx / dist;
 
-      const curveOffset = curveDirection * 30;
+      const curveOffset = curveDirection * 30 * scale;
       const midX = (source.x + target.x) / 2 + perpX * curveOffset;
       const midY = (source.y + target.y) / 2 + perpY * curveOffset;
 
@@ -252,7 +257,7 @@ export function drawFrame(
         ctx.moveTo(source.x, source.y);
         ctx.quadraticCurveTo(midX, midY, target.x, target.y);
         ctx.strokeStyle = "#fbbf24";
-        ctx.lineWidth = thickness + 4;
+        ctx.lineWidth = thickness + 4 * scale;
         ctx.stroke();
       }
 
@@ -263,8 +268,8 @@ export function drawFrame(
       ctx.lineWidth = thickness;
       ctx.stroke();
 
-      const arrowSize = Math.max(4, thickness * 2.2);
-      const arrowSpacing = 40;
+      const arrowSize = Math.max(4 * scale, thickness * 2.2);
+      const arrowSpacing = 40 * scale;
       const numArrows = Math.max(1, Math.floor(dist / arrowSpacing));
 
       ctx.fillStyle = color;
@@ -328,7 +333,7 @@ export function drawFrame(
       }
     }
 
-    const radius = 10;
+    const radius = 10 * scale;
     ctx.globalAlpha = opacity;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
@@ -337,34 +342,34 @@ export function drawFrame(
 
     if (isSelected) {
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, radius + 4, 0, Math.PI * 2);
+      ctx.arc(pos.x, pos.y, radius + 4 * scale, 0, Math.PI * 2);
       ctx.strokeStyle = "#fbbf24";
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3 * scale;
       ctx.stroke();
     }
 
     ctx.strokeStyle = isNodeConnected ? "white" : "rgba(255, 255, 255, 0.5)";
-    ctx.lineWidth = isSelected ? 2.5 : 1.5;
+    ctx.lineWidth = isSelected ? 2.5 * scale : 1.5 * scale;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
     ctx.stroke();
 
-    ctx.font = "500 12px system-ui, -apple-system, sans-serif";
+    ctx.font = `500 ${12 * scale}px system-ui, -apple-system, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     ctx.fillStyle = isNodeConnected
       ? "white"
       : `rgba(255, 255, 255, ${opacity})`;
-    ctx.fillText(node.label, pos.x, pos.y - radius - 6);
+    ctx.fillText(node.label, pos.x, pos.y - radius - 6 * scale);
 
     ctx.globalAlpha = 1;
   });
 
   // Draw info box if provided (compact wide format)
   if (infoBox) {
-    const padding = 14;
-    const lineHeight = 24;
-    const fontSize = 16;
+    const padding = 14 * scale;
+    const lineHeight = 24 * scale;
+    const fontSize = 16 * scale;
 
     // Compact two-line format
     const subjectLine = infoBox.subjectInfo
@@ -374,20 +379,20 @@ export function drawFrame(
 
     const lines = subjectLine ? [subjectLine, paramsLine] : [paramsLine];
 
-    const boxWidth = 500;
+    const boxWidth = 500 * scale;
     const boxHeight = padding * 2 + lines.length * lineHeight;
-    const boxX = 24;
-    const boxY = 24;
+    const boxX = 24 * scale;
+    const boxY = 24 * scale;
 
     ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
     ctx.beginPath();
-    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10);
+    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10 * scale);
     ctx.fill();
 
     ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1.5 * scale;
     ctx.beginPath();
-    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10);
+    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10 * scale);
     ctx.stroke();
 
     ctx.font = `500 ${fontSize}px system-ui, -apple-system, sans-serif`;

@@ -79,6 +79,7 @@ function App() {
 		subjectInfo: selectedSubjectInfo,
 		symmetric,
 		dataRange: { min: meta.edge_weight_min, max: meta.edge_weight_max },
+		qualityScale: 2, // 4K output
 	});
 
 	// Playback loop

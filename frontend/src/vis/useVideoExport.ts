@@ -5,6 +5,8 @@ import { AbideFile } from "./useGraphData";
 
 type ExportState = "idle" | "exporting" | "done" | "error";
 
+type VideoQuality = 1 | 2 | 4;
+
 type UseVideoExportOptions = {
   frames: GraphFrame[];
   playbackSpeed: number;
@@ -16,6 +18,7 @@ type UseVideoExportOptions = {
   smoothing?: string;
   interpolation?: string;
   subjectInfo?: AbideFile | null;
+  qualityScale?: VideoQuality;
   width?: number;
   height?: number;
 };
@@ -31,6 +34,7 @@ export function useVideoExport({
   smoothing = "none",
   interpolation = "none",
   subjectInfo,
+  qualityScale = 1,
   width = 1920,
   height = 1080,
 }: UseVideoExportOptions) {
@@ -67,7 +71,7 @@ export function useVideoExport({
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `brain-visualization-${Date.now()}.mp4`;
+        a.download = `brain-visualization-4K-${Date.now()}.mp4`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -91,7 +95,10 @@ export function useVideoExport({
       workerRef.current = null;
     };
 
-    // Start encoding
+    // Start encoding - pass scaled dimensions to worker
+    const scaledWidth = width * qualityScale;
+    const scaledHeight = height * qualityScale;
+
     worker.postMessage({
       type: "start",
       frames,
@@ -104,10 +111,10 @@ export function useVideoExport({
       subjectInfo: subjectInfo ?? undefined,
       symmetric,
       dataRange,
-      width,
-      height,
+      width: scaledWidth,
+      height: scaledHeight,
     });
-  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, smoothing, interpolation, subjectInfo, symmetric, dataRange, width, height]);
+  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, smoothing, interpolation, subjectInfo, symmetric, dataRange, qualityScale, width, height]);
 
   const cancel = useCallback(() => {
     if (workerRef.current) {
