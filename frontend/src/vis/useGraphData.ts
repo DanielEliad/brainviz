@@ -12,8 +12,17 @@ type GraphDataResponse = {
 };
 
 // Enums matching backend
-export type SmoothingAlgorithm = "none" | "moving_average" | "exponential" | "gaussian";
-export type InterpolationAlgorithm = "none" | "linear" | "cubic_spline" | "b_spline" | "univariate_spline";
+export type SmoothingAlgorithm =
+  | "none"
+  | "moving_average"
+  | "exponential"
+  | "gaussian";
+export type InterpolationAlgorithm =
+  | "none"
+  | "linear"
+  | "cubic_spline"
+  | "b_spline"
+  | "univariate_spline";
 export type CorrelationMethod = "pearson" | "spearman";
 
 // ABIDE file info from backend
@@ -28,7 +37,6 @@ export type AbideFile = {
 export type CorrelationMethodInfo = {
   id: string;
   name: string;
-  description: string;
   symmetric: boolean;
   params: Array<{
     name: string;
@@ -90,7 +98,16 @@ export function useAbideData(params: Partial<AbideParams> = {}) {
   const [time, setTime] = useState<number>(0);
 
   const dataQuery = useQuery<GraphDataResponse>({
-    queryKey: ["abideData", p.filePath, p.method, p.windowSize, p.step, p.smoothing, p.interpolation, p.interpolationFactor],
+    queryKey: [
+      "abideData",
+      p.filePath,
+      p.method,
+      p.windowSize,
+      p.step,
+      p.smoothing,
+      p.interpolation,
+      p.interpolationFactor,
+    ],
     queryFn: async () => {
       if (!p.filePath) {
         throw new Error("No file selected");
@@ -110,7 +127,10 @@ export function useAbideData(params: Partial<AbideParams> = {}) {
       }
       if (p.interpolation !== "none") {
         url.searchParams.set("interpolation", p.interpolation);
-        url.searchParams.set("interpolation_factor", p.interpolationFactor.toString());
+        url.searchParams.set(
+          "interpolation_factor",
+          p.interpolationFactor.toString(),
+        );
       }
 
       const res = await fetch(url.toString());
@@ -152,7 +172,13 @@ export function useAbideData(params: Partial<AbideParams> = {}) {
     allFrames,
     // Fallback meta is only for loading state - frame will be undefined so dataRange won't be used
     // Backend guarantees valid min/max when data is present (throws 400 if no matrices)
-    meta: meta ?? { available_timestamps: [], node_attributes: [], edge_attributes: [], edge_weight_min: 0, edge_weight_max: 0 },
+    meta: meta ?? {
+      available_timestamps: [],
+      node_attributes: [],
+      edge_attributes: [],
+      edge_weight_min: 0,
+      edge_weight_max: 0,
+    },
     symmetric: dataQuery.data?.symmetric ?? true,
     time: normalizedTime,
     // Only show loading when actually fetching - not when query is disabled (no file/method selected)
@@ -163,4 +189,3 @@ export function useAbideData(params: Partial<AbideParams> = {}) {
     setTime,
   };
 }
-

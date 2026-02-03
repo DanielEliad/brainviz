@@ -89,7 +89,6 @@ class TestListCorrelationMethods:
         for method in methods:
             assert "id" in method
             assert "name" in method
-            assert "description" in method
             assert "params" in method
             assert isinstance(method["params"], list)
 

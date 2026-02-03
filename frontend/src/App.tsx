@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import { CollapsibleSection } from "@/components/ui/collapsible-section";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import GraphCanvas from "./vis/GraphCanvas";
 import { Timeline } from "./ui/Timeline";
 import { ControlsBar } from "./ui/ControlsBar";
@@ -41,6 +43,9 @@ function App() {
 	const [isPlaying, setIsPlaying] = useState(false);
 	const intervalRef = useRef<number | null>(null);
 
+	// Accordion state - multiple sections can be open
+	const [openSections, setOpenSections] = useState<Set<string>>(new Set(["data"]));
+
 	// Data fetching
 	const { frame, allFrames, isLoading, isFetching, error, refetch, setTime, meta, time, symmetric } = useAbideData({
 		filePath: selectedFile,
@@ -63,6 +68,34 @@ function App() {
 		if (!selectedFile || !filesQuery.data?.files) return null;
 		return filesQuery.data.files.find((f) => f.path === selectedFile) ?? null;
 	}, [selectedFile, filesQuery.data]);
+
+	// Summary strings for collapsed accordion sections
+	const dataSummary = selectedSubjectInfo
+		? selectedSubjectInfo.diagnosis
+		: "Not configured";
+	const corrSummary = method ? `${method} | w:${windowSize} | s:${step}` : "Not configured";
+	const interpolationLabels: Record<InterpolationAlgorithm, string> = {
+		none: "",
+		linear: "linear",
+		cubic_spline: "cubic",
+		b_spline: "b-spline",
+		univariate_spline: "univariate",
+	};
+	const smoothingLabels: Record<SmoothingAlgorithm, string> = {
+		none: "",
+		moving_average: "moving avg",
+		exponential: "exp",
+		gaussian: "gaussian",
+	};
+	const procSummary =
+		[
+			interpolation !== "none" ? `${interpolationLabels[interpolation]} x${interpolationFactor}` : null,
+			smoothing !== "none" ? smoothingLabels[smoothing] : null,
+		]
+			.filter(Boolean)
+			.join(" | ") || "none";
+	const playSummary = `${playbackSpeed}x | thresh: ${edgeThreshold.toFixed(2)}`;
+	const nodesSummary = `${14 - hiddenNodes.size}/14 visible`;
 
 	const {
 		state: exportState,
@@ -196,24 +229,19 @@ function App() {
 				</Card>
 
 				<Card className="w-72 flex-shrink-0 overflow-y-auto">
-					<CardContent className="p-4 space-y-4">
+					<CardContent className="p-3">
 						{/* Data Source Section */}
-						<div className="space-y-3">
-							<div className="flex items-center justify-between border-b border-border pb-1">
-								<h3 className="text-sm font-semibold text-foreground">Data Source</h3>
-								{selectedSubjectInfo && (
-									<span
-										className={`text-xs px-2 py-0.5 rounded-full ${
-											selectedSubjectInfo.diagnosis === "ASD"
-												? "bg-amber-500/20 text-amber-400"
-												: "bg-emerald-500/20 text-emerald-400"
-										}`}
-									>
-										{selectedSubjectInfo.diagnosis}
-									</span>
-								)}
-							</div>
-
+						<CollapsibleSection
+							title="Data Source"
+							summary={dataSummary}
+							isOpen={openSections.has("data")}
+							onToggle={() => setOpenSections((prev) => {
+								const next = new Set(prev);
+								if (next.has("data")) next.delete("data");
+								else next.add("data");
+								return next;
+							})}
+						>
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Site</label>
 								<SearchableSelect
@@ -223,7 +251,6 @@ function App() {
 									placeholder="Search sites..."
 								/>
 							</div>
-
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Subject</label>
 								<SearchableSelect
@@ -234,37 +261,34 @@ function App() {
 									disabled={!selectedSite}
 								/>
 							</div>
-						</div>
+						</CollapsibleSection>
 
 						{/* Correlation Section */}
-						<div className="space-y-3">
-							<h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">Correlation</h3>
-
+						<CollapsibleSection
+							title="Correlation"
+							summary={corrSummary}
+							isOpen={openSections.has("correlation")}
+							onToggle={() => setOpenSections((prev) => {
+								const next = new Set(prev);
+								if (next.has("correlation")) next.delete("correlation");
+								else next.add("correlation");
+								return next;
+							})}
+						>
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Method</label>
-								<select
-									value={method ?? ""}
-									onChange={(e) => setMethod(e.target.value ? e.target.value as CorrelationMethod : null)}
-									className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
-								>
-									<option value="">-- Select Method --</option>
-									{(methodsQuery.data?.methods ?? [
-										{ id: "pearson", name: "Pearson" },
-										{ id: "spearman", name: "Spearman" },
-									]).map((m) => (
-										<option key={m.id} value={m.id}>{m.name}</option>
-									))}
-								</select>
-								{method && methodsQuery.data?.methods.find((m) => m.id === method)?.description && (
-									<div className="text-[10px] text-muted-foreground">
-										{methodsQuery.data.methods.find((m) => m.id === method)?.description}
-									</div>
-								)}
+								<SegmentedControl<CorrelationMethod>
+									options={[
+										{ value: "pearson", label: "Pearson" },
+										{ value: "spearman", label: "Spearman" },
+									]}
+									value={method}
+									onChange={(v) => setMethod(v)}
+								/>
 							</div>
-
 							<div className="grid grid-cols-2 gap-2">
 								<div className="space-y-1">
-									<label className="text-xs font-medium text-foreground">Window Size</label>
+									<label className="text-xs font-medium text-foreground">Window</label>
 									<input
 										type="text"
 										inputMode="numeric"
@@ -312,28 +336,34 @@ function App() {
 									/>
 								</div>
 							</div>
-
-						</div>
+						</CollapsibleSection>
 
 						{/* Processing Section */}
-						<div className="space-y-3">
-							<h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">Processing</h3>
-
+						<CollapsibleSection
+							title="Processing"
+							summary={procSummary}
+							isOpen={openSections.has("processing")}
+							onToggle={() => setOpenSections((prev) => {
+								const next = new Set(prev);
+								if (next.has("processing")) next.delete("processing");
+								else next.add("processing");
+								return next;
+							})}
+						>
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Interpolation</label>
-								<select
+								<SegmentedControl<InterpolationAlgorithm>
+									options={[
+										{ value: "none", label: "None" },
+										{ value: "linear", label: "Linear" },
+										{ value: "cubic_spline", label: "Cubic" },
+										{ value: "b_spline", label: "B-Spl" },
+									]}
 									value={interpolation}
-									onChange={(e) => setInterpolation(e.target.value as InterpolationAlgorithm)}
-									className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
-								>
-									<option value="none">None</option>
-									<option value="linear">Linear</option>
-									<option value="cubic_spline">Cubic Spline</option>
-									<option value="b_spline">B-Spline</option>
-									<option value="univariate_spline">Univariate Spline</option>
-								</select>
+									onChange={(v) => setInterpolation(v)}
+									size="sm"
+								/>
 							</div>
-
 							{interpolation !== "none" && (
 								<div className="space-y-1">
 									<label className="text-xs font-medium text-foreground">Factor (2-10)</label>
@@ -360,44 +390,52 @@ function App() {
 									/>
 								</div>
 							)}
-
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Smoothing</label>
-								<select
+								<SegmentedControl<SmoothingAlgorithm>
+									options={[
+										{ value: "none", label: "None" },
+										{ value: "moving_average", label: "MovAvg" },
+										{ value: "exponential", label: "Exp" },
+										{ value: "gaussian", label: "Gauss" },
+									]}
 									value={smoothing}
-									onChange={(e) => setSmoothing(e.target.value as SmoothingAlgorithm)}
-									className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
-								>
-									<option value="none">None</option>
-									<option value="moving_average">Moving Average</option>
-									<option value="exponential">Exponential</option>
-									<option value="gaussian">Gaussian</option>
-								</select>
+									onChange={(v) => setSmoothing(v)}
+									size="sm"
+								/>
 							</div>
-						</div>
+						</CollapsibleSection>
 
 						{/* Playback Section */}
-						<div className="space-y-3">
-							<h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">Playback</h3>
-
+						<CollapsibleSection
+							title="Playback"
+							summary={playSummary}
+							isOpen={openSections.has("playback")}
+							onToggle={() => setOpenSections((prev) => {
+								const next = new Set(prev);
+								if (next.has("playback")) next.delete("playback");
+								else next.add("playback");
+								return next;
+							})}
+						>
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Speed</label>
-								<select
-									value={playbackSpeed.toString()}
-									onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
-									className="w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm"
-								>
-									<option value="0.5">0.5x</option>
-									<option value="1">1x</option>
-									<option value="2">2x</option>
-									<option value="4">4x</option>
-									<option value="8">8x</option>
-								</select>
+								<SegmentedControl<number>
+									options={[
+										{ value: 0.5, label: "0.5x" },
+										{ value: 1, label: "1x" },
+										{ value: 2, label: "2x" },
+										{ value: 4, label: "4x" },
+										{ value: 8, label: "8x" },
+									]}
+									value={playbackSpeed}
+									onChange={(v) => setPlaybackSpeed(v)}
+									size="sm"
+								/>
 							</div>
-
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">
-									Edge Threshold: {edgeThreshold.toFixed(1)}
+									Edge Threshold: {edgeThreshold.toFixed(2)}
 								</label>
 								<input
 									type="range"
@@ -413,60 +451,74 @@ function App() {
 									<span>{Math.max(meta.edge_weight_max, 0).toFixed(3)}</span>
 								</div>
 							</div>
-						</div>
+						</CollapsibleSection>
 
 						{/* Nodes Section */}
-						{nodeNames.length > 0 && (
-							<div className="space-y-2">
-								<div className="flex items-center justify-between">
-									<h3 className="text-sm font-semibold text-foreground border-b border-border pb-1">Nodes</h3>
-									<button
-										onClick={() => {
-											if (hiddenNodes.size === 0) {
-												setHiddenNodes(new Set(frame?.nodes?.map((n) => n.id) ?? []));
-											} else {
-												setHiddenNodes(new Set());
-											}
-										}}
-										className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-									>
-										{hiddenNodes.size === 0 ? "Hide All" : "Show All"}
-									</button>
-								</div>
-								<div className="space-y-1 max-h-48 overflow-y-auto">
-									{frame?.nodes?.map((node, idx) => {
-										const nodeId = node.id;
-										const isHidden = hiddenNodes.has(nodeId);
-										const colors = ["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab", "#8cd17d", "#b6992d", "#499894", "#e15759"];
-										const color = colors[idx % colors.length];
-										return (
-											<button
-												key={nodeId}
-												onClick={() => {
-													setHiddenNodes((prev) => {
-														const next = new Set(prev);
-														if (isHidden) next.delete(nodeId);
-														else next.add(nodeId);
-														return next;
-													});
-												}}
-												className="w-full flex items-center gap-2 px-2 py-1 rounded text-left transition-all hover:bg-white/10"
+						<CollapsibleSection
+							title="Nodes"
+							summary={nodesSummary}
+							isOpen={openSections.has("nodes")}
+							onToggle={() => setOpenSections((prev) => {
+								const next = new Set(prev);
+								if (next.has("nodes")) next.delete("nodes");
+								else next.add("nodes");
+								return next;
+							})}
+							action={
+								<button
+									onClick={() => {
+										if (hiddenNodes.size === 0) {
+											setHiddenNodes(new Set(frame?.nodes?.map((n) => n.id) ?? []));
+										} else {
+											setHiddenNodes(new Set());
+										}
+									}}
+									className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+								>
+									{hiddenNodes.size === 0 ? "Hide All" : "Show All"}
+								</button>
+							}
+						>
+							<div className="space-y-1">
+								{frame?.nodes?.map((node, idx) => {
+									const nodeId = node.id;
+									const isHidden = hiddenNodes.has(nodeId);
+									const colors = [
+										"#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f",
+										"#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab",
+										"#8cd17d", "#b6992d", "#499894", "#e15759",
+									];
+									const color = colors[idx % colors.length];
+									return (
+										<button
+											key={nodeId}
+											onClick={() => {
+												setHiddenNodes((prev) => {
+													const next = new Set(prev);
+													if (isHidden) next.delete(nodeId);
+													else next.add(nodeId);
+													return next;
+												});
+											}}
+											className="w-full flex items-center gap-2 px-2 py-1 rounded text-left transition-all hover:bg-white/10"
+										>
+											<span
+												className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isHidden ? "grayscale" : ""}`}
+												style={{ backgroundColor: color }}
+											/>
+											<span
+												className={`text-xs truncate ${isHidden ? "line-through text-muted-foreground" : "text-foreground"
+													}`}
 											>
-												<span
-													className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isHidden ? "grayscale" : ""}`}
-													style={{ backgroundColor: color }}
-												/>
-												<span className={`text-xs truncate ${isHidden ? "line-through text-muted-foreground" : "text-foreground"}`}>
-													{node.label || nodeId}
-												</span>
-											</button>
-										);
-									})}
-								</div>
+												{node.label || nodeId}
+											</span>
+										</button>
+									);
+								})}
 							</div>
-						)}
+						</CollapsibleSection>
 
-						<div className="pt-2 border-t border-border">
+						<div className="pt-3 mt-2 border-t border-border">
 							<ControlsBar
 								isPlaying={isPlaying}
 								onPlay={handlePlayPause}

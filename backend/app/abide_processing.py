@@ -257,7 +257,6 @@ def get_method_info() -> List[dict]:
         {
             "id": CorrelationMethod.PEARSON.value,
             "name": "Pearson Correlation",
-            "description": "Linear correlation coefficient",
             "symmetric": True,
             "params": [
                 {
@@ -273,7 +272,6 @@ def get_method_info() -> List[dict]:
         {
             "id": CorrelationMethod.SPEARMAN.value,
             "name": "Spearman Correlation",
-            "description": "Rank-based correlation (robust to outliers)",
             "symmetric": True,
             "params": [
                 {

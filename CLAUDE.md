@@ -222,6 +222,17 @@ type DrawOptions = {
 };
 ```
 
+## UI Components
+
+### SearchableSelect (`frontend/src/components/ui/searchable-select.tsx`)
+
+A custom dropdown component with search/filter functionality. Key implementation details:
+
+- **Fixed positioning**: Dropdown uses `position: fixed` to escape overflow containers (sidebar)
+- **Right-aligned**: Dropdown aligns to the right edge of the input (`right: window.innerWidth - rect.right`) and expands leftward to avoid clipping off the viewport
+- **Scroll handling**: Closes on external scroll but stays open when scrolling inside the dropdown list (checks `listRef.current?.contains(e.target)`)
+- **Focus management**: Blurs input when closing due to external scroll, so clicking again triggers `onFocus` to reopen
+
 ## Gotchas
 
 - The `CorrelationMethod` enum exists in both backend (Python Enum) and frontend (TypeScript union type) - keep them in sync

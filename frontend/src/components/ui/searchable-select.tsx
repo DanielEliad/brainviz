@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 export interface SearchableSelectOption {
   value: string;
   label: string;
-  searchText?: string; // Additional text to search against
+  searchText?: string;
 }
 
 interface SearchableSelectProps {
@@ -27,6 +27,7 @@ export function SearchableSelect({
   const [isOpen, setIsOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const [highlightedIndex, setHighlightedIndex] = React.useState(0);
+  const [position, setPosition] = React.useState({ top: 0, right: 0, width: 0 });
   const containerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
@@ -43,12 +44,10 @@ export function SearchableSelect({
     );
   }, [options, search]);
 
-  // Reset highlight when filtered options change
   React.useEffect(() => {
     setHighlightedIndex(0);
   }, [filteredOptions.length]);
 
-  // Scroll highlighted item into view
   React.useEffect(() => {
     if (isOpen && listRef.current) {
       const highlighted = listRef.current.children[highlightedIndex] as HTMLElement;
@@ -58,7 +57,35 @@ export function SearchableSelect({
     }
   }, [highlightedIndex, isOpen]);
 
-  // Close on click outside
+  // Update position when open, close on scroll
+  React.useEffect(() => {
+    if (!isOpen || !inputRef.current) return;
+
+    const rect = inputRef.current.getBoundingClientRect();
+    setPosition({
+      top: rect.bottom + 4,
+      right: window.innerWidth - rect.right,
+      width: rect.width,
+    });
+
+    const closeDropdown = (e: Event) => {
+      // Don't close if scrolling inside the dropdown list
+      if (listRef.current?.contains(e.target as Node)) {
+        return;
+      }
+      setIsOpen(false);
+      setSearch("");
+      inputRef.current?.blur();
+    };
+
+    window.addEventListener("scroll", closeDropdown, true);
+    window.addEventListener("resize", closeDropdown);
+    return () => {
+      window.removeEventListener("scroll", closeDropdown, true);
+      window.removeEventListener("resize", closeDropdown);
+    };
+  }, [isOpen]);
+
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -149,7 +176,8 @@ export function SearchableSelect({
       {isOpen && filteredOptions.length > 0 && (
         <ul
           ref={listRef}
-          className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border border-input bg-popover shadow-lg"
+          className="fixed z-[9999] max-h-60 overflow-auto rounded-md border border-input bg-popover shadow-lg"
+          style={{ top: position.top, right: position.right, minWidth: position.width }}
         >
           {filteredOptions.map((option, index) => (
             <li
@@ -157,7 +185,7 @@ export function SearchableSelect({
               onClick={() => handleSelect(option.value)}
               onMouseEnter={() => setHighlightedIndex(index)}
               className={cn(
-                "px-2 py-1.5 text-sm cursor-pointer",
+                "px-2 py-1.5 text-sm cursor-pointer whitespace-nowrap",
                 index === highlightedIndex && "bg-accent text-accent-foreground",
                 option.value === value && "font-medium"
               )}
@@ -168,7 +196,10 @@ export function SearchableSelect({
         </ul>
       )}
       {isOpen && filteredOptions.length === 0 && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-input bg-popover p-2 text-sm text-muted-foreground shadow-lg">
+        <div
+          className="fixed z-[9999] rounded-md border border-input bg-popover p-2 text-sm text-muted-foreground shadow-lg whitespace-nowrap"
+          style={{ top: position.top, right: position.right, minWidth: position.width }}
+        >
           No results found
         </div>
       )}
