@@ -105,12 +105,14 @@ def get_rsn_labels(short: bool = True) -> List[str]:
     return [names[i] for i in RSN_INDICES]
 
 
-def parse_phenotypics(filepath: Path = PHENOTYPICS_FILE_PATH) -> dict[int, str]:
+def parse_phenotypics(filepath: Path | None = None) -> dict[int, str]:
     """
     Parse phenotypics CSV and return mapping of subject_id -> diagnosis.
     Raises FileNotFoundError if file not found.
     Raises ValueError if duplicate subject IDs are found.
     """
+    if filepath is None:
+        filepath = PHENOTYPICS_FILE_PATH
     if not filepath.exists():
         raise FileNotFoundError(f"Phenotypics file not found: {filepath}")
 
