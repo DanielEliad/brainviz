@@ -1,52 +1,55 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 import numpy as np
 from scipy import stats
 
 
-# =============================================================================
-# STAGE 1: CONSTANTS
-# =============================================================================
-
-RSN_INDICES = [1, 2, 5, 6, 7, 9, 12, 13, 14, 15, 18, 19, 21, 27]
-
 PHENOTYPICS_FILE_PATH = Path(__file__).parent.parent.parent / "data" / "phenotypics.csv"
 
-RSN_NAMES = {
-    1: "Anterior Default Mode Network",
-    2: "Primary Visual Network",
-    5: "Salience Network",
-    6: "Posterior Default Mode Network",
-    7: "Auditory Network",
-    9: "Left Frontoparietal Network",
-    12: "Right Frontoparietal Network",
-    13: "Lateral Visual Network",
-    14: "Lateral Sensorimotor Network",
-    15: "Cerebellum Network",
-    18: "Primary Sensorimotor Network",
-    19: "Dorsal Attention Network",
-    21: "Language Network",
-    27: "Occipital Visual Network",
-}
 
-RSN_SHORT = {
-    1: "aDMN",
-    2: "V1",
-    5: "SAL",
-    6: "pDMN",
-    7: "AUD",
-    9: "lFPN",
-    12: "rFPN",
-    13: "latVIS",
-    14: "latSM",
-    15: "CER",
-    18: "SM1",
-    19: "DAN",
-    21: "LANG",
-    27: "occVIS",
-}
+@dataclass(frozen=True)
+class RSN:
+    """Resting State Network definition."""
+
+    index: int  # ICA component index (1-indexed)
+    long_name: str  # Full name for display
+    short_name: str  # Abbreviated name for node labels
+    nicknames: tuple[str, ...] = field(
+        default_factory=tuple
+    )  # Alternate names in external data
+
+
+# The 14 RSNs used in analysis, in display order (position 0-13)
+RSNS = [
+    RSN(1, "Anterior Default Mode Network", "aDMN"),
+    RSN(2, "Primary Visual Network", "V1"),
+    RSN(5, "Salience Network", "SAL"),
+    RSN(6, "Posterior Default Mode Network", "pDMN"),
+    RSN(7, "Auditory Network", "AUD", ("AUDI",)),
+    RSN(9, "Left Frontoparietal Network", "lFPN", ("FPL",)),
+    RSN(12, "Right Frontoparietal Network", "rFPN", ("FPR",)),
+    RSN(13, "Lateral Visual Network", "latVIS"),
+    RSN(14, "Lateral Sensorimotor Network", "latSM"),
+    RSN(15, "Cerebellum Network", "CER", ("Cereb", "CEREB")),
+    RSN(18, "Primary Sensorimotor Network", "SM1", ("SMN",)),
+    RSN(19, "Dorsal Attention Network", "DAN"),
+    RSN(21, "Language Network", "LANG"),
+    RSN(27, "Occipital Visual Network", "occVIS"),
+]
+
+# Derived constants for backward compatibility
+RSN_INDICES = [rsn.index for rsn in RSNS]
+RSN_NAMES = {rsn.index: rsn.long_name for rsn in RSNS}
+RSN_SHORT = {rsn.index: rsn.short_name for rsn in RSNS}
+
+# Lookup: any name (short, long, or nickname) -> position (0-13)
+RSN_NAME_TO_POSITION = {}
+for pos, rsn in enumerate(RSNS):
+    RSN_NAME_TO_POSITION[rsn.short_name] = pos
+    for nickname in rsn.nicknames:
+        RSN_NAME_TO_POSITION[nickname] = pos
 
 
 # =============================================================================
@@ -59,6 +62,7 @@ class CorrelationMethod(str, Enum):
 
     PEARSON = "pearson"
     SPEARMAN = "spearman"
+    WAVELET = "wavelet"
 
 
 @dataclass
@@ -245,11 +249,13 @@ def compute_correlation_matrices(
 
 def is_symmetric(method: CorrelationMethod) -> bool:
     """Return whether a correlation method produces symmetric matrices."""
-    # All current correlation methods are symmetric
-    # Future asymmetric methods (e.g., Granger causality) would return False
+    # Pearson and Spearman are symmetric (same value both directions)
+    # Wavelet is "symmetric" in that edge[i,j] + edge[j,i] = 1
+    # (leading ratio in one direction is inverse in the other)
     return method in {
         CorrelationMethod.PEARSON,
         CorrelationMethod.SPEARMAN,
+        CorrelationMethod.WAVELET,
     }
 
 
@@ -284,6 +290,21 @@ def get_method_info() -> List[dict]:
                     "max": 100,
                 },
                 {"name": "step", "type": "int", "default": 1, "min": 1, "max": 100},
+            ],
+        },
+        {
+            "id": CorrelationMethod.WAVELET.value,
+            "name": "Wavelet Phase (Leading/Lagging)",
+            "symmetric": True,
+            "params": [
+                {
+                    "name": "window_size",
+                    "type": "int",
+                    "default": 30,
+                    "min": 5,
+                    "max": 100,
+                },
+                {"name": "step", "type": "int", "default": 1, "min": 1, "max": 50},
             ],
         },
     ]

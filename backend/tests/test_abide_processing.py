@@ -190,7 +190,7 @@ def test_get_method_info_returns_all_methods():
     info = get_method_info()
 
     assert isinstance(info, list)
-    assert len(info) == 2
+    assert len(info) == 3  # pearson, spearman, wavelet
 
 
 def test_get_method_info_has_required_fields():

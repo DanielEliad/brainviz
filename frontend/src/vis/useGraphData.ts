@@ -23,7 +23,7 @@ export type InterpolationAlgorithm =
   | "cubic_spline"
   | "b_spline"
   | "univariate_spline";
-export type CorrelationMethod = "pearson" | "spearman";
+export type CorrelationMethod = "pearson" | "spearman" | "wavelet";
 
 // ABIDE file info from backend
 export type AbideFile = {

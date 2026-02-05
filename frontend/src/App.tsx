@@ -281,6 +281,7 @@ function App() {
 									options={[
 										{ value: "pearson", label: "Pearson" },
 										{ value: "spearman", label: "Spearman" },
+										{ value: "wavelet", label: "Wavelet" },
 									]}
 									value={method}
 									onChange={(v) => setMethod(v)}

@@ -18,6 +18,7 @@ from app.abide_processing import (
     is_symmetric,
     list_subject_files,
 )
+from app import wavelet_processing
 
 # Data directory (relative to project root)
 DATA_DIR = Path(__file__).parent.parent.parent / "data" / "ABIDE"
@@ -83,17 +84,30 @@ def get_abide_data(
     except ValueError:
         raise HTTPException(status_code=400, detail=f"Invalid method: {method}")
 
-    # Compute correlation matrices
-    params = CorrelationParams(
-        method=corr_method,
-        window_size=window_size,
-        step=step,
-    )
+    # Compute matrices based on method
+    if corr_method == CorrelationMethod.WAVELET:
+        # Wavelet uses precomputed phase data from HDF5 file
+        try:
+            subject_id = wavelet_processing.get_subject_id(file_path)
+            matrices = wavelet_processing.get_coherence_matrices(
+                subject_id, window_size, step
+            )
+        except FileNotFoundError as e:
+            raise HTTPException(status_code=404, detail=str(e))
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+    else:
+        # Pearson/Spearman compute from raw time series
+        params = CorrelationParams(
+            method=corr_method,
+            window_size=window_size,
+            step=step,
+        )
 
-    try:
-        matrices = compute_correlation_matrices(full_path, params)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        try:
+            matrices = compute_correlation_matrices(full_path, params)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
 
     # Apply interpolation/smoothing
     if interpolation and interpolation != "none":
