@@ -1,7 +1,3 @@
-"""
-Tests for ABIDE processing module functions.
-"""
-
 from pathlib import Path
 
 import numpy as np

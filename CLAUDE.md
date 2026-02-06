@@ -2,6 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Code Style
+
+Keep code clean and simple:
+- Skip obvious docstrings (don't document `parse_dr_file` as "Parse a DR file")
+- Skip Args/Returns sections when types are clear from signatures
+- Avoid decorative section headers (`# =========`)
+- One-liner docstrings only when they add value beyond the function name
+- No module-level docstrings that just repeat the filename
+
 ## Development Commands
 
 **Always use the provided shell scripts** for standard tasks:
@@ -35,12 +44,14 @@ nix-shell --run "echo hello"
     - `useGraphData.ts` - Data fetching hooks and types
     - `types.ts` - Shared TypeScript types
     - `GraphCanvas.tsx` - Canvas rendering
-    - `drawFrame.ts` - Frame drawing logic
+    - `drawFrame.ts` - Frame drawing logic and edge filtering functions
+    - `drawFrame.test.ts` - Vitest unit tests
 - `data/` - READ ONLY data directory - must never change
     - `phenotypics.csv` - labels per subject id (subject_id integer -> ASD/HC label)
     - `ABIDE/` - ABIDE time series .txt files per subject
         - `ABIDE_I/` - ABIDE 1 data set with per site directories - per site are subject files (.txt)
         - `ABIDE_II/` - ABIDE 2 data set with per site directories - per site are subject files (.txt)
+    - `wavelet.h5` - Pre-computed wavelet coherence data (see Wavelet Data Pipeline)
 
 ## Domain Context
 
@@ -49,11 +60,11 @@ The data represents **14 RSN (Resting State Networks)** - brain regions that sho
 ## Key Types and Enums
 
 ### Backend (Python)
-- `CorrelationMethod` enum: `PEARSON`, `SPEARMAN`
+- `CorrelationMethod` enum: `PEARSON`, `SPEARMAN`, `WAVELET`
 - `CorrelationParams` dataclass: `method`, `window_size`, `step`
 
 ### Frontend (TypeScript)
-- `CorrelationMethod`: `"pearson" | "spearman"`
+- `CorrelationMethod`: `"pearson" | "spearman" | "wavelet"`
 - `AbideParams`: Parameters for data fetching
 
 ## API Endpoints
@@ -171,7 +182,81 @@ The data represents **14 RSN (Resting State Networks)** - brain regions that sho
 |-------|---------------|-------|
 | Raw ABIDE | ~50-150 | BOLD signal values |
 | Correlation | [-1, 1] | Pearson/Spearman coefficients |
+| Wavelet | [0, 1] | Leading ratio (proportion of lead events) |
 | Edge visualization | [0, max(\|min\|, \|max\|)] | Absolute value for color/thickness |
+
+## Wavelet Data Pipeline
+
+Wavelet coherence is pre-computed externally (MATLAB) and converted to HDF5 for use by the backend.
+
+### Conversion Script
+
+`backend/scripts/convert_wavelet_to_subject_files.py` converts MATLAB `.mat` files to HDF5:
+
+```bash
+# Dry run first (read-only, shows what would be done)
+python convert_wavelet_to_subject_files.py \
+  --input-path /path/to/mats \
+  --output-path /path/to/wavelet.h5 \
+  --participants /path/to/participants.mat \
+  --phenotypics /path/to/phenotypics.csv \
+  --dry-run
+
+# Actual conversion (only writes to --output-path, never to --input-path)
+python convert_wavelet_to_subject_files.py \
+  --input-path /path/to/mats \
+  --output-path /path/to/wavelet.h5 \
+  --participants /path/to/participants.mat \
+  --phenotypics /path/to/phenotypics.csv
+```
+
+**Input:** Directory containing `Coherence_X_Y.mat` files (one per RSN pair)
+**Output:** Single HDF5 file with structure:
+```
+wavelet.h5
+├── wavelet_subjects        # int array [n_subjects] - subject IDs in order
+└── pairs/
+    ├── aDMN_V1/
+    │   └── angle_maps      # int array [n_subjects, n_timepoints, n_scales]
+    ├── aDMN_SAL/
+    │   └── angle_maps
+    └── ... (91 RSN pairs)
+```
+
+### Phase Values (angle_maps)
+
+| Value | Constant | Meaning |
+|-------|----------|---------|
+| 1 | PHASE_LEAD | Network A leads network B |
+| -1 | PHASE_LAG | Network A lags network B |
+| 2 | PHASE_IN_PHASE | Networks are in phase |
+| -2 | PHASE_ANTI | Networks are anti-phase |
+| 0 | PHASE_NONE | No significant coherence |
+
+### Runtime Processing (`wavelet_processing.py`)
+
+`compute_wavelet_matrices()` converts phase data to leading ratios:
+
+1. **Subject lookup**: Extract subject ID from filename, find index in `wavelet_subjects`
+2. **For each RSN pair**: HDF5 has both A_B and B_A directions
+3. **Sliding window**: For each frame, count PHASE_LEAD in the window
+4. **Leadership ratio**: `n_lead / n_all` (proportion of lead events in all data)
+5. **Both directions**: Both matrix[i,j] (A leads B) and matrix[j,i] (B leads A) populated
+
+Output: `List[np.ndarray]` of 14×14 matrices, values [0, 1]:
+- Both directions populated (asymmetric data)
+- Weight = proportion of leading events in window data
+- Frontend toggle: show both edges or only dominant edge per pair
+
+### Key Difference from Correlation Methods
+
+| Aspect | Pearson/Spearman | Wavelet |
+|--------|------------------|---------|
+| Symmetric | Yes | No |
+| Value range | [-1, 1] | [0, 1] |
+| Edge direction | Bidirectional | Leader → follower |
+| Computation | Real-time from .txt | Pre-computed from .h5 |
+| Edge meaning | Correlation strength | Leadership proportion |
 
 ## Common Patterns
 
@@ -517,6 +602,55 @@ backend/tests/
 ├── test_health.py   # Simple endpoint tests
 ├── test_abide_endpoints.py  # API integration tests
 └── test_abide_processing.py # Unit tests for processing functions
+```
+
+#### Frontend Testing (Vitest)
+
+Frontend uses Vitest for unit testing pure functions. Test files are colocated with source files using `.test.ts` suffix.
+
+```
+frontend/src/
+├── lib/
+│   ├── utils.ts              # cn() class name utility
+│   └── utils.test.ts         # Tests for cn()
+└── vis/
+    ├── drawFrame.ts          # Edge filtering, node positioning, scales
+    ├── drawFrame.test.ts     # Tests for edge/node functions
+    ├── interpolation.ts      # Easing functions (linear, easeIn, bounce, etc.)
+    ├── interpolation.test.ts # Tests for all easing functions
+    ├── constants.test.ts     # Tests for visual constants (palette, padding, RSN counts)
+    └── contracts.test.ts     # Type contract tests (API shapes, defaults)
+```
+
+**What to test:**
+- Pure functions (edge filtering, visibility checks, node positioning)
+- Mathematical functions (easing/interpolation, scales)
+- Data transformations
+- Utility functions (cn)
+- **Constants** - values that shouldn't change (palette colors, padding ratios)
+- **Contracts** - type structures and defaults that backend/frontend share
+
+**What NOT to test:**
+- React components (no jsdom/testing-library set up)
+- Canvas rendering
+- API calls
+
+**Running frontend tests:**
+```bash
+./test.sh frontend    # Runs tests + build
+nix-shell --run "cd frontend && npm test"  # Tests only
+```
+
+**Test patterns:**
+```typescript
+import { describe, it, expect } from "vitest";
+import { isEdgeVisible } from "./drawFrame";
+
+describe("isEdgeVisible", () => {
+  it("returns false for zero weight", () => {
+    expect(isEdgeVisible({ source: "A", target: "B", weight: 0 }, 0)).toBe(false);
+  });
+});
 ```
 
 #### Auto-Use Fixtures for Mocking

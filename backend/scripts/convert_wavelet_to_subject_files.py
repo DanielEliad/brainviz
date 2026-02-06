@@ -1,20 +1,21 @@
+"""
+Convert wavelet Coherence_*.mat files to HDF5 format for use by the backend.
+
+Usage:
+    python convert_wavelet_to_subject_files.py --input-path /path/to/mats --output-path /path/to/output.h5 ...
+    python convert_wavelet_to_subject_files.py --summary /path/to/output.h5
+"""
+
 import argparse
-from scipy.io.matlab import loadmat
+import csv
 from dataclasses import dataclass
 from pathlib import Path
-import csv
-import sys
 
 import h5py
 import numpy as np
+from scipy.io.matlab import loadmat
 
-
-# Enum values for phase relationship
-# ang_phase = (aaa>(-pi/4)&aaa<(pi/4)); % phase
-# ang_lag = (aaa>(-3*pi/4)&aaa<(-pi/4)); % lead
-# ang_lead = (aaa>(pi/4)&aaa<(3*pi/4));%leading
-# ang_anti =(aaa>(3*pi/4)|aaa<(-3*pi/4)); %antiphase
-# angle_color = (2*ang_phase +1*ang_lead -1*ang_lag  -2*ang_anti);
+# Phase enum values (from MATLAB)
 PHASE_NONE = 0
 PHASE_LEAD = 1
 PHASE_LAG = -1
@@ -171,11 +172,79 @@ def convert_all(
     print(f"Total files created: {n_subjects}")
 
 
+def display_wavelet_data_summary(h5_path: Path, phenotypics_path: Path = None) -> None:
+    """Display summary of wavelet HDF5 file contents."""
+    if not h5_path.exists():
+        print(f"File not found: {h5_path}")
+        return
+
+    print(f"=== Wavelet Data Summary: {h5_path.name} ===\n")
+
+    with h5py.File(h5_path, "r") as f:
+        subjects = f["wavelet_subjects"][:]
+        n_subjects = len(subjects)
+        pairs = list(f["pairs"].keys())
+        n_pairs = len(pairs)
+
+        # Get dimensions from first pair
+        first_pair = f["pairs"][pairs[0]]["angle_maps"]
+        _, n_timepoints, n_scales = first_pair.shape
+
+        print(f"Dimensions:")
+        print(f"  Subjects: {n_subjects}")
+        print(f"  Pairs: {n_pairs}")
+        print(f"  Timepoints: {n_timepoints}")
+        print(f"  Scales: {n_scales}")
+        print()
+
+        print(f"Subject ID range: {subjects.min()} - {subjects.max()}")
+        print(f"First 5 subjects: {subjects[:5].tolist()}")
+        print()
+
+        print(f"RSN Pairs ({n_pairs} total):")
+        for i, pair in enumerate(sorted(pairs)[:10]):
+            print(f"  {pair}")
+        if n_pairs > 10:
+            print(f"  ... and {n_pairs - 10} more")
+        print()
+
+        # Sample angle_maps statistics from first pair
+        sample_data = first_pair[0, :, :]  # first subject
+        unique_vals = np.unique(sample_data)
+        print(f"Phase values in data: {unique_vals.tolist()}")
+        print(f"  LEAD={PHASE_LEAD}, LAG={PHASE_LAG}, ANTI={PHASE_ANTI}, IN_PHASE={PHASE_IN_PHASE}")
+        print()
+
+    # Compare with phenotypics if available
+    if phenotypics_path is None:
+        phenotypics_path = h5_path.parent / "phenotypics.csv"
+
+    if phenotypics_path.exists():
+        pheno_subjects = []
+        with open(phenotypics_path, "r") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                pheno_subjects.append(int(row["partnum"]))
+
+        print(f"Phenotypics comparison:")
+        print(f"  Phenotypics subjects: {len(pheno_subjects)}")
+        print(f"  Wavelet subjects: {n_subjects}")
+        overlap = len(set(subjects) & set(pheno_subjects))
+        print(f"  Overlap: {overlap}")
+    else:
+        print(f"Phenotypics not found at {phenotypics_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Convert wavelet Coherence_*.mat files to per-subject .npz files",
+        description="Convert wavelet Coherence_*.mat files to HDF5 or display summary",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__,
+    )
+    parser.add_argument(
+        "--summary",
+        type=Path,
+        metavar="H5_FILE",
+        help="Display summary of existing HDF5 file",
     )
     parser.add_argument(
         "--input-path",
@@ -185,12 +254,11 @@ def main():
     parser.add_argument(
         "--output-path",
         type=Path,
-        help="Output directory for subject .npz files",
+        help="Output HDF5 file path",
     )
     parser.add_argument(
         "--participants",
         type=Path,
-        required=True,
         help="Participant matlab file",
     )
     parser.add_argument(
@@ -206,8 +274,18 @@ def main():
 
     args = parser.parse_args()
 
+    if args.summary:
+        display_wavelet_data_summary(args.summary, args.phenotypics)
+        return
+
+    if not args.input_path:
+        parser.error("--input-path required for conversion")
+    if not args.output_path:
+        parser.error("--output-path required for conversion")
+    if not args.participants:
+        parser.error("--participants required for conversion")
     if not args.input_path.exists():
-        raise FileNotFoundError(f"ERROR: Input directory not found: {args.input_path}")
+        raise FileNotFoundError(f"Input directory not found: {args.input_path}")
 
     convert_all(
         input_path=args.input_path,

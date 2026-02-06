@@ -1,7 +1,3 @@
-"""
-Shared test utilities.
-"""
-
 import numpy as np
 
 
@@ -10,22 +6,7 @@ def generate_abide_timeseries(
     n_components: int = 32,
     seed: int = 42,
 ) -> np.ndarray:
-    """
-    Generate synthetic ABIDE dual-regression time series data.
-
-    Creates realistic-ish data with:
-    - Specified number of ICA components (columns)
-    - Specified number of timepoints (rows)
-    - Some correlated component pairs (simulating RSN connectivity)
-
-    Args:
-        n_timepoints: Number of time points (TRs)
-        n_components: Number of ICA components (32 for raw ABIDE, 14 for RSN-filtered)
-        seed: Random seed for reproducibility
-
-    Returns:
-        ndarray [n_timepoints x n_components]
-    """
+    """Generate synthetic ABIDE data with some correlated component pairs."""
     rng = np.random.default_rng(seed)
 
     # Base random data

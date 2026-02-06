@@ -40,27 +40,82 @@ export function createColorScale(range: DataRange) {
 
 export function createThicknessScale(range: DataRange, scale: number = 1) {
   const absRange = getAbsoluteRange(range);
-  return d3.scaleLinear().domain([absRange.min, absRange.max]).range([0.5 * scale, 8 * scale]);
+  return d3
+    .scaleLinear()
+    .domain([absRange.min, absRange.max])
+    .range([0.5 * scale, 8 * scale]);
+}
+
+type Edge = { source: string; target: string; weight: number };
+
+/**
+ * Check if edge passes threshold filter.
+ */
+export function isEdgeVisible(edge: Edge, edgeThreshold: number): boolean {
+  const absWeight = Math.abs(edge.weight);
+  return absWeight > 0 && absWeight > edgeThreshold;
+}
+
+function filterStrongerEdgePerPair(edges: Edge[]): Edge[] {
+  const pairMap = new Map<string, Edge>();
+  for (const edge of edges) {
+    const pairKey = [edge.source, edge.target].sort().join("|");
+    const existing = pairMap.get(pairKey);
+    if (!existing) {
+      pairMap.set(pairKey, edge);
+      continue;
+    }
+    const edgeWeight = Math.abs(edge.weight);
+    const existingWeight = Math.abs(existing.weight);
+    if (edgeWeight > existingWeight) {
+      pairMap.set(pairKey, edge);
+    } else if (edgeWeight === existingWeight && edge.source < edge.target) {
+      // tie breaker: prefer edge where source < target
+      pairMap.set(pairKey, edge);
+    }
+  }
+  return Array.from(pairMap.values());
+}
+/**
+ * Filter edges for display. For symmetric mode, picks the dominant edge per pair
+ * (the one with larger |weight|). For asymmetric mode, returns all edges.
+ */
+export function filterEdgesForDisplay(
+  edges: Edge[],
+  edgeThreshold: number,
+  symmetric: boolean,
+): Edge[] {
+  let filteredEdges = edges;
+  if (symmetric) {
+    filteredEdges = filterStrongerEdgePerPair(edges);
+  }
+  return filteredEdges.filter((e) => isEdgeVisible(e, edgeThreshold));
 }
 
 /**
- * Unified edge visibility check - use this everywhere to determine if an edge should be shown.
- *
- * Filters:
- * - Zero weight edges (no correlation)
- * - Edges below the user-controlled threshold
- * - In symmetric mode: duplicate edges (only show source < target)
+ * Is edge connected to the active (hovered/selected) node?
+ * Used to dim unrelated edges when a node is focused.
  */
-export function isEdgeVisible(
-  edge: { source: string; target: string; weight: number },
-  edgeThreshold: number,
-  symmetric: boolean,
+export function isEdgeConnectedToNode(
+  edge: { source: string; target: string },
+  activeNodeId: string,
 ): boolean {
-  const absWeight = Math.abs(edge.weight);
-  if (absWeight === 0) return false;
-  if (absWeight <= edgeThreshold) return false;
-  if (symmetric && edge.source >= edge.target) return false;
-  return true;
+  return edge.source === activeNodeId || edge.target === activeNodeId;
+}
+
+/**
+ * Is this edge the currently selected edge?
+ * Matches in either direction since edges can be clicked from either end.
+ */
+export function isEdgeSelected(
+  edge: { source: string; target: string },
+  selectedEdge: { source: string; target: string },
+): boolean {
+  return (
+    (edge.source === selectedEdge.source &&
+      edge.target === selectedEdge.target) ||
+    (edge.source === selectedEdge.target && edge.target === selectedEdge.source)
+  );
 }
 
 export function computeNodePositions(
@@ -141,24 +196,11 @@ export function drawFrame(
   ctx.fillStyle = "#0f172a";
   ctx.fillRect(0, 0, width, height);
 
-  const isEdgeConnected = (edge: { source: string; target: string }) => {
-    if (!activeNodeId) return true;
-    return edge.source === activeNodeId || edge.target === activeNodeId;
-  };
-
-  const isEdgeSelected = (edge: { source: string; target: string }) => {
-    if (!selectedEdge) return false;
-    return (
-      (edge.source === selectedEdge.source &&
-        edge.target === selectedEdge.target) ||
-      (edge.source === selectedEdge.target &&
-        edge.target === selectedEdge.source)
-    );
-  };
-
-  // Filter edges using unified visibility check
-  const edgesToDraw = frame.edges.filter((edge) =>
-    isEdgeVisible(edge, edgeThreshold, symmetric),
+  // Filter edges for display
+  const edgesToDraw = filterEdgesForDisplay(
+    frame.edges,
+    edgeThreshold,
+    symmetric,
   );
 
   edgesToDraw.forEach((edge) => {
@@ -169,16 +211,16 @@ export function drawFrame(
 
     // Use absolute value for color/thickness - scales expect |correlation|
     const baseColor = colorScale(absWeight);
-    const edgeIsConnected = isEdgeConnected(edge);
-    const edgeIsSelectedCurrent = isEdgeSelected(edge);
-    // Dim edges that are not connected to active node, or when another edge is selected
-    const opacity = selectedEdge
-      ? edgeIsSelectedCurrent
-        ? 1
-        : 0.15
-      : edgeIsConnected
-        ? 1
-        : 0.15;
+    let opacity = 1;
+    let edgeIsSelectedCurrent = selectedEdge
+      ? isEdgeSelected(edge, selectedEdge)
+      : false;
+    if (activeNodeId) {
+      opacity = isEdgeConnectedToNode(edge, activeNodeId) ? opacity : 0.15;
+    }
+    if (selectedEdge) {
+      opacity = edgeIsSelectedCurrent ? opacity : 0.15;
+    }
 
     const rgbMatch = baseColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
     const color = rgbMatch
@@ -189,7 +231,6 @@ export function drawFrame(
     // Calculate direction vector for arrows
     const dx = target.x - source.x;
     const dy = target.y - source.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
 
     if (symmetric) {
       // Symmetric: draw straight line with arrow to show correlation direction

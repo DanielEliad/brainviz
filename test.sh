@@ -11,6 +11,11 @@ run_backend_tests() {
     nix-shell --run "cd backend && pytest tests/ -v --tb=short"
 }
 
+run_frontend_tests() {
+    echo "=== Running Frontend Tests ==="
+    nix-shell --run "cd frontend && npm test"
+}
+
 run_frontend_build() {
     echo "=== Building Frontend (TypeScript check) ==="
     nix-shell --run "cd frontend && npm run build"
@@ -21,10 +26,14 @@ case "${1:-all}" in
         run_backend_tests
         ;;
     frontend)
+        run_frontend_tests
+        echo ""
         run_frontend_build
         ;;
     all)
         run_backend_tests
+        echo ""
+        run_frontend_tests
         echo ""
         run_frontend_build
         echo ""

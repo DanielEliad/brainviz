@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { GraphFrame } from "./types";
-import { drawFrame, computeNodePositions, createThicknessScale, isEdgeVisible, Point, DataRange } from "./drawFrame";
+import { drawFrame, computeNodePositions, createThicknessScale, filterEdgesForDisplay, Point, DataRange } from "./drawFrame";
 
 type Props = {
   frame?: GraphFrame;
@@ -132,11 +132,9 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
 
       if (!foundNode) {
         let closestDist = Infinity;
+        const visibleEdges = filterEdgesForDisplay(filteredFrame.edges, edgeThreshold, symmetric);
 
-        for (const edge of filteredFrame.edges) {
-          // Use unified visibility check
-          if (!isEdgeVisible(edge, edgeThreshold, symmetric)) continue;
-
+        for (const edge of visibleEdges) {
           const source = nodePositions.get(edge.source);
           const target = nodePositions.get(edge.target);
           if (!source || !target) continue;

@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { Slider } from "@/components/ui/slider";
 import { GraphMeta } from "../vis/types";
 
@@ -9,10 +8,9 @@ type Props = {
 };
 
 export function Timeline({ meta, value, onChange }: Props) {
-  const times = meta?.available_timestamps || [0];
-  const currentValue = value ?? times[0] ?? 0;
-  const min = times[0] ?? 0;
-  const max = times[times.length - 1] ?? 0;
+  const frameCount = meta?.frame_count ?? 1;
+  const currentValue = value ?? 0;
+  const max = Math.max(0, frameCount - 1);
 
 
   return (
@@ -23,7 +21,7 @@ export function Timeline({ meta, value, onChange }: Props) {
       </div>
       <div className="space-y-2">
         <Slider
-          min={min}
+          min={0}
           max={max}
           step={1}
           value={currentValue}
@@ -33,7 +31,7 @@ export function Timeline({ meta, value, onChange }: Props) {
           className="w-full"
         />
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{min}</span>
+          <span>0</span>
           <span>{max}</span>
         </div>
       </div>
