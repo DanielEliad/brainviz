@@ -264,8 +264,9 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
     };
   }, [filteredFrame, nodePositions, selectedNode, selectedEdge, hoveredEdge, edgeThreshold, dataRange, symmetric]);
 
-  // Node ID is already the label for ABIDE data
-  const nodeName = hoveredNode;
+  const nodeFullName = hoveredNode && filteredFrame
+    ? filteredFrame.nodes.find(n => n.id === hoveredNode)?.full_name ?? hoveredNode
+    : null;
 
   // Look up weight from current frame so tooltip updates when frame changes
   const hoveredEdgeWeight = hoveredEdge && filteredFrame
@@ -311,7 +312,7 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
             transform: "translateX(-50%)",
           }}
         >
-          {hoveredNode ? nodeName : edgeLabel}
+          {hoveredNode ? nodeFullName : edgeLabel}
         </div>
       )}
     </div>

@@ -6,8 +6,8 @@ from pydantic import BaseModel
 class Node(BaseModel):
     id: str
     label: Optional[str] = None
+    full_name: Optional[str] = None
     degree: Optional[int] = None
-    attrs: Dict[str, str] = {}
 
 
 class Edge(BaseModel):

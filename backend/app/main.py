@@ -84,8 +84,9 @@ def get_abide_data(request: CorrelationRequest) -> dict:
     if request.smoothing is not None and request.smoothing.algorithm is not None:
         matrices = apply_smoothing(matrices, request.smoothing)
 
-    # Get node labels
+    # Get node labels (short for IDs, long for display)
     node_labels = get_rsn_labels(short=True)
+    node_long_labels = get_rsn_labels(short=False)
 
     # For symmetric correlations, only create upper triangle edges
     # to avoid duplicate A→B and B→A edges with same weight
@@ -122,9 +123,10 @@ def get_abide_data(request: CorrelationRequest) -> dict:
             Node(
                 id=node_id,
                 label=node_id,
+                full_name=node_long_labels[i],
                 degree=degree_map[node_id],
             )
-            for node_id in node_ids
+            for i, node_id in enumerate(node_ids)
         ]
 
         processed_frames.append(

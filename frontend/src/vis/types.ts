@@ -1,6 +1,7 @@
 export type NodeDatum = {
   id: string;
   label?: string;
+  full_name?: string;
   degree?: number | null;
 };
 
