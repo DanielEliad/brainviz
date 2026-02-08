@@ -11,7 +11,6 @@ import type {
   CorrelationMethod,
   SmoothingAlgorithm,
   InterpolationAlgorithm,
-  CorrelationMethodInfo,
 } from "./useGraphData";
 
 /**
@@ -200,37 +199,6 @@ describe("InterpolationAlgorithm values", () => {
     expect(algorithms).toHaveLength(4);
     expect(algorithms).toContain("linear");
     expect(algorithms).toContain("cubic_spline");
-  });
-});
-
-describe("CorrelationMethodInfo contract", () => {
-  it("has required fields", () => {
-    const info: CorrelationMethodInfo = {
-      id: "pearson",
-      name: "Pearson Correlation",
-      symmetric: true,
-      params: [
-        { name: "window_size", type: "int", default: 30, min: 5, max: 100 },
-      ],
-    };
-    expect(info).toHaveProperty("id");
-    expect(info).toHaveProperty("name");
-    expect(info).toHaveProperty("symmetric");
-    expect(info).toHaveProperty("params");
-  });
-
-  it("params have required fields", () => {
-    const info: CorrelationMethodInfo = {
-      id: "test",
-      name: "Test",
-      symmetric: true,
-      params: [{ name: "window_size", type: "int", default: 30, min: 5, max: 100 }],
-    };
-    const param = info.params[0];
-    expect(param).toHaveProperty("name");
-    expect(param).toHaveProperty("type");
-    expect(param).toHaveProperty("min");
-    expect(param).toHaveProperty("max");
   });
 });
 

@@ -61,7 +61,7 @@ def compute_wavelet_matrices(
                 end = start + window_size
                 window = phase_data[start:end, :]
 
-                n_lead = np.sum(window == PHASE_LEAD)
+                n_lead = np.count_nonzero(window == PHASE_LEAD)
                 n_all = window.size
                 ratio = n_lead / n_all if n_all > 0 else 0
 

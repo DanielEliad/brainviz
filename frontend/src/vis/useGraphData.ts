@@ -32,19 +32,6 @@ export type AbideFile = {
   diagnosis: "ASD" | "HC";
 };
 
-export type CorrelationMethodInfo = {
-  id: string;
-  name: string;
-  symmetric: boolean;
-  params: Array<{
-    name: string;
-    type: string;
-    default: number | null;
-    min: number;
-    max: number;
-  }>;
-};
-
 // Hook to list available ABIDE files
 export function useAbideFiles() {
   return useQuery<{ files: AbideFile[]; data_dir: string }>({
@@ -52,18 +39,6 @@ export function useAbideFiles() {
     queryFn: async () => {
       const res = await fetch(`${API_URL}/abide/files`);
       if (!res.ok) throw new Error(`Failed to list files (${res.status})`);
-      return res.json();
-    },
-  });
-}
-
-// Hook to list available correlation methods
-export function useCorrelationMethods() {
-  return useQuery<{ methods: CorrelationMethodInfo[] }>({
-    queryKey: ["correlationMethods"],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/abide/methods`);
-      if (!res.ok) throw new Error(`Failed to list methods (${res.status})`);
       return res.json();
     },
   });
@@ -211,7 +186,7 @@ export function useAbideData(params: Partial<AbideParams> = {}) {
     isLoading: dataQuery.isFetching,
     isFetching: dataQuery.isFetching,
     error: dataQuery.error,
-    refetch: () => dataQuery.refetch(),
+    refetch: dataQuery.refetch,
     setTime,
   };
 }

@@ -12,7 +12,6 @@ from app.abide_processing import (
     compute_correlation,
     compute_correlation_matrices,
     filter_rsn_columns,
-    get_method_info,
     get_rsn_labels,
     parse_dr_file,
     pearson_matrix,
@@ -180,20 +179,3 @@ def test_compute_correlation_matrices_values_in_range(single_abide_file: Path):
     assert -1.0 <= arr.min() <= arr.max() <= 1.0
 
 
-# --- Method Info ---
-
-def test_get_method_info_returns_all_methods():
-    info = get_method_info()
-
-    assert isinstance(info, list)
-    assert len(info) == 3  # pearson, spearman, wavelet
-
-
-def test_get_method_info_has_required_fields():
-    info = get_method_info()
-
-    for method in info:
-        assert "id" in method
-        assert "name" in method
-        assert "params" in method
-        assert isinstance(method["params"], list)

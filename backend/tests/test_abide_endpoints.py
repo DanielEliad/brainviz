@@ -55,48 +55,6 @@ def test_list_files_returns_empty_when_no_files(test_client_empty_data: TestClie
     assert response.json()["files"] == []
 
 
-# --- GET /abide/methods ---
-
-def test_list_methods_returns_list(test_client: TestClient):
-    response = test_client.get("/abide/methods")
-
-    assert response.status_code == 200
-    data = response.json()
-    assert "methods" in data
-    assert isinstance(data["methods"], list)
-
-
-def test_list_methods_includes_pearson_and_spearman(test_client: TestClient):
-    response = test_client.get("/abide/methods")
-    methods = response.json()["methods"]
-
-    method_ids = [m["id"] for m in methods]
-    assert "pearson" in method_ids
-    assert "spearman" in method_ids
-
-
-def test_list_methods_have_required_fields(test_client: TestClient):
-    response = test_client.get("/abide/methods")
-    methods = response.json()["methods"]
-
-    for method in methods:
-        assert "id" in method
-        assert "name" in method
-        assert "params" in method
-
-
-def test_list_methods_params_have_required_fields(test_client: TestClient):
-    response = test_client.get("/abide/methods")
-    methods = response.json()["methods"]
-
-    for method in methods:
-        for param in method["params"]:
-            assert "name" in param
-            assert "type" in param
-            assert "min" in param
-            assert "max" in param
-
-
 # --- POST /abide/data ---
 
 def test_get_data_returns_frames_and_meta(test_client: TestClient, file_path: str):

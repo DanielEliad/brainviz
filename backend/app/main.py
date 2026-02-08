@@ -11,7 +11,6 @@ from app.abide_processing import (
     CorrelationMethod,
     CorrelationParams,
     compute_correlation_matrices,
-    get_method_info,
     get_rsn_labels,
     is_symmetric,
     list_subject_files,
@@ -46,11 +45,6 @@ def healthcheck() -> dict:
 def list_abide_files() -> dict:
     files = list_subject_files(DATA_DIR)
     return {"files": files, "data_dir": str(DATA_DIR)}
-
-
-@app.get("/abide/methods")
-def list_correlation_methods() -> dict:
-    return {"methods": get_method_info()}
 
 
 @app.post("/abide/data")
