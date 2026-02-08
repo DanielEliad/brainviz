@@ -1,7 +1,7 @@
 export type NodeDatum = {
   id: string;
   label?: string;
-  group?: string | number | null;
+  full_name?: string;
   degree?: number | null;
 };
 
@@ -20,7 +20,7 @@ export type GraphFrame = {
 };
 
 export type GraphMeta = {
-  available_timestamps: number[];
+  frame_count: number;
   node_attributes: string[];
   edge_attributes: string[];
   edge_weight_min: number;

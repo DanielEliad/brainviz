@@ -1,14 +1,9 @@
-"""
-Tests for ABIDE data endpoints.
-"""
-
 import pytest
 from fastapi.testclient import TestClient
 
 
 @pytest.fixture
 def file_path(test_client: TestClient) -> str:
-    """Get the first available file path from the test fixture."""
     response = test_client.get("/abide/files")
     files = response.json()["files"]
     return files[0]["path"]
@@ -102,12 +97,12 @@ def test_list_methods_params_have_required_fields(test_client: TestClient):
             assert "max" in param
 
 
-# --- GET /abide/data ---
+# --- POST /abide/data ---
 
 def test_get_data_returns_frames_and_meta(test_client: TestClient, file_path: str):
-    response = test_client.get(
+    response = test_client.post(
         "/abide/data",
-        params={"file_path": file_path, "method": "pearson"}
+        json={"file_path": file_path, "method": "pearson"}
     )
 
     assert response.status_code == 200
@@ -117,9 +112,9 @@ def test_get_data_returns_frames_and_meta(test_client: TestClient, file_path: st
 
 
 def test_get_data_frames_have_correct_structure(test_client: TestClient, file_path: str):
-    response = test_client.get(
+    response = test_client.post(
         "/abide/data",
-        params={"file_path": file_path, "method": "pearson", "window_size": 30, "step": 5}
+        json={"file_path": file_path, "method": "pearson", "window_size": 30, "step": 5}
     )
     frames = response.json()["frames"]
 
@@ -132,9 +127,9 @@ def test_get_data_frames_have_correct_structure(test_client: TestClient, file_pa
 
 
 def test_get_data_returns_14_rsn_nodes(test_client: TestClient, file_path: str):
-    response = test_client.get(
+    response = test_client.post(
         "/abide/data",
-        params={"file_path": file_path, "method": "pearson"}
+        json={"file_path": file_path, "method": "pearson"}
     )
     nodes = response.json()["frames"][0]["nodes"]
 
@@ -147,21 +142,21 @@ def test_get_data_returns_14_rsn_nodes(test_client: TestClient, file_path: str):
 
 def test_get_data_both_correlation_methods_work(test_client: TestClient, file_path: str):
     for method in ["pearson", "spearman"]:
-        response = test_client.get(
+        response = test_client.post(
             "/abide/data",
-            params={"file_path": file_path, "method": method, "window_size": 20}
+            json={"file_path": file_path, "method": method, "window_size": 20}
         )
         assert response.status_code == 200, f"Method {method} failed"
 
 
 def test_get_data_smaller_window_produces_more_frames(test_client: TestClient, file_path: str):
-    response_small = test_client.get(
+    response_small = test_client.post(
         "/abide/data",
-        params={"file_path": file_path, "method": "pearson", "window_size": 20, "step": 1}
+        json={"file_path": file_path, "method": "pearson", "window_size": 20, "step": 1}
     )
-    response_large = test_client.get(
+    response_large = test_client.post(
         "/abide/data",
-        params={"file_path": file_path, "method": "pearson", "window_size": 50, "step": 1}
+        json={"file_path": file_path, "method": "pearson", "window_size": 50, "step": 1}
     )
 
     frames_small = len(response_small.json()["frames"])
@@ -170,13 +165,13 @@ def test_get_data_smaller_window_produces_more_frames(test_client: TestClient, f
 
 
 def test_get_data_smaller_step_produces_more_frames(test_client: TestClient, file_path: str):
-    response_step1 = test_client.get(
+    response_step1 = test_client.post(
         "/abide/data",
-        params={"file_path": file_path, "method": "pearson", "window_size": 30, "step": 1}
+        json={"file_path": file_path, "method": "pearson", "window_size": 30, "step": 1}
     )
-    response_step5 = test_client.get(
+    response_step5 = test_client.post(
         "/abide/data",
-        params={"file_path": file_path, "method": "pearson", "window_size": 30, "step": 5}
+        json={"file_path": file_path, "method": "pearson", "window_size": 30, "step": 5}
     )
 
     frames_step1 = len(response_step1.json()["frames"])
@@ -185,13 +180,14 @@ def test_get_data_smaller_step_produces_more_frames(test_client: TestClient, fil
 
 
 def test_get_data_meta_has_correct_structure(test_client: TestClient, file_path: str):
-    response = test_client.get(
+    response = test_client.post(
         "/abide/data",
-        params={"file_path": file_path, "method": "pearson"}
+        json={"file_path": file_path, "method": "pearson"}
     )
     meta = response.json()["meta"]
 
-    assert "available_timestamps" in meta
+    assert "frame_count" in meta
+    assert meta["frame_count"] > 0
     assert "node_attributes" in meta
     assert "edge_attributes" in meta
     assert "edge_weight_min" in meta
@@ -201,26 +197,37 @@ def test_get_data_meta_has_correct_structure(test_client: TestClient, file_path:
 
 
 def test_get_data_all_smoothing_methods_work(test_client: TestClient, file_path: str):
-    for smoothing in ["none", "moving_average", "exponential", "gaussian"]:
-        response = test_client.get(
+    # Test without smoothing (None)
+    response = test_client.post(
+        "/abide/data",
+        json={"file_path": file_path, "method": "pearson"}
+    )
+    assert response.status_code == 200, "No smoothing failed"
+
+    # Test each smoothing algorithm
+    for algo in ["moving_average", "exponential", "gaussian"]:
+        response = test_client.post(
             "/abide/data",
-            params={"file_path": file_path, "method": "pearson", "smoothing": smoothing}
+            json={
+                "file_path": file_path,
+                "method": "pearson",
+                "smoothing": {"algorithm": algo}
+            }
         )
-        assert response.status_code == 200, f"Smoothing {smoothing} failed"
+        assert response.status_code == 200, f"Smoothing {algo} failed"
 
 
 def test_get_data_interpolation_increases_frame_count(test_client: TestClient, file_path: str):
-    response_none = test_client.get(
+    response_none = test_client.post(
         "/abide/data",
-        params={"file_path": file_path, "method": "pearson", "interpolation": "none"}
+        json={"file_path": file_path, "method": "pearson"}
     )
-    response_interp = test_client.get(
+    response_interp = test_client.post(
         "/abide/data",
-        params={
+        json={
             "file_path": file_path,
             "method": "pearson",
-            "interpolation": "linear",
-            "interpolation_factor": 2
+            "interpolation": {"algorithm": "linear", "factor": 2}
         }
     )
 
@@ -230,29 +237,37 @@ def test_get_data_interpolation_increases_frame_count(test_client: TestClient, f
 
 
 def test_get_data_all_interpolation_methods_work(test_client: TestClient, file_path: str):
-    methods = ["none", "linear", "cubic_spline", "b_spline", "univariate_spline"]
+    # Test without interpolation (None)
+    response = test_client.post(
+        "/abide/data",
+        json={"file_path": file_path, "method": "pearson", "window_size": 30}
+    )
+    assert response.status_code == 200, "No interpolation failed"
 
-    for interp in methods:
-        params = {"file_path": file_path, "method": "pearson", "window_size": 30}
-        if interp != "none":
-            params["interpolation"] = interp
-            params["interpolation_factor"] = 2
-
-        response = test_client.get("/abide/data", params=params)
-        assert response.status_code == 200, f"Interpolation {interp} failed"
+    # Test each interpolation algorithm
+    for algo in ["linear", "cubic_spline", "b_spline", "univariate_spline"]:
+        response = test_client.post(
+            "/abide/data",
+            json={
+                "file_path": file_path,
+                "method": "pearson",
+                "window_size": 30,
+                "interpolation": {"algorithm": algo, "factor": 2}
+            }
+        )
+        assert response.status_code == 200, f"Interpolation {algo} failed"
 
 
 def test_get_data_full_processing_pipeline(test_client: TestClient, file_path: str):
-    response = test_client.get(
+    response = test_client.post(
         "/abide/data",
-        params={
+        json={
             "file_path": file_path,
             "method": "pearson",
             "window_size": 30,
             "step": 5,
-            "interpolation": "linear",
-            "interpolation_factor": 2,
-            "smoothing": "gaussian",
+            "interpolation": {"algorithm": "linear", "factor": 2},
+            "smoothing": {"algorithm": "gaussian"},
         }
     )
 
@@ -266,35 +281,245 @@ def test_get_data_full_processing_pipeline(test_client: TestClient, file_path: s
     assert data["symmetric"] is True
 
 
-# --- GET /abide/data errors ---
+# --- POST /abide/data errors ---
 
 def test_get_data_404_for_nonexistent_file(test_client: TestClient):
-    response = test_client.get(
+    response = test_client.post(
         "/abide/data",
-        params={"file_path": "nonexistent/file.txt", "method": "pearson"}
+        json={"file_path": "nonexistent/file.txt", "method": "pearson"}
     )
     assert response.status_code == 404
 
 
 def test_get_data_400_for_invalid_method(test_client: TestClient, file_path: str):
-    response = test_client.get(
+    response = test_client.post(
         "/abide/data",
-        params={"file_path": file_path, "method": "invalid_method"}
+        json={"file_path": file_path, "method": "invalid_method"}
     )
     assert response.status_code == 400
 
 
 def test_get_data_422_for_window_size_out_of_range(test_client: TestClient, file_path: str):
-    response = test_client.get(
+    response = test_client.post(
         "/abide/data",
-        params={"file_path": file_path, "method": "pearson", "window_size": 150}
+        json={"file_path": file_path, "method": "pearson", "window_size": 150}
     )
     assert response.status_code == 422
 
 
 def test_get_data_422_when_method_missing(test_client: TestClient, file_path: str):
-    response = test_client.get(
+    response = test_client.post(
         "/abide/data",
-        params={"file_path": file_path}
+        json={"file_path": file_path}
     )
     assert response.status_code == 422
+
+
+def test_get_data_422_for_invalid_smoothing(test_client: TestClient, file_path: str):
+    response = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "invalid_algo"}
+        }
+    )
+    assert response.status_code == 422
+
+
+def test_get_data_422_for_invalid_interpolation(test_client: TestClient, file_path: str):
+    response = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "interpolation": {"algorithm": "invalid_algo"}
+        }
+    )
+    assert response.status_code == 422
+
+
+def test_get_data_422_for_interpolation_factor_out_of_range(test_client: TestClient, file_path: str):
+    response = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "interpolation": {"algorithm": "linear", "factor": 20}
+        }
+    )
+    assert response.status_code == 422
+
+
+def test_get_data_smoothing_params_are_configurable(test_client: TestClient, file_path: str):
+    response = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "moving_average", "window": 5}
+        }
+    )
+    assert response.status_code == 200
+
+    response = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "exponential", "alpha": 0.3}
+        }
+    )
+    assert response.status_code == 200
+
+    response = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "gaussian", "sigma": 2.0}
+        }
+    )
+    assert response.status_code == 200
+
+
+def test_get_data_422_for_smoothing_params_out_of_range(test_client: TestClient, file_path: str):
+    response = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "moving_average", "window": 100}
+        }
+    )
+    assert response.status_code == 422
+
+    response = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "exponential", "alpha": 2.0}
+        }
+    )
+    assert response.status_code == 422
+
+
+# --- Smoothing behavior tests ---
+
+def test_smoothing_changes_edge_weights(test_client: TestClient, file_path: str):
+    no_smooth = test_client.post(
+        "/abide/data",
+        json={"file_path": file_path, "method": "pearson"}
+    ).json()
+
+    with_smooth = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "gaussian", "sigma": 2.0}
+        }
+    ).json()
+
+    # Same number of frames
+    assert len(no_smooth["frames"]) == len(with_smooth["frames"])
+
+    # But edge weights should differ (smoothing averages neighboring values)
+    no_smooth_weights = [e["weight"] for e in no_smooth["frames"][1]["edges"]]
+    smooth_weights = [e["weight"] for e in with_smooth["frames"][1]["edges"]]
+    assert no_smooth_weights != smooth_weights
+
+
+def test_different_smoothing_params_produce_different_results(test_client: TestClient, file_path: str):
+    result_sigma1 = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "gaussian", "sigma": 0.5}
+        }
+    ).json()
+
+    result_sigma3 = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "gaussian", "sigma": 3.0}
+        }
+    ).json()
+
+    weights_sigma1 = [e["weight"] for e in result_sigma1["frames"][1]["edges"]]
+    weights_sigma3 = [e["weight"] for e in result_sigma3["frames"][1]["edges"]]
+    assert weights_sigma1 != weights_sigma3
+
+
+def test_moving_average_window_affects_output(test_client: TestClient, file_path: str):
+    result_w2 = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "moving_average", "window": 2}
+        }
+    ).json()
+
+    result_w5 = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "moving_average", "window": 5}
+        }
+    ).json()
+
+    weights_w2 = [e["weight"] for e in result_w2["frames"][2]["edges"]]
+    weights_w5 = [e["weight"] for e in result_w5["frames"][2]["edges"]]
+    assert weights_w2 != weights_w5
+
+
+def test_exponential_alpha_affects_output(test_client: TestClient, file_path: str):
+    result_a1 = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "exponential", "alpha": 0.1}
+        }
+    ).json()
+
+    result_a9 = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "exponential", "alpha": 0.9}
+        }
+    ).json()
+
+    weights_a1 = [e["weight"] for e in result_a1["frames"][2]["edges"]]
+    weights_a9 = [e["weight"] for e in result_a9["frames"][2]["edges"]]
+    assert weights_a1 != weights_a9
+
+
+def test_smoothing_and_interpolation_combined(test_client: TestClient, file_path: str):
+    base = test_client.post(
+        "/abide/data",
+        json={"file_path": file_path, "method": "pearson"}
+    ).json()
+    base_frames = len(base["frames"])
+
+    combined = test_client.post(
+        "/abide/data",
+        json={
+            "file_path": file_path,
+            "method": "pearson",
+            "smoothing": {"algorithm": "gaussian", "sigma": 1.5},
+            "interpolation": {"algorithm": "linear", "factor": 3}
+        }
+    ).json()
+
+    # Interpolation should increase frame count
+    expected_frames = (base_frames - 1) * 3 + 1
+    assert len(combined["frames"]) == expected_frames

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { GraphFrame } from "./types";
-import { drawFrame, computeNodePositions, createThicknessScale, isEdgeVisible, Point, DataRange } from "./drawFrame";
+import { drawFrame, computeNodePositions, createThicknessScale, filterEdgesForDisplay, Point, DataRange } from "./drawFrame";
 
 type Props = {
   frame?: GraphFrame;
@@ -132,11 +132,9 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
 
       if (!foundNode) {
         let closestDist = Infinity;
+        const visibleEdges = filterEdgesForDisplay(filteredFrame.edges, edgeThreshold, symmetric);
 
-        for (const edge of filteredFrame.edges) {
-          // Use unified visibility check
-          if (!isEdgeVisible(edge, edgeThreshold, symmetric)) continue;
-
+        for (const edge of visibleEdges) {
           const source = nodePositions.get(edge.source);
           const target = nodePositions.get(edge.target);
           if (!source || !target) continue;
@@ -266,14 +264,14 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
     };
   }, [filteredFrame, nodePositions, selectedNode, selectedEdge, hoveredEdge, edgeThreshold, dataRange, symmetric]);
 
-  // Node ID is already the label for ABIDE data
-  const nodeName = hoveredNode;
+  const nodeFullName = hoveredNode && filteredFrame
+    ? filteredFrame.nodes.find(n => n.id === hoveredNode)?.full_name ?? hoveredNode
+    : null;
 
   // Look up weight from current frame so tooltip updates when frame changes
   const hoveredEdgeWeight = hoveredEdge && filteredFrame
     ? filteredFrame.edges.find(
-        e => (e.source === hoveredEdge.source && e.target === hoveredEdge.target) ||
-             (e.source === hoveredEdge.target && e.target === hoveredEdge.source)
+        e => e.source === hoveredEdge.source && e.target === hoveredEdge.target
       )?.weight
     : undefined;
 
@@ -314,7 +312,7 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
             transform: "translateX(-50%)",
           }}
         >
-          {hoveredNode ? nodeName : edgeLabel}
+          {hoveredNode ? nodeFullName : edgeLabel}
         </div>
       )}
     </div>

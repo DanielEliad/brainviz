@@ -1,87 +1,21 @@
-from dataclasses import dataclass
-from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import List
+
 import numpy as np
 from scipy import stats
 
-
-# =============================================================================
-# STAGE 1: CONSTANTS
-# =============================================================================
-
-RSN_INDICES = [1, 2, 5, 6, 7, 9, 12, 13, 14, 15, 18, 19, 21, 27]
-
-PHENOTYPICS_FILE_PATH = Path(__file__).parent.parent.parent / "data" / "phenotypics.csv"
-
-RSN_NAMES = {
-    1: "Anterior Default Mode Network",
-    2: "Primary Visual Network",
-    5: "Salience Network",
-    6: "Posterior Default Mode Network",
-    7: "Auditory Network",
-    9: "Left Frontoparietal Network",
-    12: "Right Frontoparietal Network",
-    13: "Lateral Visual Network",
-    14: "Lateral Sensorimotor Network",
-    15: "Cerebellum Network",
-    18: "Primary Sensorimotor Network",
-    19: "Dorsal Attention Network",
-    21: "Language Network",
-    27: "Occipital Visual Network",
-}
-
-RSN_SHORT = {
-    1: "aDMN",
-    2: "V1",
-    5: "SAL",
-    6: "pDMN",
-    7: "AUD",
-    9: "lFPN",
-    12: "rFPN",
-    13: "latVIS",
-    14: "latSM",
-    15: "CER",
-    18: "SM1",
-    19: "DAN",
-    21: "LANG",
-    27: "occVIS",
-}
-
-
-# =============================================================================
-# STAGE 2: ENUMS
-# =============================================================================
-
-
-class CorrelationMethod(str, Enum):
-    """Available correlation methods."""
-
-    PEARSON = "pearson"
-    SPEARMAN = "spearman"
-
-
-@dataclass
-class CorrelationParams:
-    """Parameters for correlation computation."""
-
-    method: CorrelationMethod = CorrelationMethod.PEARSON
-    window_size: int = 30
-    step: int = 1
-
-
-# =============================================================================
-# STAGE 3: PARSERS
-# =============================================================================
+from app.rsn_constants import (
+    PHENOTYPICS_FILE_PATH,
+    RSN_INDICES,
+    RSN_NAMES,
+    RSN_SHORT,
+    CorrelationMethod,
+    CorrelationParams,
+)
+from app.wavelet_processing import compute_wavelet_matrices
 
 
 def parse_dr_file(filepath: Path) -> np.ndarray:
-    """
-    Parse a dual-regression file.
-
-    Input: dr_stage1_subjectXXXXXXX.txt (space-separated, 32 columns)
-    Output: ndarray [timepoints x 32]
-    """
     data = np.loadtxt(filepath)
     if data.ndim == 1:
         data = data.reshape(1, -1)
@@ -89,28 +23,16 @@ def parse_dr_file(filepath: Path) -> np.ndarray:
 
 
 def filter_rsn_columns(data: np.ndarray) -> np.ndarray:
-    """
-    Keep only the 14 RSN components.
-
-    Input: ndarray [timepoints x 32]
-    Output: ndarray [timepoints x 14]
-    """
     indices = [i - 1 for i in RSN_INDICES]
     return data[:, indices]
 
 
 def get_rsn_labels(short: bool = True) -> List[str]:
-    """Get ordered list of RSN labels."""
     names = RSN_SHORT if short else RSN_NAMES
     return [names[i] for i in RSN_INDICES]
 
 
 def parse_phenotypics(filepath: Path | None = None) -> dict[int, str]:
-    """
-    Parse phenotypics CSV and return mapping of subject_id -> diagnosis.
-    Raises FileNotFoundError if file not found.
-    Raises ValueError if duplicate subject IDs are found.
-    """
     if filepath is None:
         filepath = PHENOTYPICS_FILE_PATH
     if not filepath.exists():
@@ -130,13 +52,6 @@ def parse_phenotypics(filepath: Path | None = None) -> dict[int, str]:
 
 
 def list_subject_files(data_dir: Path) -> List[dict]:
-    """
-    List all available subject files in the data directory.
-
-    Returns list of {path, subject_id, site, version, diagnosis} dicts.
-    Raises ValueError if any subject is missing a diagnosis.
-    """
-    # Load phenotypics data
     phenotypics = parse_phenotypics()
 
     files = []
@@ -164,18 +79,11 @@ def list_subject_files(data_dir: Path) -> List[dict]:
     return sorted(files, key=lambda x: (x["version"], x["site"], x["subject_id"]))
 
 
-# =============================================================================
-# STAGE 4: TRANSFORMS
-# =============================================================================
-
-
 def pearson_matrix(data: np.ndarray) -> np.ndarray:
-    """Pearson correlation matrix. Input: [T x N], Output: [N x N]"""
     return np.corrcoef(data.T)
 
 
 def spearman_matrix(data: np.ndarray) -> np.ndarray:
-    """Spearman correlation matrix. Input: [T x N], Output: [N x N]"""
     n = data.shape[1]
     matrix = np.zeros((n, n))
     for i in range(n):
@@ -186,7 +94,6 @@ def spearman_matrix(data: np.ndarray) -> np.ndarray:
 
 
 def compute_correlation(data: np.ndarray, method: CorrelationMethod) -> np.ndarray:
-    """Compute correlation matrix using specified method."""
     if method == CorrelationMethod.PEARSON:
         return pearson_matrix(data)
     elif method == CorrelationMethod.SPEARMAN:
@@ -220,33 +127,22 @@ def windowed_correlation(
     return matrices
 
 
-# =============================================================================
-# STAGE 5: API
-# =============================================================================
-
-
 def compute_correlation_matrices(
     filepath: Path,
     params: CorrelationParams,
 ) -> List[np.ndarray]:
-    # Parse
+    if params.method == CorrelationMethod.WAVELET:
+        return compute_wavelet_matrices(filepath, params)
+
     data = parse_dr_file(filepath)
     data = filter_rsn_columns(data)
-
-    # Transform
     matrices = windowed_correlation(
         data, params.method, params.window_size, params.step
     )
-
-    # Return as list of 2D matrices for easier downstream processing
-    # Values are NOT normalized - use actual min/max from data for visualization
     return [matrices[i] for i in range(matrices.shape[0])]
 
 
 def is_symmetric(method: CorrelationMethod) -> bool:
-    """Return whether a correlation method produces symmetric matrices."""
-    # All current correlation methods are symmetric
-    # Future asymmetric methods (e.g., Granger causality) would return False
     return method in {
         CorrelationMethod.PEARSON,
         CorrelationMethod.SPEARMAN,
@@ -254,7 +150,6 @@ def is_symmetric(method: CorrelationMethod) -> bool:
 
 
 def get_method_info() -> List[dict]:
-    """Return info about available correlation methods and their parameters."""
     return [
         {
             "id": CorrelationMethod.PEARSON.value,
@@ -284,6 +179,21 @@ def get_method_info() -> List[dict]:
                     "max": 100,
                 },
                 {"name": "step", "type": "int", "default": 1, "min": 1, "max": 100},
+            ],
+        },
+        {
+            "id": CorrelationMethod.WAVELET.value,
+            "name": "Wavelet Phase (Leading/Lagging)",
+            "symmetric": False,
+            "params": [
+                {
+                    "name": "window_size",
+                    "type": "int",
+                    "default": 30,
+                    "min": 5,
+                    "max": 100,
+                },
+                {"name": "step", "type": "int", "default": 1, "min": 1, "max": 50},
             ],
         },
     ]

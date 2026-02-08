@@ -1,13 +1,11 @@
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from scipy.ndimage import gaussian_filter1d
 from scipy.interpolate import interp1d, UnivariateSpline, make_interp_spline
 
-from app.analytics.community import simple_components
 from app.models import Edge, GraphFrame, GraphMeta, Node
 from app.abide_processing import (
     CorrelationMethod,
@@ -17,6 +15,13 @@ from app.abide_processing import (
     get_rsn_labels,
     is_symmetric,
     list_subject_files,
+)
+from app.processing import (
+    CorrelationRequest,
+    InterpolationAlgorithm,
+    InterpolationParams,
+    SmoothingAlgorithm,
+    SmoothingParams,
 )
 
 # Data directory (relative to project root)
@@ -37,11 +42,6 @@ def healthcheck() -> dict:
     return {"status": "ok"}
 
 
-# =============================================================================
-# ABIDE Data Endpoints
-# =============================================================================
-
-
 @app.get("/abide/files")
 def list_abide_files() -> dict:
     files = list_subject_files(DATA_DIR)
@@ -53,56 +53,40 @@ def list_correlation_methods() -> dict:
     return {"methods": get_method_info()}
 
 
-@app.get("/abide/data")
-def get_abide_data(
-    file_path: str = Query(..., description="Relative path to subject file"),
-    method: str = Query(..., description="Correlation method: pearson, spearman"),
-    window_size: int = Query(
-        default=30, ge=5, le=100, description="Sliding window size"
-    ),
-    step: int = Query(default=1, ge=1, le=100, description="Step between windows"),
-    smoothing: Optional[str] = Query(default="none", description="Smoothing algorithm"),
-    interpolation: Optional[str] = Query(
-        default="none", description="Interpolation algorithm"
-    ),
-    interpolation_factor: Optional[int] = Query(
-        default=2, description="Interpolation factor"
-    ),
-) -> dict:
-    """
-    Get graph data from an ABIDE subject file with correlation analysis.
-    """
+@app.post("/abide/data")
+def get_abide_data(request: CorrelationRequest) -> dict:
     # Validate file path
-    full_path = DATA_DIR / file_path
+    full_path = DATA_DIR / request.file_path
     if not full_path.exists():
-        raise HTTPException(status_code=404, detail=f"File not found: {file_path}")
+        raise HTTPException(status_code=404, detail=f"File not found: {request.file_path}")
 
-    # Parse correlation method
     try:
-        corr_method = CorrelationMethod(method)
+        corr_method = CorrelationMethod(request.method)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid method: {method}")
+        raise HTTPException(status_code=400, detail=f"Invalid method: {request.method}")
 
-    # Compute correlation matrices
     params = CorrelationParams(
         method=corr_method,
-        window_size=window_size,
-        step=step,
+        window_size=request.window_size,
+        step=request.step,
     )
 
     try:
         matrices = compute_correlation_matrices(full_path, params)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
     # Apply interpolation/smoothing
-    if interpolation and interpolation != "none":
-        matrices = apply_interpolation(matrices, interpolation, interpolation_factor)
-    if smoothing and smoothing != "none":
-        matrices = apply_smoothing(matrices, smoothing)
+    if request.interpolation is not None and request.interpolation.algorithm is not None:
+        matrices = apply_interpolation(matrices, request.interpolation)
+    if request.smoothing is not None and request.smoothing.algorithm is not None:
+        matrices = apply_smoothing(matrices, request.smoothing)
 
-    # Get node labels
+    # Get node labels (short for IDs, long for display)
     node_labels = get_rsn_labels(short=True)
+    node_long_labels = get_rsn_labels(short=False)
 
     # For symmetric correlations, only create upper triangle edges
     # to avoid duplicate A→B and B→A edges with same weight
@@ -135,16 +119,14 @@ def get_abide_data(
                 if symmetric:
                     degree_map[node_ids[j]] += 1
 
-        communities = simple_components(edges)
-
         nodes = [
             Node(
                 id=node_id,
                 label=node_id,
+                full_name=node_long_labels[i],
                 degree=degree_map[node_id],
-                group=str(communities.get(node_id, 0)),
             )
-            for node_id in node_ids
+            for i, node_id in enumerate(node_ids)
         ]
 
         processed_frames.append(
@@ -154,9 +136,9 @@ def get_abide_data(
                 edges=edges,
                 metadata={
                     "source": "abide",
-                    "file": file_path,
-                    "method": method,
-                    "window_size": str(window_size),
+                    "file": request.file_path,
+                    "method": request.method,
+                    "window_size": str(request.window_size),
                 },
             )
         )
@@ -166,7 +148,10 @@ def get_abide_data(
     # Frontend must use these values to scale visualizations - never assume a fixed range
     all_weights = []
     for matrix in matrices:
-        all_weights.extend(matrix.flatten().tolist())
+        mask = ~np.eye(matrix.shape[0], dtype=bool)
+        if symmetric:
+            mask = np.triu(mask, k=1)
+        all_weights.extend(matrix[mask].tolist())
 
     if not all_weights:
         raise HTTPException(
@@ -179,12 +164,12 @@ def get_abide_data(
     edge_weight_max = float(max(all_weights))
 
     meta = GraphMeta(
-        available_timestamps=list(range(len(matrices))),
-        node_attributes=["label", "group", "degree"],
+        frame_count=len(matrices),
+        node_attributes=["label", "degree"],
         edge_attributes=["weight"],
         edge_weight_min=edge_weight_min,
         edge_weight_max=edge_weight_max,
-        description=f"ABIDE data: {file_path} ({method} correlation)",
+        description=f"ABIDE data: {request.file_path} ({request.method} correlation)",
     )
 
     return {
@@ -194,8 +179,10 @@ def get_abide_data(
     }
 
 
-def apply_smoothing(matrices: list[np.ndarray], algorithm: str) -> list[np.ndarray]:
-    if algorithm == "none" or len(matrices) == 0:
+def apply_smoothing(
+    matrices: list[np.ndarray], params: SmoothingParams
+) -> list[np.ndarray]:
+    if len(matrices) == 0 or params.algorithm is None:
         return matrices
 
     num_frames = len(matrices)
@@ -207,19 +194,23 @@ def apply_smoothing(matrices: list[np.ndarray], algorithm: str) -> list[np.ndarr
         for j in range(n):
             time_series = np.array([m[i, j] for m in matrices])
 
-            if algorithm == "moving_average":
-                window_size = min(3, num_frames)
+            if params.algorithm == SmoothingAlgorithm.MOVING_AVERAGE:
+                window = min(params.window, num_frames)
                 smoothed = np.convolve(
-                    time_series, np.ones(window_size) / window_size, mode="same"
+                    time_series, np.ones(window) / window, mode="same"
                 )
-            elif algorithm == "exponential":
-                alpha = 0.5
+            elif params.algorithm == SmoothingAlgorithm.EXPONENTIAL:
                 smoothed = np.zeros_like(time_series)
                 smoothed[0] = time_series[0]
                 for k in range(1, len(time_series)):
-                    smoothed[k] = alpha * time_series[k] + (1 - alpha) * smoothed[k - 1]
-            elif algorithm == "gaussian":
-                smoothed = gaussian_filter1d(time_series, sigma=1.0, mode="nearest")
+                    smoothed[k] = (
+                        params.alpha * time_series[k]
+                        + (1 - params.alpha) * smoothed[k - 1]
+                    )
+            elif params.algorithm == SmoothingAlgorithm.GAUSSIAN:
+                smoothed = gaussian_filter1d(
+                    time_series, sigma=params.sigma, mode="nearest"
+                )
             else:
                 smoothed = time_series
 
@@ -237,16 +228,16 @@ def apply_smoothing(matrices: list[np.ndarray], algorithm: str) -> list[np.ndarr
 
 
 def apply_interpolation(
-    matrices: list[np.ndarray], algorithm: str, factor: int = 2
+    matrices: list[np.ndarray], params: InterpolationParams
 ) -> list[np.ndarray]:
-    if algorithm == "none" or len(matrices) == 0 or factor <= 1:
+    if len(matrices) == 0 or params.algorithm is None or params.factor <= 1:
         return matrices
 
     num_frames = len(matrices)
     n = matrices[0].shape[0]
 
     original_times = np.arange(num_frames)
-    new_num_frames = (num_frames - 1) * factor + 1
+    new_num_frames = (num_frames - 1) * params.factor + 1
     new_times = np.linspace(0, num_frames - 1, new_num_frames)
 
     interpolated_data: dict[tuple[int, int], np.ndarray] = {}
@@ -255,22 +246,22 @@ def apply_interpolation(
         for j in range(n):
             time_series = np.array([m[i, j] for m in matrices])
 
-            if algorithm == "linear":
+            if params.algorithm == InterpolationAlgorithm.LINEAR:
                 interp_func = interp1d(
                     original_times, time_series, kind="linear", fill_value="extrapolate"
                 )
                 interpolated = interp_func(new_times)
-            elif algorithm == "cubic_spline":
+            elif params.algorithm == InterpolationAlgorithm.CUBIC_SPLINE:
                 interp_func = interp1d(
                     original_times, time_series, kind="cubic", fill_value="extrapolate"
                 )
                 interpolated = interp_func(new_times)
-            elif algorithm == "b_spline":
+            elif params.algorithm == InterpolationAlgorithm.B_SPLINE:
                 spl = make_interp_spline(
                     original_times, time_series, k=min(3, num_frames - 1)
                 )
                 interpolated = spl(new_times)
-            elif algorithm == "univariate_spline":
+            elif params.algorithm == InterpolationAlgorithm.UNIVARIATE_SPLINE:
                 spl = UnivariateSpline(
                     original_times, time_series, k=min(3, num_frames - 1), s=0
                 )

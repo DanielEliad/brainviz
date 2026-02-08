@@ -23,7 +23,7 @@ type GraphFrame = {
 type GraphData = {
   frames: GraphFrame[];
   meta: {
-    available_timestamps: number[];
+    frame_count: number;
   };
 };
 

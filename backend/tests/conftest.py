@@ -1,7 +1,3 @@
-"""
-Test fixtures for ABIDE processing and API tests.
-"""
-
 import shutil
 import tempfile
 from pathlib import Path
@@ -19,16 +15,6 @@ from tests.utils import generate_abide_timeseries
 
 
 def create_test_phenotypics(data_dir: Path, subjects: list[tuple[int, str]]) -> Path:
-    """
-    Create a test phenotypics.csv file with the given subjects.
-
-    Args:
-        data_dir: Directory to create the phenotypics.csv file in
-        subjects: List of (subject_id, diagnosis) tuples
-
-    Returns:
-        Path to the created phenotypics.csv file
-    """
     phenotypics_path = data_dir / "phenotypics.csv"
     with open(phenotypics_path, "w") as f:
         f.write("partnum,diagnosis\n")
@@ -39,13 +25,7 @@ def create_test_phenotypics(data_dir: Path, subjects: list[tuple[int, str]]) -> 
 
 @pytest.fixture(autouse=True)
 def mock_data_paths(tmp_path: Path) -> Generator[None, None, None]:
-    """
-    Auto-use fixture that mocks DATA_DIR and PHENOTYPICS_FILE_PATH to temp directories.
-
-    This ensures tests don't depend on real data files existing.
-    Creates an empty phenotypics.csv by default.
-    """
-    # Create a minimal phenotypics file
+    """Mocks DATA_DIR and PHENOTYPICS_FILE_PATH to temp directories."""
     phenotypics_path = tmp_path / "phenotypics.csv"
     phenotypics_path.write_text("partnum,diagnosis\n")
 
@@ -60,7 +40,6 @@ def mock_data_paths(tmp_path: Path) -> Generator[None, None, None]:
 
 @pytest.fixture
 def temp_data_dir() -> Generator[Path, None, None]:
-    """Create a temporary data directory with test ABIDE files."""
     temp_dir = Path(tempfile.mkdtemp())
     yield temp_dir
     shutil.rmtree(temp_dir)
@@ -68,24 +47,6 @@ def temp_data_dir() -> Generator[Path, None, None]:
 
 @pytest.fixture
 def sample_abide_structure(temp_data_dir: Path) -> Path:
-    """
-    Create a sample ABIDE directory structure with test files and phenotypics.csv.
-
-    Generates its own test data - does not depend on real data files.
-
-    Structure:
-        temp_dir/
-            phenotypics.csv
-            ABIDE/
-                ABIDE_I/
-                    NYU/
-                        dr_stage1_subject0050953.txt
-                        dr_stage1_subject0050954.txt
-                    CMU/
-                        dr_stage1_subject0050649.txt
-                    CMU2/
-                        dr_stage1_subject0050659.txt
-    """
     np.random.seed(42)
 
     # Define test subjects with their diagnoses
@@ -120,8 +81,6 @@ def sample_abide_structure(temp_data_dir: Path) -> Path:
 
 @pytest.fixture
 def single_abide_file(temp_data_dir: Path) -> Path:
-    """Create a single test ABIDE file with corresponding phenotypics entry."""
-    # Add entry for this subject to phenotypics
     phenotypics_path = processing_module.PHENOTYPICS_FILE_PATH
     phenotypics_path.write_text("partnum,diagnosis\n50001,ASD\n")
 
@@ -133,9 +92,6 @@ def single_abide_file(temp_data_dir: Path) -> Path:
 
 @pytest.fixture
 def test_client(sample_abide_structure: Path) -> Generator[TestClient, None, None]:
-    """
-    Create a test client with mocked DATA_DIR and PHENOTYPICS_FILE_PATH pointing to temp directory.
-    """
     phenotypics_path = sample_abide_structure / "phenotypics.csv"
 
     with patch.object(main_module, "DATA_DIR", sample_abide_structure), \
@@ -145,10 +101,6 @@ def test_client(sample_abide_structure: Path) -> Generator[TestClient, None, Non
 
 @pytest.fixture
 def test_client_empty_data(temp_data_dir: Path) -> Generator[TestClient, None, None]:
-    """
-    Create a test client with empty data directory.
-    """
-    # Create an empty phenotypics.csv
     phenotypics_path = create_test_phenotypics(temp_data_dir, [])
 
     with patch.object(main_module, "DATA_DIR", temp_data_dir), \

@@ -31,14 +31,17 @@ function App() {
 	const [stepInput, setStepInput] = useState<string>("1");
 
 	// Processing parameters
-	const [smoothing, setSmoothing] = useState<SmoothingAlgorithm>("none");
-	const [interpolation, setInterpolation] = useState<InterpolationAlgorithm>("none");
+	const [smoothing, setSmoothing] = useState<SmoothingAlgorithm | null>(null);
+	const [smoothingWindow, setSmoothingWindow] = useState<number>(3);
+	const [smoothingAlpha, setSmoothingAlpha] = useState<number>(0.5);
+	const [smoothingSigma, setSmoothingSigma] = useState<number>(1.0);
+	const [interpolation, setInterpolation] = useState<InterpolationAlgorithm | null>(null);
 	const [interpolationFactor, setInterpolationFactor] = useState<number>(2);
-	const [factorInput, setFactorInput] = useState<string>("2");
 
 	// Playback
 	const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
 	const [edgeThreshold, setEdgeThreshold] = useState<number>(0);
+	const [waveletEdgeMode, setWaveletEdgeMode] = useState<"both" | "dominant">("both");
 	const [hiddenNodes, setHiddenNodes] = useState<Set<string>>(new Set());
 	const [isPlaying, setIsPlaying] = useState(false);
 	const intervalRef = useRef<number | null>(null);
@@ -53,6 +56,9 @@ function App() {
 		windowSize,
 		step,
 		smoothing,
+		smoothingWindow,
+		smoothingAlpha,
+		smoothingSigma,
 		interpolation,
 		interpolationFactor,
 	});
@@ -75,27 +81,33 @@ function App() {
 		: "Not configured";
 	const corrSummary = method ? `${method} | w:${windowSize} | s:${step}` : "Not configured";
 	const interpolationLabels: Record<InterpolationAlgorithm, string> = {
-		none: "",
 		linear: "linear",
 		cubic_spline: "cubic",
 		b_spline: "b-spline",
 		univariate_spline: "univariate",
 	};
 	const smoothingLabels: Record<SmoothingAlgorithm, string> = {
-		none: "",
 		moving_average: "moving avg",
 		exponential: "exp",
 		gaussian: "gaussian",
 	};
+	const getSmoothingSummary = () => {
+		if (!smoothing) return null;
+		const label = smoothingLabels[smoothing];
+		if (smoothing === "moving_average") return `${label}(${smoothingWindow})`;
+		if (smoothing === "exponential") return `${label}(${smoothingAlpha.toFixed(1)})`;
+		if (smoothing === "gaussian") return `${label}(σ${smoothingSigma.toFixed(1)})`;
+		return label;
+	};
 	const procSummary =
 		[
-			interpolation !== "none" ? `${interpolationLabels[interpolation]} x${interpolationFactor}` : null,
-			smoothing !== "none" ? smoothingLabels[smoothing] : null,
+			interpolation ? `${interpolationLabels[interpolation]} x${interpolationFactor}` : null,
+			getSmoothingSummary(),
 		]
 			.filter(Boolean)
 			.join(" | ") || "none";
 	const playSummary = `${playbackSpeed}x | thresh: ${edgeThreshold.toFixed(2)}`;
-	const nodesSummary = `${14 - hiddenNodes.size}/14 visible`;
+	const nodesSummary = `${nodeNames.length - hiddenNodes.size}/${nodeNames.length} visible`;
 
 	const {
 		state: exportState,
@@ -110,21 +122,18 @@ function App() {
 		smoothing,
 		interpolation,
 		subjectInfo: selectedSubjectInfo,
-		symmetric,
+		symmetric: symmetric || (method === "wavelet" && waveletEdgeMode === "dominant"),
 		dataRange: { min: meta.edge_weight_min, max: meta.edge_weight_max },
 		qualityScale: 2, // 4K output
 	});
 
 	// Playback loop
 	useEffect(() => {
-		if (isPlaying && meta.available_timestamps.length > 0) {
+		if (isPlaying && meta.frame_count > 0) {
 			const baseInterval = 500;
 			const interval = baseInterval / playbackSpeed;
 			intervalRef.current = window.setInterval(() => {
-				const currentIndex = meta.available_timestamps.indexOf(time);
-				const nextIndex = (currentIndex + 1) % meta.available_timestamps.length;
-				const nextTime = meta.available_timestamps[nextIndex];
-				setTime(nextTime);
+				setTime((time + 1) % meta.frame_count);
 			}, interval);
 		} else {
 			if (intervalRef.current) {
@@ -138,7 +147,7 @@ function App() {
 				clearInterval(intervalRef.current);
 			}
 		};
-	}, [isPlaying, meta.available_timestamps, time, setTime, playbackSpeed]);
+	}, [isPlaying, meta.frame_count, time, setTime, playbackSpeed]);
 
 	// Keyboard shortcuts
 	useEffect(() => {
@@ -157,11 +166,16 @@ function App() {
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, []);
 
-	// Reset playback when parameters change
+	// Reset time when any data parameter changes
 	useEffect(() => {
 		setTime(0);
 		setIsPlaying(false);
-	}, [selectedFile, method, windowSize, step, smoothing, interpolation, interpolationFactor, setTime]);
+	}, [selectedFile, method, windowSize, step, smoothing, smoothingWindow, smoothingAlpha, smoothingSigma, interpolation, interpolationFactor, setTime]);
+
+	// Reset threshold only when correlation method changes (value range differs)
+	useEffect(() => {
+		setEdgeThreshold(0);
+	}, [method]);
 
 	// Site options for searchable dropdown
 	const siteOptions = useMemo(() => {
@@ -220,7 +234,7 @@ function App() {
 								isLoading={isFetching}
 								edgeThreshold={edgeThreshold}
 								hiddenNodes={hiddenNodes}
-								symmetric={symmetric}
+								symmetric={symmetric || (method === "wavelet" && waveletEdgeMode === "dominant")}
 								dataRange={{ min: meta.edge_weight_min, max: meta.edge_weight_max }}
 								diagnosis={selectedSubjectInfo?.diagnosis}
 							/>
@@ -281,6 +295,7 @@ function App() {
 									options={[
 										{ value: "pearson", label: "Pearson" },
 										{ value: "spearman", label: "Spearman" },
+										{ value: "wavelet", label: "Wavelet" },
 									]}
 									value={method}
 									onChange={(v) => setMethod(v)}
@@ -352,9 +367,9 @@ function App() {
 						>
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Interpolation</label>
-								<SegmentedControl<InterpolationAlgorithm>
+								<SegmentedControl<InterpolationAlgorithm | null>
 									options={[
-										{ value: "none", label: "None" },
+										{ value: null, label: "None" },
 										{ value: "linear", label: "Linear" },
 										{ value: "cubic_spline", label: "Cubic" },
 										{ value: "b_spline", label: "B-Spl" },
@@ -364,37 +379,25 @@ function App() {
 									size="sm"
 								/>
 							</div>
-							{interpolation !== "none" && (
+							{interpolation !== null && (
 								<div className="space-y-1">
 									<label className="text-xs font-medium text-foreground">Factor (2-10)</label>
 									<input
-										type="text"
-										inputMode="numeric"
-										value={factorInput}
-										onChange={(e) => setFactorInput(e.target.value.replace(/\D/g, ""))}
-										onBlur={() => {
-											const val = parseInt(factorInput);
-											if (isNaN(val) || val < 2) {
-												setFactorInput("2");
-												setInterpolationFactor(2);
-											} else if (val > 10) {
-												setFactorInput("10");
-												setInterpolationFactor(10);
-											} else {
-												setFactorInput(String(val));
-												setInterpolationFactor(val);
-											}
-										}}
-										onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-										className="w-full h-8 rounded-md border border-input bg-background px-2 py-1 text-sm"
+										type="range"
+										min={2}
+										max={10}
+										value={interpolationFactor}
+										onChange={(e) => setInterpolationFactor(parseInt(e.target.value))}
+										className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
 									/>
+									<div className="text-xs text-muted-foreground text-center">{interpolationFactor}x</div>
 								</div>
 							)}
 							<div className="space-y-1">
 								<label className="text-xs font-medium text-foreground">Smoothing</label>
-								<SegmentedControl<SmoothingAlgorithm>
+								<SegmentedControl<SmoothingAlgorithm | null>
 									options={[
-										{ value: "none", label: "None" },
+										{ value: null, label: "None" },
 										{ value: "moving_average", label: "MovAvg" },
 										{ value: "exponential", label: "Exp" },
 										{ value: "gaussian", label: "Gauss" },
@@ -404,6 +407,50 @@ function App() {
 									size="sm"
 								/>
 							</div>
+							{smoothing === "moving_average" && (
+								<div className="space-y-1">
+									<label className="text-xs font-medium text-foreground">Window (2-10)</label>
+									<input
+										type="range"
+										min={2}
+										max={10}
+										value={smoothingWindow}
+										onChange={(e) => setSmoothingWindow(parseInt(e.target.value))}
+										className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+									/>
+									<div className="text-xs text-muted-foreground text-center">{smoothingWindow}</div>
+								</div>
+							)}
+							{smoothing === "exponential" && (
+								<div className="space-y-1">
+									<label className="text-xs font-medium text-foreground">Alpha (0-1)</label>
+									<input
+										type="range"
+										min={0}
+										max={1}
+										step={0.05}
+										value={smoothingAlpha}
+										onChange={(e) => setSmoothingAlpha(parseFloat(e.target.value))}
+										className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+									/>
+									<div className="text-xs text-muted-foreground text-center">{smoothingAlpha.toFixed(2)}</div>
+								</div>
+							)}
+							{smoothing === "gaussian" && (
+								<div className="space-y-1">
+									<label className="text-xs font-medium text-foreground">Sigma (0.1-5)</label>
+									<input
+										type="range"
+										min={0.1}
+										max={5}
+										step={0.1}
+										value={smoothingSigma}
+										onChange={(e) => setSmoothingSigma(parseFloat(e.target.value))}
+										className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+									/>
+									<div className="text-xs text-muted-foreground text-center">{smoothingSigma.toFixed(1)}</div>
+								</div>
+							)}
 						</CollapsibleSection>
 
 						{/* Playback Section */}
@@ -433,24 +480,43 @@ function App() {
 									size="sm"
 								/>
 							</div>
-							<div className="space-y-1">
-								<label className="text-xs font-medium text-foreground">
-									Edge Threshold: {edgeThreshold.toFixed(2)}
-								</label>
-								<input
-									type="range"
-									min={Math.max(meta.edge_weight_min, 0)}
-									max={Math.max(meta.edge_weight_max, 0)}
-									step={(Math.max(meta.edge_weight_max, 0) - Math.max(meta.edge_weight_min, 0)) / 100}
-									value={edgeThreshold}
-									onChange={(e) => setEdgeThreshold(parseFloat(e.target.value))}
-									className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
-								/>
-								<div className="flex justify-between text-[10px] text-muted-foreground">
-									<span>{Math.max(meta.edge_weight_min, 0).toFixed(3)}</span>
-									<span>{Math.max(meta.edge_weight_max, 0).toFixed(3)}</span>
+							{(() => {
+								const thresholdMax = Math.max(Math.abs(meta.edge_weight_min), Math.abs(meta.edge_weight_max));
+								return (
+									<div className="space-y-1">
+										<label className="text-xs font-medium text-foreground">
+											Edge Threshold: {edgeThreshold.toFixed(2)}
+										</label>
+										<input
+											type="range"
+											min={0}
+											max={thresholdMax}
+											step={thresholdMax / 100}
+											value={edgeThreshold}
+											onChange={(e) => setEdgeThreshold(parseFloat(e.target.value))}
+											className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+										/>
+										<div className="flex justify-between text-[10px] text-muted-foreground">
+											<span>0</span>
+											<span>{thresholdMax.toFixed(3)}</span>
+										</div>
+									</div>
+								);
+							})()}
+							{method === "wavelet" && (
+								<div className="space-y-1">
+									<label className="text-xs font-medium text-foreground">Edge Display</label>
+									<SegmentedControl<"both" | "dominant">
+										options={[
+											{ value: "both", label: "Both" },
+											{ value: "dominant", label: "Dominant" },
+										]}
+										value={waveletEdgeMode}
+										onChange={(v) => setWaveletEdgeMode(v)}
+										size="sm"
+									/>
 								</div>
-							</div>
+							)}
 						</CollapsibleSection>
 
 						{/* Nodes Section */}

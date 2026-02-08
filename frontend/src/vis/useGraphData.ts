@@ -13,17 +13,15 @@ type GraphDataResponse = {
 
 // Enums matching backend
 export type SmoothingAlgorithm =
-  | "none"
   | "moving_average"
   | "exponential"
   | "gaussian";
 export type InterpolationAlgorithm =
-  | "none"
   | "linear"
   | "cubic_spline"
   | "b_spline"
   | "univariate_spline";
-export type CorrelationMethod = "pearson" | "spearman";
+export type CorrelationMethod = "pearson" | "spearman" | "wavelet";
 
 // ABIDE file info from backend
 export type AbideFile = {
@@ -71,14 +69,30 @@ export function useCorrelationMethods() {
   });
 }
 
+// Nested params matching backend Pydantic models
+export type SmoothingParams = {
+  algorithm: SmoothingAlgorithm;
+  window?: number;
+  alpha?: number;
+  sigma?: number;
+};
+
+export type InterpolationParams = {
+  algorithm: InterpolationAlgorithm;
+  factor?: number;
+};
+
 // Parameters for ABIDE data fetching
 export type AbideParams = {
   filePath: string | null;
   method: CorrelationMethod | null;
   windowSize: number;
   step: number;
-  smoothing: SmoothingAlgorithm;
-  interpolation: InterpolationAlgorithm;
+  smoothing: SmoothingAlgorithm | null;
+  smoothingWindow: number;
+  smoothingAlpha: number;
+  smoothingSigma: number;
+  interpolation: InterpolationAlgorithm | null;
   interpolationFactor: number;
 };
 
@@ -87,8 +101,11 @@ const DEFAULT_ABIDE_PARAMS: AbideParams = {
   method: null,
   windowSize: 30,
   step: 1,
-  smoothing: "none",
-  interpolation: "none",
+  smoothing: null,
+  smoothingWindow: 3,
+  smoothingAlpha: 0.5,
+  smoothingSigma: 1.0,
+  interpolation: null,
   interpolationFactor: 2,
 };
 
@@ -105,6 +122,9 @@ export function useAbideData(params: Partial<AbideParams> = {}) {
       p.windowSize,
       p.step,
       p.smoothing,
+      p.smoothingWindow,
+      p.smoothingAlpha,
+      p.smoothingSigma,
       p.interpolation,
       p.interpolationFactor,
     ],
@@ -116,24 +136,33 @@ export function useAbideData(params: Partial<AbideParams> = {}) {
         throw new Error("No correlation method selected");
       }
 
-      const url = new URL(`${API_URL}/abide/data`);
-      url.searchParams.set("file_path", p.filePath);
-      url.searchParams.set("method", p.method);
-      url.searchParams.set("window_size", p.windowSize.toString());
-      url.searchParams.set("step", p.step.toString());
+      const body: Record<string, unknown> = {
+        file_path: p.filePath,
+        method: p.method,
+        window_size: p.windowSize,
+        step: p.step,
+      };
 
-      if (p.smoothing !== "none") {
-        url.searchParams.set("smoothing", p.smoothing);
+      if (p.smoothing !== null) {
+        body.smoothing = {
+          algorithm: p.smoothing,
+          window: p.smoothingWindow,
+          alpha: p.smoothingAlpha,
+          sigma: p.smoothingSigma,
+        };
       }
-      if (p.interpolation !== "none") {
-        url.searchParams.set("interpolation", p.interpolation);
-        url.searchParams.set(
-          "interpolation_factor",
-          p.interpolationFactor.toString(),
-        );
+      if (p.interpolation !== null) {
+        body.interpolation = {
+          algorithm: p.interpolation,
+          factor: p.interpolationFactor,
+        };
       }
 
-      const res = await fetch(url.toString());
+      const res = await fetch(`${API_URL}/abide/data`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
       if (!res.ok) {
         const text = await res.text();
         throw new Error(`Data fetch failed (${res.status}): ${text}`);
@@ -148,32 +177,29 @@ export function useAbideData(params: Partial<AbideParams> = {}) {
   const allFrames = dataQuery.data?.frames ?? [];
 
   useEffect(() => {
-    if (meta && meta.available_timestamps.length > 0) {
-      if (!meta.available_timestamps.includes(time)) {
-        setTime(meta.available_timestamps[0]);
+    if (meta && meta.frame_count > 0) {
+      if (time < 0 || time >= meta.frame_count) {
+        setTime(0);
       }
     }
   }, [meta, time]);
 
   const normalizedTime = useMemo(() => {
-    if (!meta || meta.available_timestamps.length === 0) return 0;
-    const times = meta.available_timestamps;
-    if (!times.includes(time)) return times[0];
+    if (!meta || meta.frame_count === 0) return 0;
+    if (time < 0 || time >= meta.frame_count) return 0;
     return time;
   }, [meta, time]);
 
   const frame = useMemo(() => {
     if (allFrames.length === 0 || !meta) return undefined;
-    return allFrames.find((f) => f.timestamp === normalizedTime);
+    return allFrames[normalizedTime];
   }, [allFrames, normalizedTime, meta]);
 
   return {
     frame,
     allFrames,
-    // Fallback meta is only for loading state - frame will be undefined so dataRange won't be used
-    // Backend guarantees valid min/max when data is present (throws 400 if no matrices)
     meta: meta ?? {
-      available_timestamps: [],
+      frame_count: 0,
       node_attributes: [],
       edge_attributes: [],
       edge_weight_min: 0,

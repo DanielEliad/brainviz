@@ -15,8 +15,8 @@ type UseVideoExportOptions = {
   nodeNames?: string[];
   edgeThreshold?: number;
   hiddenNodes?: Set<string>;
-  smoothing?: string;
-  interpolation?: string;
+  smoothing?: string | null;
+  interpolation?: string | null;
   subjectInfo?: AbideFile | null;
   qualityScale?: VideoQuality;
   width?: number;
@@ -31,8 +31,8 @@ export function useVideoExport({
   nodeNames,
   edgeThreshold = 0,
   hiddenNodes,
-  smoothing = "none",
-  interpolation = "none",
+  smoothing = null,
+  interpolation = null,
   subjectInfo,
   qualityScale = 1,
   width = 1920,
@@ -106,8 +106,8 @@ export function useVideoExport({
       nodeNames,
       edgeThreshold,
       hiddenNodes: hiddenNodes ? Array.from(hiddenNodes) : [],
-      smoothing,
-      interpolation,
+      smoothing: smoothing ?? "none",
+      interpolation: interpolation ?? "none",
       subjectInfo: subjectInfo ?? undefined,
       symmetric,
       dataRange,
