@@ -107,7 +107,7 @@ function App() {
 			.filter(Boolean)
 			.join(" | ") || "none";
 	const playSummary = `${playbackSpeed}x | thresh: ${edgeThreshold.toFixed(2)}`;
-	const nodesSummary = `${14 - hiddenNodes.size}/14 visible`;
+	const nodesSummary = `${nodeNames.length - hiddenNodes.size}/${nodeNames.length} visible`;
 
 	const {
 		state: exportState,
@@ -166,11 +166,16 @@ function App() {
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, []);
 
-	// Reset playback when parameters change
+	// Reset time when any data parameter changes
 	useEffect(() => {
 		setTime(0);
 		setIsPlaying(false);
 	}, [selectedFile, method, windowSize, step, smoothing, smoothingWindow, smoothingAlpha, smoothingSigma, interpolation, interpolationFactor, setTime]);
+
+	// Reset threshold only when correlation method changes (value range differs)
+	useEffect(() => {
+		setEdgeThreshold(0);
+	}, [method]);
 
 	// Site options for searchable dropdown
 	const siteOptions = useMemo(() => {
@@ -475,24 +480,29 @@ function App() {
 									size="sm"
 								/>
 							</div>
-							<div className="space-y-1">
-								<label className="text-xs font-medium text-foreground">
-									Edge Threshold: {edgeThreshold.toFixed(2)}
-								</label>
-								<input
-									type="range"
-									min={Math.max(meta.edge_weight_min, 0)}
-									max={Math.max(meta.edge_weight_max, 0)}
-									step={(Math.max(meta.edge_weight_max, 0) - Math.max(meta.edge_weight_min, 0)) / 100}
-									value={edgeThreshold}
-									onChange={(e) => setEdgeThreshold(parseFloat(e.target.value))}
-									className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
-								/>
-								<div className="flex justify-between text-[10px] text-muted-foreground">
-									<span>{Math.max(meta.edge_weight_min, 0).toFixed(3)}</span>
-									<span>{Math.max(meta.edge_weight_max, 0).toFixed(3)}</span>
-								</div>
-							</div>
+							{(() => {
+								const thresholdMax = Math.max(Math.abs(meta.edge_weight_min), Math.abs(meta.edge_weight_max));
+								return (
+									<div className="space-y-1">
+										<label className="text-xs font-medium text-foreground">
+											Edge Threshold: {edgeThreshold.toFixed(2)}
+										</label>
+										<input
+											type="range"
+											min={0}
+											max={thresholdMax}
+											step={thresholdMax / 100}
+											value={edgeThreshold}
+											onChange={(e) => setEdgeThreshold(parseFloat(e.target.value))}
+											className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+										/>
+										<div className="flex justify-between text-[10px] text-muted-foreground">
+											<span>0</span>
+											<span>{thresholdMax.toFixed(3)}</span>
+										</div>
+									</div>
+								);
+							})()}
 							{method === "wavelet" && (
 								<div className="space-y-1">
 									<label className="text-xs font-medium text-foreground">Edge Display</label>

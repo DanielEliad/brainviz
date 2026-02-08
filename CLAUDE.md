@@ -227,11 +227,76 @@ wavelet.h5
 
 | Value | Constant | Meaning |
 |-------|----------|---------|
-| 1 | PHASE_LEAD | Network A leads network B |
-| -1 | PHASE_LAG | Network A lags network B |
+| 1 | PHASE_LEAD | Network A leads network B (x leads y by ~90°) |
+| -1 | PHASE_LAG | Network A lags network B (x lags y by ~90°) |
 | 2 | PHASE_IN_PHASE | Networks are in phase |
 | -2 | PHASE_ANTI | Networks are anti-phase |
-| 0 | PHASE_NONE | No significant coherence |
+| 0 | PHASE_NONE | No significant coherence (outside COI or Rsq < 0.5) |
+
+### Source MATLAB Scripts (data/wavelet_new/)
+
+The `Coherence_*.mat` files are created by MATLAB scripts using wavelet coherence analysis.
+
+**Main Scripts:**
+- `WCMsABIDE.m` - Outer loop: iterates over all 182 RSN pairs (14×14 - 14 self-connections)
+- `Wavelet_coherences_function.m` - Inner loop: computes wavelet coherence for one RSN pair across all subjects
+
+**Pipeline:**
+```
+participantStructs.mat          # Input: time series per subject per RSN
+        │
+        ▼
+   WCMsABIDE.m                  # Loops over RSN pairs (parallelized on GPU)
+        │
+        ▼
+Wavelet_coherences_function.m   # For each pair:
+        │                       #   1. Extract time series for RSN1 and RSN2
+        │                       #   2. Compute wavelet transform (wt_MORLET)
+        │                       #   3. Compute cross-wavelet transform (xwt_MORLET)
+        │                       #   4. Compute wavelet coherence (my_wtc_MORLET)
+        │                       #   5. Classify phase angles into categories
+        ▼
+Coherence_RSN1_RSN2.mat         # Output: one file per RSN pair
+```
+
+**Phase Angle Classification** (from `my_wtc_MORLET_pSJC.m` lines 211-215):
+```matlab
+aaa = angle(Wxy);  % Cross-wavelet phase angle
+aaa(Rsq < 0.5 | incoi | ~issig_coh) = NaN;  % Mask insignificant regions
+
+ang_phase = (aaa > -pi/4  & aaa < pi/4);      % In-phase: -45° to +45°
+ang_lead  = (aaa > pi/4   & aaa < 3*pi/4);    % Leading:  +45° to +135°
+ang_lag   = (aaa > -3*pi/4 & aaa < -pi/4);    # Lagging:  -135° to -45°
+ang_anti  = (aaa > 3*pi/4 | aaa < -3*pi/4);   % Anti-phase: ±135° to ±180°
+
+angle_color = 2*ang_phase + 1*ang_lead - 1*ang_lag - 2*ang_anti;
+```
+
+**Source .mat File Contents** (what we read from `Coherence_*.mat`):
+| Variable | Shape | Description |
+|----------|-------|-------------|
+| `Rsq_per_sub` | [n_scales, n_timepoints, n_subjects] | Wavelet coherence (R²) |
+| `Wxy_per_sub` | [n_scales, n_timepoints, n_subjects] | Cross-wavelet transform |
+| `angle_maps` | cell{5} containing: | Phase classification maps |
+| | `angle_color_per_sub` | Combined phase codes (-2,-1,0,1,2) |
+| | `angle_lead_per_sub` | Boolean: RSN1 leads RSN2 |
+| | `angle_lag_per_sub` | Boolean: RSN1 lags RSN2 |
+| | `angle_anti_per_sub` | Boolean: anti-phase |
+| | `angle_phase_per_sub` | Boolean: in-phase |
+| `period_per_sub` | [n_subjects, n_scales] | Wavelet periods (seconds) |
+| `scale_per_sub` | [n_subjects, n_scales] | Wavelet scales |
+| `coi_per_sub` | [n_subjects, n_timepoints] | Cone of influence |
+| `sig95_coh_per_sub` | [n_scales, n_timepoints, n_subjects] | Significance mask (95%) |
+
+**Dependencies** (`data/wavelet_new/Dependencies/`):
+- Grinsted wavelet coherence toolbox (wtc.m, xwt.m, wavelet.m)
+- Custom adaptations by Ramona Cirstian and Antoine Bernas
+
+**Key Parameters:**
+- `TR = 2` seconds (fMRI repetition time)
+- `nrScales = 50` wavelet scales
+- Morlet mother wavelet
+- Monte Carlo significance testing (300 surrogates)
 
 ### Runtime Processing (`wavelet_processing.py`)
 

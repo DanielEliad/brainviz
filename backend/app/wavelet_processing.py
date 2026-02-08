@@ -4,7 +4,7 @@ from typing import List
 import h5py
 import numpy as np
 
-from app.rsn_constants import CorrelationParams, RSN_NAME_TO_POSITION
+from app.rsn_constants import NUM_RSNS, CorrelationParams, RSN_NAME_TO_POSITION
 
 WAVELET_HDF5_PATH = Path(__file__).parent.parent.parent / "data" / "wavelet.h5"
 
@@ -16,7 +16,6 @@ PHASE_LAG = -1
 def compute_wavelet_matrices(
     filepath: Path, params: CorrelationParams
 ) -> List[np.ndarray]:
-    """Edge values = leading ratio [0-1]: 1.0 = always leads, 0.0 = always lags."""
     subject_id = int(filepath.stem.replace("dr_stage1_subject", ""))
     window_size = params.window_size
     step = params.step
@@ -43,15 +42,17 @@ def compute_wavelet_matrices(
             )
 
         # Initialize with 0 (both directions populated from HDF5)
-        matrices = [np.zeros((14, 14)) for _ in range(n_frames)]
+        matrices = [np.zeros((NUM_RSNS, NUM_RSNS)) for _ in range(n_frames)]
 
         # Process each pair from HDF5 (both A_B and B_A exist)
         for pair_key in pairs:
             rsn1, rsn2 = pair_key.split("_")
             i = RSN_NAME_TO_POSITION.get(rsn1)
             j = RSN_NAME_TO_POSITION.get(rsn2)
-            if i is None or j is None:
-                continue
+            if i is None:
+                raise ValueError(f"invalid RSN name {rsn1}")
+            if j is None:
+                raise ValueError(f"invalid RSN name {rsn2}")
 
             phase_data = f["pairs"][pair_key]["angle_maps"][subj_idx, :, :]
 

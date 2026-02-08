@@ -270,8 +270,7 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
   // Look up weight from current frame so tooltip updates when frame changes
   const hoveredEdgeWeight = hoveredEdge && filteredFrame
     ? filteredFrame.edges.find(
-        e => (e.source === hoveredEdge.source && e.target === hoveredEdge.target) ||
-             (e.source === hoveredEdge.target && e.target === hoveredEdge.source)
+        e => e.source === hoveredEdge.source && e.target === hoveredEdge.target
       )?.weight
     : undefined;
 

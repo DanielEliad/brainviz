@@ -128,20 +128,24 @@ describe("isEdgeSelected", () => {
 // --- getAbsoluteRange ---
 
 describe("getAbsoluteRange", () => {
-  it("returns positive range unchanged", () => {
-    expect(getAbsoluteRange({ min: 0.1, max: 0.9 })).toEqual({ min: 0.1, max: 0.9 });
+  it("returns zero min for positive range", () => {
+    expect(getAbsoluteRange({ min: 0.1, max: 0.9 })).toEqual({ min: 0, max: 0.9 });
   });
 
-  it("clamps negative min to 0", () => {
+  it("uses max of abs values when min is negative", () => {
     expect(getAbsoluteRange({ min: -0.5, max: 0.8 })).toEqual({ min: 0, max: 0.8 });
   });
 
-  it("clamps negative max to 0", () => {
-    expect(getAbsoluteRange({ min: -0.8, max: -0.2 })).toEqual({ min: 0, max: 0 });
+  it("uses abs(min) when both values are negative", () => {
+    expect(getAbsoluteRange({ min: -0.8, max: -0.2 })).toEqual({ min: 0, max: 0.8 });
   });
 
   it("handles zero range", () => {
     expect(getAbsoluteRange({ min: 0, max: 0 })).toEqual({ min: 0, max: 0 });
+  });
+
+  it("picks larger absolute value as max", () => {
+    expect(getAbsoluteRange({ min: -0.9, max: 0.5 })).toEqual({ min: 0, max: 0.9 });
   });
 });
 
@@ -228,9 +232,16 @@ describe("createColorScale", () => {
 
   it("uses absolute range for negative values", () => {
     const scale = createColorScale({ min: -0.5, max: 0.8 });
-    // min is clamped to 0, so 0 should give blue
+    // min is 0, so 0 should give blue
     expect(scale(0)).toBe("rgb(59, 130, 246)");
+    // max is max(abs(-0.5), abs(0.8)) = 0.8
     expect(scale(0.8)).toBe("rgb(220, 38, 38)");
+  });
+
+  it("clamps values beyond domain", () => {
+    const scale = createColorScale({ min: 0, max: 1 });
+    // Value beyond max should clamp to red
+    expect(scale(2)).toBe("rgb(220, 38, 38)");
   });
 });
 
@@ -262,5 +273,10 @@ describe("createThicknessScale", () => {
     const scale = createThicknessScale({ min: -0.5, max: 1 });
     expect(scale(0)).toBe(0.5);
     expect(scale(1)).toBe(8);
+  });
+
+  it("clamps values beyond domain", () => {
+    const scale = createThicknessScale({ min: 0, max: 1 });
+    expect(scale(2)).toBe(8);
   });
 });

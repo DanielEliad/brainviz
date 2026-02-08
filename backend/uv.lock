@@ -55,6 +55,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "h5py-stubs" },
     { name = "httpx" },
     { name = "pytest" },
 ]
@@ -74,6 +75,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "h5py-stubs", specifier = ">=0.1.2" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "pytest", specifier = ">=9.0.2" },
 ]
@@ -174,6 +176,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/a5/83/393a7226024238b0f51965a7156004eaae1fcf84aa4bfecf7e582676271b/h5py-3.15.1-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:f4a016df3f4a8a14d573b496e4d1964deb380e26031fc85fb40e417e9131888a", size = 5037161, upload-time = "2025-10-16T10:34:30.383Z" },
     { url = "https://files.pythonhosted.org/packages/cf/51/329e7436bf87ca6b0fe06dd0a3795c34bebe4ed8d6c44450a20565d57832/h5py-3.15.1-cp312-cp312-win_amd64.whl", hash = "sha256:59b25cf02411bf12e14f803fef0b80886444c7fe21a5ad17c6a28d3f08098a1e", size = 2874165, upload-time = "2025-10-16T10:34:33.461Z" },
     { url = "https://files.pythonhosted.org/packages/09/a8/2d02b10a66747c54446e932171dd89b8b4126c0111b440e6bc05a7c852ec/h5py-3.15.1-cp312-cp312-win_arm64.whl", hash = "sha256:61d5a58a9851e01ee61c932bbbb1c98fe20aba0a5674776600fb9a361c0aa652", size = 2458214, upload-time = "2025-10-16T10:34:35.733Z" },
+]
+
+[[package]]
+name = "h5py-stubs"
+version = "0.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "h5py" },
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/55/a0/65cbd1422dbc6bcccb3c7f11755c44b67e487b01ccd7e098648fdf6bea6a/h5py_stubs-0.1.2.tar.gz", hash = "sha256:f984bf66bc2cce02fd89d91b64dd0489b0014b2e79f2be6dc56f0bf38ef4e759", size = 3074, upload-time = "2025-09-09T16:21:10.37Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f9/52/b8eea98dd5e9167ed9162a700cdb3040dfcf52e285bd33c548a6fb5f6a8c/h5py_stubs-0.1.2-py3-none-any.whl", hash = "sha256:22899b06f7cfe028ba8eabf9aebee79d6facd0aeaee965e65bc290df1360a5ca", size = 6383, upload-time = "2025-09-09T16:21:09.604Z" },
 ]
 
 [[package]]

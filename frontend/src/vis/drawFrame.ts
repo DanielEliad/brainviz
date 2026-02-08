@@ -25,7 +25,7 @@ export function getAbsoluteRange(range: DataRange): {
   min: number;
   max: number;
 } {
-  return { min: Math.max(0, range.min), max: Math.max(range.max, 0) };
+  return { min: 0, max: Math.max(Math.abs(range.min), Math.abs(range.max)) };
 }
 
 // Scale factory functions - create scales based on absolute value range
@@ -35,7 +35,8 @@ export function createColorScale(range: DataRange) {
   return d3
     .scaleLinear<string>()
     .domain([absRange.min, absRange.max])
-    .range(["rgb(59, 130, 246)", "rgb(220, 38, 38)"]);
+    .range(["rgb(59, 130, 246)", "rgb(220, 38, 38)"])
+    .clamp(true);
 }
 
 export function createThicknessScale(range: DataRange, scale: number = 1) {
@@ -43,7 +44,8 @@ export function createThicknessScale(range: DataRange, scale: number = 1) {
   return d3
     .scaleLinear()
     .domain([absRange.min, absRange.max])
-    .range([0.5 * scale, 8 * scale]);
+    .range([0.5 * scale, 8 * scale])
+    .clamp(true);
 }
 
 type Edge = { source: string; target: string; weight: number };

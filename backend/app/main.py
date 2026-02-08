@@ -146,7 +146,10 @@ def get_abide_data(request: CorrelationRequest) -> dict:
     # Frontend must use these values to scale visualizations - never assume a fixed range
     all_weights = []
     for matrix in matrices:
-        all_weights.extend(matrix.flatten().tolist())
+        mask = ~np.eye(matrix.shape[0], dtype=bool)
+        if symmetric:
+            mask = np.triu(mask, k=1)
+        all_weights.extend(matrix[mask].tolist())
 
     if not all_weights:
         raise HTTPException(
