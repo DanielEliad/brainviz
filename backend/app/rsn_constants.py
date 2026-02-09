@@ -55,5 +55,5 @@ class CorrelationMethod(str, Enum):
 @dataclass
 class CorrelationParams:
     method: CorrelationMethod = CorrelationMethod.PEARSON
-    window_size: int = 30
-    step: int = 1
+    window_size: int | None = None
+    step: int | None = None

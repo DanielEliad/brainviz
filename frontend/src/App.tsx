@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import GraphCanvas from "./vis/GraphCanvas";
 import { Timeline } from "./ui/Timeline";
 import { ControlPanel } from "./ui/ControlPanel";
@@ -11,8 +12,18 @@ import {
 	CorrelationMethod,
 } from "./vis/useGraphData";
 import { useVideoExport } from "./vis/useVideoExport";
+import { OverviewTab } from "./overview/OverviewTab";
+
+type TabId = "player" | "overview";
+
+const TAB_OPTIONS: { value: TabId; label: string }[] = [
+	{ value: "player", label: "Player" },
+	{ value: "overview", label: "Overview" },
+];
 
 function App() {
+	const [activeTab, setActiveTab] = useState<TabId>("player");
+
 	// ABIDE file selection
 	const [selectedSite, setSelectedSite] = useState<string | null>(null);
 	const [selectedFile, setSelectedFile] = useState<string | null>(null);
@@ -153,91 +164,103 @@ function App() {
 
 	return (
 		<div className="dark h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col overflow-hidden">
-			<div className="flex-shrink-0 px-4 py-2 border-b border-border">
-				<h1 className="text-xl font-bold tracking-tight text-foreground">Brain Visualizer</h1>
+			<div className="flex-shrink-0 px-3 py-1.5 border-b border-border flex items-center gap-3">
+				<h1 className="text-sm font-bold tracking-tight text-foreground">Brain Visualizer</h1>
+				<SegmentedControl<TabId>
+					options={TAB_OPTIONS}
+					value={activeTab}
+					onChange={setActiveTab}
+					size="sm"
+				/>
 			</div>
 
-			<div className="flex-1 flex gap-3 px-3 py-3 min-h-0">
-				<Card className="border-2 shadow-lg flex-1 min-h-0">
-					<CardContent className="p-0 h-full">
-						<div className="relative h-full">
-							{error && (
-								<div className="absolute top-4 left-4 z-10 bg-destructive text-destructive-foreground px-4 py-2 rounded-md text-sm shadow-md max-w-md">
-									{String(error)}
-								</div>
-							)}
-							{(!selectedFile || !method) && !error && (
-								<div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-									{!selectedFile && "Select a subject and correlation method to begin"}
-									{selectedFile && !method && "Select a correlation method to begin"}
-								</div>
-							)}
-							<GraphCanvas
-								frame={frame}
-								isLoading={isFetching}
+			{/* Player tab — hidden via display:none to preserve state */}
+			<div style={{ display: activeTab === "player" ? "flex" : "none" }} className="flex-1 flex flex-col min-h-0">
+				<div className="flex-1 flex gap-3 px-3 py-3 min-h-0">
+					<Card className="border-2 shadow-lg flex-1 min-h-0">
+						<CardContent className="p-0 h-full">
+							<div className="relative h-full">
+								{error && (
+									<div className="absolute top-4 left-4 z-10 bg-destructive text-destructive-foreground px-4 py-2 rounded-md text-sm shadow-md max-w-md">
+										{String(error)}
+									</div>
+								)}
+								{(!selectedFile || !method) && !error && (
+									<div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+										{!selectedFile && "Select a subject and correlation method to begin"}
+										{selectedFile && !method && "Select a correlation method to begin"}
+									</div>
+								)}
+								<GraphCanvas
+									frame={frame}
+									isLoading={isFetching}
+									edgeThreshold={edgeThreshold}
+									hiddenNodes={hiddenNodes}
+									symmetric={symmetric || (method === "wavelet" && waveletEdgeMode === "dominant")}
+									dataRange={dataRange}
+									diagnosis={selectedSubjectInfo?.diagnosis}
+								/>
+							</div>
+						</CardContent>
+					</Card>
+
+					<Card className="w-64 flex-shrink-0 overflow-y-auto">
+						<CardContent className="p-2">
+							<ControlPanel
+								selectedSite={selectedSite}
+								setSelectedSite={setSelectedSite}
+								selectedFile={selectedFile}
+								setSelectedFile={setSelectedFile}
+								method={method}
+								setMethod={setMethod}
+								windowSize={windowSize}
+								setWindowSize={setWindowSize}
+								step={step}
+								setStep={setStep}
+								smoothing={smoothing}
+								setSmoothing={setSmoothing}
+								smoothingWindow={smoothingWindow}
+								setSmoothingWindow={setSmoothingWindow}
+								smoothingAlpha={smoothingAlpha}
+								setSmoothingAlpha={setSmoothingAlpha}
+								smoothingSigma={smoothingSigma}
+								setSmoothingSigma={setSmoothingSigma}
+								interpolation={interpolation}
+								setInterpolation={setInterpolation}
+								interpolationFactor={interpolationFactor}
+								setInterpolationFactor={setInterpolationFactor}
+								playbackSpeed={playbackSpeed}
+								setPlaybackSpeed={setPlaybackSpeed}
 								edgeThreshold={edgeThreshold}
+								setEdgeThreshold={setEdgeThreshold}
+								waveletEdgeMode={waveletEdgeMode}
+								setWaveletEdgeMode={setWaveletEdgeMode}
+								meta={meta}
+								nodes={nodes}
 								hiddenNodes={hiddenNodes}
-								symmetric={symmetric || (method === "wavelet" && waveletEdgeMode === "dominant")}
-								dataRange={dataRange}
-								diagnosis={selectedSubjectInfo?.diagnosis}
+								setHiddenNodes={setHiddenNodes}
+								isPlaying={isPlaying}
+								onPlayPause={handlePlayPause}
+								onRefresh={handleRefresh}
+								exportVideo={exportVideo}
+								exportState={exportState}
+								exportProgress={exportProgress}
 							/>
-						</div>
-					</CardContent>
-				</Card>
+						</CardContent>
+					</Card>
+				</div>
 
-				<Card className="w-72 flex-shrink-0 overflow-y-auto">
-					<CardContent className="p-3">
-						<ControlPanel
-							selectedSite={selectedSite}
-							setSelectedSite={setSelectedSite}
-							selectedFile={selectedFile}
-							setSelectedFile={setSelectedFile}
-							method={method}
-							setMethod={setMethod}
-							windowSize={windowSize}
-							setWindowSize={setWindowSize}
-							step={step}
-							setStep={setStep}
-							smoothing={smoothing}
-							setSmoothing={setSmoothing}
-							smoothingWindow={smoothingWindow}
-							setSmoothingWindow={setSmoothingWindow}
-							smoothingAlpha={smoothingAlpha}
-							setSmoothingAlpha={setSmoothingAlpha}
-							smoothingSigma={smoothingSigma}
-							setSmoothingSigma={setSmoothingSigma}
-							interpolation={interpolation}
-							setInterpolation={setInterpolation}
-							interpolationFactor={interpolationFactor}
-							setInterpolationFactor={setInterpolationFactor}
-							playbackSpeed={playbackSpeed}
-							setPlaybackSpeed={setPlaybackSpeed}
-							edgeThreshold={edgeThreshold}
-							setEdgeThreshold={setEdgeThreshold}
-							waveletEdgeMode={waveletEdgeMode}
-							setWaveletEdgeMode={setWaveletEdgeMode}
-							meta={meta}
-							nodes={nodes}
-							hiddenNodes={hiddenNodes}
-							setHiddenNodes={setHiddenNodes}
-							isPlaying={isPlaying}
-							onPlayPause={handlePlayPause}
-							onRefresh={handleRefresh}
-							exportVideo={exportVideo}
-							exportState={exportState}
-							exportProgress={exportProgress}
-						/>
-					</CardContent>
-				</Card>
+				<div className="flex-shrink-0 px-3 pb-2">
+					<Card>
+						<CardContent className="py-2">
+							<Timeline meta={meta} value={time} onChange={setTime} />
+						</CardContent>
+					</Card>
+				</div>
 			</div>
 
-			<div className="flex-shrink-0 px-3 pb-3">
-				<Card>
-					<CardContent className="py-3">
-						<Timeline meta={meta} value={time} onChange={setTime} />
-					</CardContent>
-				</Card>
-			</div>
+			{/* Overview tab */}
+			{activeTab === "overview" && <OverviewTab />}
 		</div>
 	);
 }

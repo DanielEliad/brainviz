@@ -93,6 +93,11 @@ def load_angle_maps(mat_path: Path) -> np.ndarray:
         return _mat_h5_deref(f, ref)
 
 
+def load_period_per_sub(mat_path: Path) -> np.ndarray:
+    with h5py.File(str(mat_path), "r") as f:
+        return np.asarray(_h5_dataset(f, "period_per_sub"))
+
+
 def get_subject_ids_from_phenotypics(phenotypics_path: Path) -> list[int]:
 
     subject_ids = []
@@ -101,19 +106,6 @@ def get_subject_ids_from_phenotypics(phenotypics_path: Path) -> list[int]:
         for row in reader:
             subject_ids.append(int(row["partnum"]))
     return subject_ids
-
-
-def get_angle_map(
-    output_path: Path, network_a: str, network_b: str, subject_id: int
-) -> np.ndarray:
-    key = f"{network_a}_{network_b}"
-    with h5py.File(str(output_path), "r") as f:
-        subjects = _h5_read_array(f, "wavelet_subjects")
-        idx = int(np.where(subjects == subject_id)[0][0])
-        pairs_group = _h5_group(f, "pairs")
-        pair_group = _h5_group(pairs_group, key)
-        angle_maps = _h5_dataset(pair_group, "angle_maps")
-        return np.asarray(angle_maps[idx, :, :])
 
 
 def convert_all(
@@ -216,13 +208,16 @@ def convert_all(
     with h5py.File(str(output_path), "w") as output_f:
         print(f"  Writing wavelet_subjects dataset ({len(wavelet_subjects)} IDs)")
         output_f.create_dataset("wavelet_subjects", data=wavelet_subjects)
+        output_f.create_dataset(
+            "period_per_subject", data=load_period_per_sub(pairs[0].mat_file)
+        )
 
         pairs_g = output_f.create_group("pairs")
         print(f"  Writing {len(pairs)} RSN pair datasets:")
 
-        for i, p in enumerate(pairs, 1):
+        for i, p in enumerate(pairs):
             pair_name = f"{p.network_a}_{p.network_b}"
-            print(f"    [{i:2d}/{len(pairs)}] {pair_name} <- {p.mat_file.name}")
+            print(f"    [{i+1:2d}/{len(pairs)}] {pair_name} <- {p.mat_file.name}")
 
             angle_maps = load_angle_maps(p.mat_file)
             if angle_maps.shape[0] != len(wavelet_subjects):

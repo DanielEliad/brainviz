@@ -186,7 +186,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 				onToggle={() => toggleSection("data")}
 			>
 				<div className="space-y-1">
-					<label className="text-xs font-medium text-foreground">Site</label>
+					<label className="text-[10px] font-medium text-foreground">Site</label>
 					<SearchableSelect
 						options={siteOptions}
 						value={selectedSite}
@@ -195,7 +195,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 					/>
 				</div>
 				<div className="space-y-1">
-					<label className="text-xs font-medium text-foreground">Subject</label>
+					<label className="text-[10px] font-medium text-foreground">Subject</label>
 					<SearchableSelect
 						options={subjectOptions}
 						value={selectedFile}
@@ -214,7 +214,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 				onToggle={() => toggleSection("correlation")}
 			>
 				<div className="space-y-1">
-					<label className="text-xs font-medium text-foreground">Method</label>
+					<label className="text-[10px] font-medium text-foreground">Method</label>
 					<SegmentedControl<CorrelationMethod>
 						options={[
 							{ value: "pearson", label: "Pearson" },
@@ -227,7 +227,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 				</div>
 				<div className="grid grid-cols-2 gap-2">
 					<div className="space-y-1">
-						<label className="text-xs font-medium text-foreground">Window</label>
+						<label className="text-[10px] font-medium text-foreground">Window</label>
 						<input
 							type="text"
 							inputMode="numeric"
@@ -247,11 +247,11 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 								}
 							}}
 							onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-							className="w-full h-8 rounded-md border border-input bg-background px-2 py-1 text-sm"
+							className="w-full h-7 rounded-md border border-input bg-background px-2 py-1 text-xs"
 						/>
 					</div>
 					<div className="space-y-1">
-						<label className="text-xs font-medium text-foreground">Step</label>
+						<label className="text-[10px] font-medium text-foreground">Step</label>
 						<input
 							type="text"
 							inputMode="numeric"
@@ -271,7 +271,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 								}
 							}}
 							onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-							className="w-full h-8 rounded-md border border-input bg-background px-2 py-1 text-sm"
+							className="w-full h-7 rounded-md border border-input bg-background px-2 py-1 text-xs"
 						/>
 					</div>
 				</div>
@@ -285,7 +285,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 				onToggle={() => toggleSection("processing")}
 			>
 				<div className="space-y-1">
-					<label className="text-xs font-medium text-foreground">Interpolation</label>
+					<label className="text-[10px] font-medium text-foreground">Interpolation</label>
 					<SegmentedControl<InterpolationAlgorithm | null>
 						options={[
 							{ value: null, label: "None" },
@@ -300,7 +300,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 				</div>
 				{interpolation !== null && (
 					<div className="space-y-1">
-						<label className="text-xs font-medium text-foreground">Factor (2-10)</label>
+						<label className="text-[10px] font-medium text-foreground">Factor (2-10)</label>
 						<input
 							type="range"
 							min={2}
@@ -313,7 +313,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 					</div>
 				)}
 				<div className="space-y-1">
-					<label className="text-xs font-medium text-foreground">Smoothing</label>
+					<label className="text-[10px] font-medium text-foreground">Smoothing</label>
 					<SegmentedControl<SmoothingAlgorithm | null>
 						options={[
 							{ value: null, label: "None" },
@@ -328,7 +328,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 				</div>
 				{smoothing === "moving_average" && (
 					<div className="space-y-1">
-						<label className="text-xs font-medium text-foreground">Window (2-10)</label>
+						<label className="text-[10px] font-medium text-foreground">Window (2-10)</label>
 						<input
 							type="range"
 							min={2}
@@ -342,7 +342,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 				)}
 				{smoothing === "exponential" && (
 					<div className="space-y-1">
-						<label className="text-xs font-medium text-foreground">Alpha (0-1)</label>
+						<label className="text-[10px] font-medium text-foreground">Alpha (0-1)</label>
 						<input
 							type="range"
 							min={0}
@@ -357,7 +357,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 				)}
 				{smoothing === "gaussian" && (
 					<div className="space-y-1">
-						<label className="text-xs font-medium text-foreground">Sigma (0.1-5)</label>
+						<label className="text-[10px] font-medium text-foreground">Sigma (0.1-5)</label>
 						<input
 							type="range"
 							min={0.1}
@@ -380,7 +380,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 				onToggle={() => toggleSection("playback")}
 			>
 				<div className="space-y-1">
-					<label className="text-xs font-medium text-foreground">Speed</label>
+					<label className="text-[10px] font-medium text-foreground">Speed</label>
 					<SegmentedControl<number>
 						options={[
 							{ value: 0.5, label: "0.5x" },
@@ -395,7 +395,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 					/>
 				</div>
 				<div className="space-y-1">
-					<label className="text-xs font-medium text-foreground">
+					<label className="text-[10px] font-medium text-foreground">
 						Edge Threshold: {edgeThreshold.toFixed(2)}
 					</label>
 					<input
@@ -414,7 +414,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 				</div>
 				{method === "wavelet" && (
 					<div className="space-y-1">
-						<label className="text-xs font-medium text-foreground">Edge Display</label>
+						<label className="text-[10px] font-medium text-foreground">Edge Display</label>
 						<SegmentedControl<"both" | "dominant">
 							options={[
 								{ value: "both", label: "Both" },
@@ -471,7 +471,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 									style={{ backgroundColor: color }}
 								/>
 								<span
-									className={`text-xs truncate ${isHidden ? "line-through text-muted-foreground" : "text-foreground"}`}
+									className={`text-[10px] truncate ${isHidden ? "line-through text-muted-foreground" : "text-foreground"}`}
 								>
 									{node.label}
 								</span>
@@ -481,7 +481,7 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 				</div>
 			</CollapsibleSection>
 
-			<div className="pt-3 mt-2 border-t border-border">
+			<div className="pt-2 mt-1 border-t border-border">
 				<ControlsBar
 					isPlaying={isPlaying}
 					onPlay={onPlayPause}

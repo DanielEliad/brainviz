@@ -155,7 +155,7 @@ export function SearchableSelect({
         placeholder={placeholder}
         disabled={disabled}
         className={cn(
-          "w-full h-9 rounded-md border border-input bg-background px-2 py-1 text-sm",
+          "w-full h-7 rounded-md border border-input bg-background px-2 py-0.5 text-xs",
           "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           selectedOption && !isOpen && "text-foreground",
@@ -168,7 +168,7 @@ export function SearchableSelect({
           onClick={() => onChange(null)}
           className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -185,7 +185,7 @@ export function SearchableSelect({
               onClick={() => handleSelect(option.value)}
               onMouseEnter={() => setHighlightedIndex(index)}
               className={cn(
-                "px-2 py-1.5 text-sm cursor-pointer whitespace-nowrap",
+                "px-2 py-1 text-xs cursor-pointer whitespace-nowrap",
                 index === highlightedIndex && "bg-accent text-accent-foreground",
                 option.value === value && "font-medium"
               )}

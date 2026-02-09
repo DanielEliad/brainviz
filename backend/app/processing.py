@@ -44,7 +44,7 @@ class InterpolationParams(BaseModel):
 class CorrelationRequest(BaseModel):
     file_path: str = Field(..., description="Relative path to subject file")
     method: str = Field(..., description="Correlation method: pearson, spearman, wavelet")
-    window_size: int = Field(default=30, ge=5, le=100, description="Sliding window size")
-    step: int = Field(default=1, ge=1, le=100, description="Step between windows")
+    window_size: Optional[int] = Field(default=None, ge=5, description="Sliding window size (None = full series)")
+    step: Optional[int] = Field(default=None, ge=1, description="Step between windows (None = 1)")
     smoothing: Optional[SmoothingParams] = Field(default=None, description="Smoothing parameters")
     interpolation: Optional[InterpolationParams] = Field(default=None, description="Interpolation parameters")

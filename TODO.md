@@ -1,9 +1,17 @@
 # BUGS
 - wavelet map has some dirty data on the edges because of padding all of the data to 146 timepoints
-- I want to change how that data is handled now - I want the ratio to be count(lead)/count(all data)  (ratio of lead to anything else) - Also note that I removed (matrices[frame_idx][j, i] = 1.0 - ratio) line because the opposite pair will appear later and while the data should be complementary we shouldn't edit it ourselves to be 1-ratio. And the wavelet is asymetric in a sense but also there is no need to show the complementary 1-ratio behaviour with two lines they don't convey any extra information. Let's just show one line (make sure its the big one that is shown in the FE - we want to show the arrow in the direction that the other is leading in more. plan this redesign out and make sure to include the update of the skill and CLAUDE.md documentations in this
+- filter out based on the scales below 10 seconds (need to convert to scales)
+period per sub keep > 10s AND <100s + double AND
+
+REST NOT NEEDED
+- coi_per_sub, and period_per_sub period greater than 10 saved lower than 10 filtered
+- coi make sure they are all zeros (no coherence)
+- AND the two maps using the AND of both significance maps applied to the angle info color map (just use and of color maps)
 
 # FEATURES
 
-- wavelet data
+- total data comparison per correlation
+- hosting it
+
 
 

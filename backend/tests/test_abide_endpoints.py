@@ -122,6 +122,18 @@ def test_get_data_smaller_window_produces_more_frames(test_client: TestClient, f
     assert frames_small > frames_large
 
 
+def test_get_data_omitted_window_size_returns_single_frame(test_client: TestClient, file_path: str):
+    response = test_client.post(
+        "/abide/data",
+        json={"file_path": file_path, "method": "pearson"}
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["frames"]) == 1
+    assert data["frames"][0]["metadata"]["window_size"] == "full"
+
+
 def test_get_data_smaller_step_produces_more_frames(test_client: TestClient, file_path: str):
     response_step1 = test_client.post(
         "/abide/data",
@@ -178,13 +190,14 @@ def test_get_data_all_smoothing_methods_work(test_client: TestClient, file_path:
 def test_get_data_interpolation_increases_frame_count(test_client: TestClient, file_path: str):
     response_none = test_client.post(
         "/abide/data",
-        json={"file_path": file_path, "method": "pearson"}
+        json={"file_path": file_path, "method": "pearson", "window_size": 30}
     )
     response_interp = test_client.post(
         "/abide/data",
         json={
             "file_path": file_path,
             "method": "pearson",
+            "window_size": 30,
             "interpolation": {"algorithm": "linear", "factor": 2}
         }
     )
@@ -257,12 +270,12 @@ def test_get_data_400_for_invalid_method(test_client: TestClient, file_path: str
     assert response.status_code == 400
 
 
-def test_get_data_422_for_window_size_out_of_range(test_client: TestClient, file_path: str):
+def test_get_data_400_for_window_size_too_large(test_client: TestClient, file_path: str):
     response = test_client.post(
         "/abide/data",
-        json={"file_path": file_path, "method": "pearson", "window_size": 150}
+        json={"file_path": file_path, "method": "pearson", "window_size": 9999}
     )
-    assert response.status_code == 422
+    assert response.status_code == 400
 
 
 def test_get_data_422_when_method_missing(test_client: TestClient, file_path: str):
@@ -368,7 +381,7 @@ def test_get_data_422_for_smoothing_params_out_of_range(test_client: TestClient,
 def test_smoothing_changes_edge_weights(test_client: TestClient, file_path: str):
     no_smooth = test_client.post(
         "/abide/data",
-        json={"file_path": file_path, "method": "pearson"}
+        json={"file_path": file_path, "method": "pearson", "window_size": 30}
     ).json()
 
     with_smooth = test_client.post(
@@ -376,6 +389,7 @@ def test_smoothing_changes_edge_weights(test_client: TestClient, file_path: str)
         json={
             "file_path": file_path,
             "method": "pearson",
+            "window_size": 30,
             "smoothing": {"algorithm": "gaussian", "sigma": 2.0}
         }
     ).json()
@@ -395,6 +409,7 @@ def test_different_smoothing_params_produce_different_results(test_client: TestC
         json={
             "file_path": file_path,
             "method": "pearson",
+            "window_size": 30,
             "smoothing": {"algorithm": "gaussian", "sigma": 0.5}
         }
     ).json()
@@ -404,6 +419,7 @@ def test_different_smoothing_params_produce_different_results(test_client: TestC
         json={
             "file_path": file_path,
             "method": "pearson",
+            "window_size": 30,
             "smoothing": {"algorithm": "gaussian", "sigma": 3.0}
         }
     ).json()
@@ -419,6 +435,7 @@ def test_moving_average_window_affects_output(test_client: TestClient, file_path
         json={
             "file_path": file_path,
             "method": "pearson",
+            "window_size": 30,
             "smoothing": {"algorithm": "moving_average", "window": 2}
         }
     ).json()
@@ -428,6 +445,7 @@ def test_moving_average_window_affects_output(test_client: TestClient, file_path
         json={
             "file_path": file_path,
             "method": "pearson",
+            "window_size": 30,
             "smoothing": {"algorithm": "moving_average", "window": 5}
         }
     ).json()
@@ -443,6 +461,7 @@ def test_exponential_alpha_affects_output(test_client: TestClient, file_path: st
         json={
             "file_path": file_path,
             "method": "pearson",
+            "window_size": 30,
             "smoothing": {"algorithm": "exponential", "alpha": 0.1}
         }
     ).json()
@@ -452,6 +471,7 @@ def test_exponential_alpha_affects_output(test_client: TestClient, file_path: st
         json={
             "file_path": file_path,
             "method": "pearson",
+            "window_size": 30,
             "smoothing": {"algorithm": "exponential", "alpha": 0.9}
         }
     ).json()
@@ -464,7 +484,7 @@ def test_exponential_alpha_affects_output(test_client: TestClient, file_path: st
 def test_smoothing_and_interpolation_combined(test_client: TestClient, file_path: str):
     base = test_client.post(
         "/abide/data",
-        json={"file_path": file_path, "method": "pearson"}
+        json={"file_path": file_path, "method": "pearson", "window_size": 30}
     ).json()
     base_frames = len(base["frames"])
 
@@ -473,6 +493,7 @@ def test_smoothing_and_interpolation_combined(test_client: TestClient, file_path
         json={
             "file_path": file_path,
             "method": "pearson",
+            "window_size": 30,
             "smoothing": {"algorithm": "gaussian", "sigma": 1.5},
             "interpolation": {"algorithm": "linear", "factor": 3}
         }

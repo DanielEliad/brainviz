@@ -136,9 +136,9 @@ def compute_correlation_matrices(
 
     data = parse_dr_file(filepath)
     data = filter_rsn_columns(data)
-    matrices = windowed_correlation(
-        data, params.method, params.window_size, params.step
-    )
+    window_size = params.window_size if params.window_size is not None else data.shape[0]
+    step = params.step if params.step is not None else 1
+    matrices = windowed_correlation(data, params.method, window_size, step)
     return [matrices[i] for i in range(matrices.shape[0])]
 
 

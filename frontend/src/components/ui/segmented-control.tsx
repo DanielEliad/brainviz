@@ -16,7 +16,7 @@ export function SegmentedControl<T extends string | number>({
 	onChange,
 	size = "md",
 }: Props<T>) {
-	const sizeClasses = size === "sm" ? "text-[10px] px-1.5 py-0.5" : "text-xs px-2 py-1";
+	const sizeClasses = size === "sm" ? "text-[10px] px-1.5 py-px" : "text-[11px] px-2 py-0.5";
 
 	return (
 		<div className="inline-flex rounded-md bg-muted p-0.5 gap-0.5">

@@ -132,7 +132,7 @@ def get_abide_data(request: CorrelationRequest) -> dict:
                     "source": "abide",
                     "file": request.file_path,
                     "method": request.method,
-                    "window_size": str(request.window_size),
+                    "window_size": "full" if request.window_size is None else str(request.window_size),
                 },
             )
         )
