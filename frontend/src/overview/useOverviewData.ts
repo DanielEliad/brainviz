@@ -1,8 +1,11 @@
-import { useQueries } from "@tanstack/react-query";
-import type { CorrelationMethod, AbideFile } from "../vis/useGraphData";
+import { useState, useEffect, useRef, useMemo } from "react";
+import type { CorrelationMethod } from "../vis/useGraphData";
 import type { GraphFrame, GraphMeta } from "../vis/types";
-
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+import {
+	buildGraphFrame,
+	type OverviewAsset,
+	type SubjectEntry,
+} from "./overviewCodec";
 
 type GraphDataResponse = {
 	frames: GraphFrame[];
@@ -10,61 +13,131 @@ type GraphDataResponse = {
 	symmetric: boolean;
 };
 
-async function fetchOverviewData(
-	filePath: string,
-	method: CorrelationMethod,
-): Promise<GraphDataResponse> {
-	const body = { file_path: filePath, method };
-	const res = await fetch(`${API_URL}/abide/data`, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(body),
-	});
-	if (!res.ok) {
-		const text = await res.text();
-		throw new Error(`Overview fetch failed (${res.status}): ${text}`);
-	}
-	return res.json();
-}
-
 export type OverviewResult = {
-	file: AbideFile;
+	file: {
+		path: string;
+		subject_id: number;
+		site: string;
+		version: string;
+		diagnosis: "ASD" | "HC";
+	};
 	data: GraphDataResponse | undefined;
 	isLoading: boolean;
 	error: Error | null;
 };
 
-export function useOverviewData(files: AbideFile[], method: CorrelationMethod) {
-	const queries = useQueries({
-		queries: files.map((file) => ({
-			queryKey: ["overviewData", file.path, method],
-			queryFn: () => fetchOverviewData(file.path, method),
-			staleTime: 5 * 60 * 1000,
-		})),
-	});
+let cachedAsset: OverviewAsset | null = null;
+let assetPromise: Promise<OverviewAsset> | null = null;
 
-	const results: OverviewResult[] = files.map((file, i) => ({
-		file,
-		data: queries[i].data,
-		isLoading: queries[i].isLoading,
-		error: queries[i].error,
-	}));
+function fetchAsset(): Promise<OverviewAsset> {
+	if (cachedAsset) return Promise.resolve(cachedAsset);
+	if (assetPromise) return assetPromise;
+	assetPromise = fetch("/overview_data.json")
+		.then((res) => {
+			if (!res.ok) throw new Error(`Failed to fetch overview data (${res.status})`);
+			return res.json() as Promise<OverviewAsset>;
+		})
+		.then((data) => {
+			cachedAsset = data;
+			return data;
+		});
+	return assetPromise;
+}
 
-	// Compute global data range across all loaded subjects
-	let globalMin = Infinity;
-	let globalMax = -Infinity;
-	for (const q of queries) {
-		if (q.data) {
-			globalMin = Math.min(globalMin, q.data.meta.edge_weight_min);
-			globalMax = Math.max(globalMax, q.data.meta.edge_weight_max);
+type BuiltCache = Map<CorrelationMethod, GraphDataResponse[]>;
+
+function buildForMethod(
+	asset: OverviewAsset,
+	method: CorrelationMethod,
+): GraphDataResponse[] {
+	const methodInfo = asset.methods[method];
+	if (!methodInfo) return [];
+
+	return asset.subjects.map((subject: SubjectEntry) => {
+		const methodData = subject[method];
+		if (!methodData) {
+			return {
+				frames: [],
+				meta: {
+					frame_count: 0,
+					node_attributes: [],
+					edge_attributes: [],
+					edge_weight_min: 0,
+					edge_weight_max: 0,
+				},
+				symmetric: methodInfo.symmetric,
+			};
 		}
-	}
-	const dataRange =
-		globalMin <= globalMax
-			? { min: globalMin, max: globalMax }
-			: { min: 0, max: 0 };
 
-	const loadedCount = queries.filter((q) => q.data).length;
+		const frame = buildGraphFrame(
+			methodData.w,
+			methodInfo.symmetric,
+			asset.rsn_labels,
+			asset.rsn_full_names,
+		);
 
-	return { results, dataRange, loadedCount };
+		return {
+			frames: [frame],
+			meta: {
+				frame_count: 1,
+				node_attributes: ["label", "degree"],
+				edge_attributes: ["weight"],
+				edge_weight_min: methodData.min,
+				edge_weight_max: methodData.max,
+			},
+			symmetric: methodInfo.symmetric,
+		};
+	});
+}
+
+export function useOverviewData(method: CorrelationMethod) {
+	const [asset, setAsset] = useState<OverviewAsset | null>(cachedAsset);
+	const builtCache = useRef<BuiltCache>(new Map());
+
+	useEffect(() => {
+		if (asset) return;
+		fetchAsset().then(setAsset);
+	}, [asset]);
+
+	const methodResponses = useMemo(() => {
+		if (!asset) return null;
+
+		const cached = builtCache.current.get(method);
+		if (cached) return cached;
+
+		const built = buildForMethod(asset, method);
+		builtCache.current.set(method, built);
+		return built;
+	}, [asset, method]);
+
+	const results: OverviewResult[] = useMemo(() => {
+		if (!asset || !methodResponses) return [];
+
+		return asset.subjects.map((subject, i) => ({
+			file: {
+				path: subject.path,
+				subject_id: subject.subject_id,
+				site: subject.site,
+				version: subject.version,
+				diagnosis: subject.diagnosis,
+			},
+			data: methodResponses[i].frames.length > 0 ? methodResponses[i] : undefined,
+			isLoading: false,
+			error: null,
+		}));
+	}, [asset, methodResponses]);
+
+	const dataRange = useMemo(() => {
+		if (!asset) return { min: 0, max: 0 };
+		const info = asset.methods[method];
+		if (!info) return { min: 0, max: 0 };
+		return { min: info.global_min, max: info.global_max };
+	}, [asset, method]);
+
+	return {
+		results,
+		dataRange,
+		loadedCount: results.length,
+		totalCount: asset?.subjects.length ?? 0,
+	};
 }

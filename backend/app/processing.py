@@ -48,3 +48,5 @@ class CorrelationRequest(BaseModel):
     step: Optional[int] = Field(default=None, ge=1, description="Step between windows (None = 1)")
     smoothing: Optional[SmoothingParams] = Field(default=None, description="Smoothing parameters")
     interpolation: Optional[InterpolationParams] = Field(default=None, description="Interpolation parameters")
+
+

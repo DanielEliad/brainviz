@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Slider } from "@/components/ui/slider";
-import { useAbideFiles, type CorrelationMethod } from "../vis/useGraphData";
+import type { CorrelationMethod } from "../vis/useGraphData";
 import { useOverviewData, type OverviewResult } from "./useOverviewData";
 import { SubjectCard } from "./SubjectCard";
 
@@ -25,18 +25,24 @@ type SiteGroup = {
 export function OverviewTab() {
 	const [method, setMethod] = useState<CorrelationMethod>("pearson");
 	const [viewMode, setViewMode] = useState<"matrix" | "graph">("matrix");
+	const thresholdPerMethod = useRef<Map<CorrelationMethod, number>>(new Map());
 	const [edgeThreshold, setEdgeThreshold] = useState(0);
 
-	const filesQuery = useAbideFiles();
-	const files = filesQuery.data?.files ?? [];
-
-	const { results, dataRange, loadedCount } = useOverviewData(files, method);
+	const { results, dataRange, loadedCount, totalCount } = useOverviewData(method);
 
 	const thresholdMax = Math.max(Math.abs(dataRange.min), Math.abs(dataRange.max));
 
-	// Reset threshold when method changes (value range differs)
+	// Save threshold when it changes, restore when method changes
 	useEffect(() => {
-		setEdgeThreshold(0);
+		thresholdPerMethod.current.set(method, edgeThreshold);
+	}, [edgeThreshold, method]);
+
+	const prevMethodRef = useRef(method);
+	useEffect(() => {
+		if (prevMethodRef.current !== method) {
+			prevMethodRef.current = method;
+			setEdgeThreshold(thresholdPerMethod.current.get(method) ?? 0);
+		}
 	}, [method]);
 
 	// Group results by site, split HC/ASD, sorted by subject_id
@@ -115,7 +121,7 @@ export function OverviewTab() {
 					</span>
 				</div>
 				<span className="text-xs text-muted-foreground ml-auto">
-					{loadedCount}/{files.length} loaded
+					{loadedCount}/{totalCount} loaded
 				</span>
 			</div>
 

@@ -52,7 +52,9 @@ def get_abide_data(request: CorrelationRequest) -> dict:
     # Validate file path
     full_path = DATA_DIR / request.file_path
     if not full_path.exists():
-        raise HTTPException(status_code=404, detail=f"File not found: {request.file_path}")
+        raise HTTPException(
+            status_code=404, detail=f"File not found: {request.file_path}"
+        )
 
     try:
         corr_method = CorrelationMethod(request.method)
@@ -73,7 +75,10 @@ def get_abide_data(request: CorrelationRequest) -> dict:
         raise HTTPException(status_code=400, detail=str(e))
 
     # Apply interpolation/smoothing
-    if request.interpolation is not None and request.interpolation.algorithm is not None:
+    if (
+        request.interpolation is not None
+        and request.interpolation.algorithm is not None
+    ):
         matrices = apply_interpolation(matrices, request.interpolation)
     if request.smoothing is not None and request.smoothing.algorithm is not None:
         matrices = apply_smoothing(matrices, request.smoothing)
@@ -132,7 +137,11 @@ def get_abide_data(request: CorrelationRequest) -> dict:
                     "source": "abide",
                     "file": request.file_path,
                     "method": request.method,
-                    "window_size": "full" if request.window_size is None else str(request.window_size),
+                    "window_size": (
+                        "full"
+                        if request.window_size is None
+                        else str(request.window_size)
+                    ),
                 },
             )
         )
