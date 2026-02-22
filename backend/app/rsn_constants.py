@@ -16,20 +16,20 @@ class RSN:
 
 # The 14 RSNs used in analysis, in display order (position 0-13)
 RSNS = [
-    RSN(1, "Anterior Default Mode Network", "aDMN", ("DMNa",)),
-    RSN(2, "Primary Visual Network", "V1", ("VISUp",)),
-    RSN(5, "Salience Network", "SAL", ("SN",)),
-    RSN(6, "Posterior Default Mode Network", "pDMN", ("DMNp",)),
-    RSN(7, "Auditory Network", "AUD", ("AUDI",)),
-    RSN(9, "Left Frontoparietal Network", "lFPN", ("FPL",)),
-    RSN(12, "Right Frontoparietal Network", "rFPN", ("FPR",)),
-    RSN(13, "Lateral Visual Network", "latVIS", ("VISUl",)),
-    RSN(14, "Lateral Sensorimotor Network", "latSM", ("SMNl",)),
-    RSN(15, "Cerebellum Network", "CER", ("Cereb", "CEREB")),
-    RSN(18, "Primary Sensorimotor Network", "SM1", ("SMNp",)),
-    RSN(19, "Dorsal Attention Network", "DAN"),
-    RSN(21, "Language Network", "LANG", ("LN",)),
-    RSN(27, "Occipital Visual Network", "occVIS", ("VISUo",)),
+    RSN(1, "Anterior Default Mode", "aDMN", ("DMNa",)),
+    RSN(2, "Primary Visual", "V1", ("VISUp",)),
+    RSN(5, "Salience", "SAL", ("SN",)),
+    RSN(6, "Posterior Default Mode", "pDMN", ("DMNp",)),
+    RSN(7, "Auditory", "AUD", ("AUDI",)),
+    RSN(9, "Left Frontoparietal", "lFPN", ("FPL",)),
+    RSN(12, "Right Frontoparietal", "rFPN", ("FPR",)),
+    RSN(13, "Lateral Visual", "latVIS", ("VISUl",)),
+    RSN(14, "Lateral Sensorimotor", "latSM", ("SMNl",)),
+    RSN(15, "Cerebellum", "CER", ("Cereb", "CEREB")),
+    RSN(18, "Primary Sensorimotor", "SM1", ("SMNp",)),
+    RSN(19, "Dorsal Attention", "DAN"),
+    RSN(21, "Language", "LANG", ("LN",)),
+    RSN(27, "Occipital Visual", "occVIS", ("VISUo",)),
 ]
 
 # Derived constants

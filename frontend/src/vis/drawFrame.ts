@@ -3,9 +3,55 @@ import { GraphFrame } from "./types";
 
 export type Point = { x: number; y: number };
 
+// ── Palette / layout ────────────────────────────────────────────────────────
 export const palette = d3.schemeTableau10;
 export const PADDING_RATIO = 0.08; // 8% of smaller dimension
 export const BASE_WIDTH = 1920; // Reference width for scaling
+export const BG_COLOR = "#0f172a";
+export const SELECTION_COLOR = "#fbbf24";
+
+// ── Nodes ────────────────────────────────────────────────────────────────────
+export const NODE_RADIUS = 10;
+export const NODE_STROKE = 1.5;
+export const NODE_STROKE_SELECTED = 2.5;
+export const NODE_SELECTION_GLOW_RADIUS = 4;
+export const NODE_SELECTION_GLOW_STROKE = 3;
+
+// ── Labels ───────────────────────────────────────────────────────────────────
+export const LABEL_FONT_SIZE = 20;
+export const LABEL_FONT_WEIGHT = 800;
+export const LABEL_GAP = 14; // extra distance from node edge to label anchor
+export const LABEL_MARGIN = 4; // min distance from canvas edge
+export const LABEL_CLAMP_RAISE = 30; // Y raise applied when X is clamped to bounds
+export const LABEL_OUTLINE_WIDTH = 4;
+
+// ── Edges ────────────────────────────────────────────────────────────────────
+export const EDGE_THICKNESS_MIN = 0.5;
+export const EDGE_THICKNESS_MAX = 16;
+export const EDGE_GLOW_WIDTH = 4; // extra stroke width behind selected edge
+export const EDGE_COLOR_WEAK = "rgb(59, 130, 246)";
+export const EDGE_COLOR_STRONG = "rgb(220, 38, 38)";
+
+// Symmetric arrows
+export const EDGE_ARROW_MIN_SYMMETRIC = 8;
+export const EDGE_ARROW_MULTIPLIER_SYMMETRIC = 2.8;
+
+// Asymmetric (curved) arrows
+export const EDGE_CURVE_OFFSET = 30; // perpendicular offset for curved edges
+export const EDGE_ARROW_SPACING = 40;
+export const EDGE_ARROW_MIN_ASYMMETRIC = 4;
+export const EDGE_ARROW_MULTIPLIER_ASYMMETRIC = 2.2;
+
+// ── Info box ─────────────────────────────────────────────────────────────────
+export const INFO_BOX_FONT_SIZE = 20;
+export const INFO_BOX_PADDING = 14;
+export const INFO_BOX_LINE_HEIGHT = 20;
+export const INFO_BOX_WIDTH = 600;
+export const INFO_BOX_MARGIN = 5;
+export const INFO_BOX_CORNER_RADIUS = 10;
+export const INFO_BOX_BORDER_WIDTH = 1.5;
+
+// ── Types ────────────────────────────────────────────────────────────────────
 
 // Data range type - must be provided from actual data, never hardcoded
 export type DataRange = {
@@ -33,18 +79,20 @@ export function getAbsoluteRange(range: DataRange): {
 export function createColorScale(range: DataRange) {
   const absRange = getAbsoluteRange(range);
   return d3
-    .scaleLinear<string>()
+    .scalePow<string>()
+    .exponent(2.5)
     .domain([absRange.min, absRange.max])
-    .range(["rgb(59, 130, 246)", "rgb(220, 38, 38)"])
+    .range([EDGE_COLOR_WEAK, EDGE_COLOR_STRONG])
     .clamp(true);
 }
 
 export function createThicknessScale(range: DataRange, scale: number = 1) {
   const absRange = getAbsoluteRange(range);
   return d3
-    .scaleLinear()
+    .scalePow()
+    .exponent(2.5)
     .domain([absRange.min, absRange.max])
-    .range([0.5 * scale, 8 * scale])
+    .range([EDGE_THICKNESS_MIN * scale, EDGE_THICKNESS_MAX * scale])
     .clamp(true);
 }
 
@@ -195,7 +243,7 @@ export function drawFrame(
     nodePositions.set(node.id, positions[i]);
   });
 
-  ctx.fillStyle = "#0f172a";
+  ctx.fillStyle = BG_COLOR;
   ctx.fillRect(0, 0, width, height);
 
   // Filter edges for display
@@ -241,8 +289,8 @@ export function drawFrame(
         ctx.beginPath();
         ctx.moveTo(source.x, source.y);
         ctx.lineTo(target.x, target.y);
-        ctx.strokeStyle = "#fbbf24";
-        ctx.lineWidth = thickness + 4 * scale;
+        ctx.strokeStyle = SELECTION_COLOR;
+        ctx.lineWidth = thickness + EDGE_GLOW_WIDTH * scale;
         ctx.stroke();
       }
 
@@ -254,7 +302,10 @@ export function drawFrame(
       ctx.stroke();
 
       // Add 3 equally spaced arrows to show direction
-      const arrowSize = Math.max(8 * scale, thickness * 2.8);
+      const arrowSize = Math.max(
+        EDGE_ARROW_MIN_SYMMETRIC * scale,
+        thickness * EDGE_ARROW_MULTIPLIER_SYMMETRIC,
+      );
       const arrowAngle = Math.atan2(dy, dx);
 
       ctx.fillStyle = color;
@@ -290,7 +341,7 @@ export function drawFrame(
       const perpX = -dy / dist;
       const perpY = dx / dist;
 
-      const curveOffset = curveDirection * 30 * scale;
+      const curveOffset = curveDirection * EDGE_CURVE_OFFSET * scale;
       const midX = (source.x + target.x) / 2 + perpX * curveOffset;
       const midY = (source.y + target.y) / 2 + perpY * curveOffset;
 
@@ -299,8 +350,8 @@ export function drawFrame(
         ctx.beginPath();
         ctx.moveTo(source.x, source.y);
         ctx.quadraticCurveTo(midX, midY, target.x, target.y);
-        ctx.strokeStyle = "#fbbf24";
-        ctx.lineWidth = thickness + 4 * scale;
+        ctx.strokeStyle = SELECTION_COLOR;
+        ctx.lineWidth = thickness + EDGE_GLOW_WIDTH * scale;
         ctx.stroke();
       }
 
@@ -311,8 +362,11 @@ export function drawFrame(
       ctx.lineWidth = thickness;
       ctx.stroke();
 
-      const arrowSize = Math.max(4 * scale, thickness * 2.2);
-      const arrowSpacing = 40 * scale;
+      const arrowSize = Math.max(
+        EDGE_ARROW_MIN_ASYMMETRIC * scale,
+        thickness * EDGE_ARROW_MULTIPLIER_ASYMMETRIC,
+      );
+      const arrowSpacing = EDGE_ARROW_SPACING * scale;
       const numArrows = Math.max(1, Math.floor(dist / arrowSpacing));
 
       ctx.fillStyle = color;
@@ -376,7 +430,7 @@ export function drawFrame(
       }
     }
 
-    const radius = 10 * scale;
+    const radius = NODE_RADIUS * scale;
     ctx.globalAlpha = opacity;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
@@ -385,34 +439,104 @@ export function drawFrame(
 
     if (isSelected) {
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, radius + 4 * scale, 0, Math.PI * 2);
-      ctx.strokeStyle = "#fbbf24";
-      ctx.lineWidth = 3 * scale;
+      ctx.arc(
+        pos.x,
+        pos.y,
+        radius + NODE_SELECTION_GLOW_RADIUS * scale,
+        0,
+        Math.PI * 2,
+      );
+      ctx.strokeStyle = SELECTION_COLOR;
+      ctx.lineWidth = NODE_SELECTION_GLOW_STROKE * scale;
       ctx.stroke();
     }
 
     ctx.strokeStyle = isNodeConnected ? "white" : "rgba(255, 255, 255, 0.5)";
-    ctx.lineWidth = isSelected ? 2.5 * scale : 1.5 * scale;
+    ctx.lineWidth = isSelected
+      ? NODE_STROKE_SELECTED * scale
+      : NODE_STROKE * scale;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
     ctx.stroke();
 
-    ctx.font = `500 ${12 * scale}px system-ui, -apple-system, sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "bottom";
+    const label = node.full_name ?? node.label;
+
+    // Position label radially outward from the circle center
+    const cx = width / 2;
+    const cy = height / 2;
+    const angle = Math.atan2(pos.y - cy, pos.x - cx);
+    const labelDist = radius + LABEL_GAP * scale;
+    let labelX = pos.x + Math.cos(angle) * labelDist;
+    let labelY = pos.y + Math.sin(angle) * labelDist;
+
+    // Align text so it reads outward (never overlaps the node)
+    const cosA = Math.cos(angle);
+    const sinA = Math.sin(angle);
+    const hAlign: CanvasTextAlign =
+      Math.abs(cosA) < 0.3 ? "center" : cosA > 0 ? "left" : "right";
+    const vAlign: CanvasTextBaseline =
+      Math.abs(sinA) < 0.3 ? "middle" : sinA > 0 ? "top" : "bottom";
+
+    ctx.font = `${LABEL_FONT_WEIGHT} ${LABEL_FONT_SIZE * scale}px system-ui, -apple-system, sans-serif`;
+    ctx.textAlign = hAlign;
+    ctx.textBaseline = vAlign;
+
+    const margin = LABEL_MARGIN * scale;
+    const fontSize = LABEL_FONT_SIZE * scale;
+    const textWidth = ctx.measureText(label).width;
+
+    // Returns bounding box of the text given an anchor point
+    const getTextBounds = (lx: number, ly: number) => {
+      const left =
+        hAlign === "left"
+          ? lx
+          : hAlign === "right"
+            ? lx - textWidth
+            : lx - textWidth / 2;
+      const top =
+        vAlign === "top"
+          ? ly
+          : vAlign === "bottom"
+            ? ly - fontSize
+            : ly - fontSize / 2;
+      return { left, right: left + textWidth, top, bottom: top + fontSize };
+    };
+
+    // Clamp X to canvas bounds; when clamped, also raise Y to avoid node overlap
+    let b = getTextBounds(labelX, labelY);
+    if (b.left < margin) {
+      labelY -= LABEL_CLAMP_RAISE * scale;
+      labelX += margin - b.left;
+    } else if (b.right > width - margin) {
+      labelY -= LABEL_CLAMP_RAISE * scale;
+      labelX -= b.right - (width - margin);
+    }
+
+    // Clamp Y to canvas bounds
+    b = getTextBounds(labelX, labelY);
+    if (b.top < margin) labelY += margin - b.top;
+    else if (b.bottom > height - margin) labelY -= b.bottom - (height - margin);
+
+    // Dark outline for contrast against edges and background
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
+    ctx.lineWidth = LABEL_OUTLINE_WIDTH * scale;
+    ctx.lineJoin = "round";
+    ctx.globalAlpha = opacity;
+    ctx.strokeText(label, labelX, labelY);
+
     ctx.fillStyle = isNodeConnected
       ? "white"
       : `rgba(255, 255, 255, ${opacity})`;
-    ctx.fillText(node.label, pos.x, pos.y - radius - 6 * scale);
+    ctx.fillText(label, labelX, labelY);
 
     ctx.globalAlpha = 1;
   });
 
   // Draw info box if provided (compact wide format)
   if (infoBox) {
-    const padding = 14 * scale;
-    const lineHeight = 24 * scale;
-    const fontSize = 16 * scale;
+    const padding = INFO_BOX_PADDING * scale;
+    const lineHeight = INFO_BOX_LINE_HEIGHT * scale;
+    const fontSize = INFO_BOX_FONT_SIZE * scale;
 
     // Compact two-line format
     const subjectLine = infoBox.subjectInfo
@@ -422,20 +546,32 @@ export function drawFrame(
 
     const lines = subjectLine ? [subjectLine, paramsLine] : [paramsLine];
 
-    const boxWidth = 500 * scale;
+    const boxWidth = INFO_BOX_WIDTH * scale;
     const boxHeight = padding * 2 + lines.length * lineHeight;
-    const boxX = 24 * scale;
-    const boxY = 24 * scale;
+    const boxX = INFO_BOX_MARGIN * scale;
+    const boxY = INFO_BOX_MARGIN * scale;
 
     ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
     ctx.beginPath();
-    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10 * scale);
+    ctx.roundRect(
+      boxX,
+      boxY,
+      boxWidth,
+      boxHeight,
+      INFO_BOX_CORNER_RADIUS * scale,
+    );
     ctx.fill();
 
     ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.lineWidth = 1.5 * scale;
+    ctx.lineWidth = INFO_BOX_BORDER_WIDTH * scale;
     ctx.beginPath();
-    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10 * scale);
+    ctx.roundRect(
+      boxX,
+      boxY,
+      boxWidth,
+      boxHeight,
+      INFO_BOX_CORNER_RADIUS * scale,
+    );
     ctx.stroke();
 
     ctx.font = `500 ${fontSize}px system-ui, -apple-system, sans-serif`;

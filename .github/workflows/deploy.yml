@@ -90,5 +90,16 @@ jobs:
         env:
           DEPLOY_DOMAIN: ${{ secrets.DEPLOY_DOMAIN }}
         run: |
-          sleep 10
-          curl -sf "https://${DEPLOY_DOMAIN}/api/health" || (echo "Health check failed" && exit 1)
+          for i in 1 2 3 4 5; do
+            echo "Attempt $i: checking https://${DEPLOY_DOMAIN}/api/health"
+            if curl -sSf --max-time 10 "https://${DEPLOY_DOMAIN}/api/health"; then
+              echo ""
+              echo "Health check passed"
+              exit 0
+            fi
+            echo ""
+            echo "Attempt $i failed, waiting 10s..."
+            sleep 10
+          done
+          echo "Health check failed after 5 attempts"
+          exit 1
