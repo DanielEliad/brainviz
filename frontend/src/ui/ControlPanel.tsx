@@ -18,6 +18,12 @@ type ExportState = "idle" | "exporting" | "done" | "error";
 type NodeInfo = { id: string; label: string };
 
 type ControlPanelProps = {
+	// Data source mode
+	dataSource: "subject" | "group";
+	setDataSource: (mode: "subject" | "group") => void;
+	selectedGroup: "ASD" | "HC" | null;
+	setSelectedGroup: (group: "ASD" | "HC" | null) => void;
+
 	// Data source
 	selectedSite: string | null;
 	setSelectedSite: (site: string | null) => void;
@@ -85,6 +91,8 @@ const smoothingLabels: Record<SmoothingAlgorithm, string> = {
 
 export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps) {
 	const {
+		dataSource, setDataSource,
+		selectedGroup, setSelectedGroup,
 		selectedSite, setSelectedSite,
 		selectedFile, setSelectedFile,
 		method, setMethod,
@@ -142,7 +150,9 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 	})();
 
 	// Summaries
-	const dataSummary = selectedSubjectInfo ? selectedSubjectInfo.diagnosis : "Not configured";
+	const dataSummary = dataSource === "subject"
+		? (selectedSubjectInfo?.diagnosis ?? "Not configured")
+		: (selectedGroup ? `Group: ${selectedGroup}` : "Not configured");
 	const corrSummary = method ? `${method} | w:${windowSize} | s:${step}` : "Not configured";
 
 	const getSmoothingSummary = () => {
@@ -186,24 +196,51 @@ export const ControlPanel = memo(function ControlPanel(props: ControlPanelProps)
 				onToggle={() => toggleSection("data")}
 			>
 				<div className="space-y-1">
-					<label className="text-[10px] font-medium text-foreground">Site</label>
-					<SearchableSelect
-						options={siteOptions}
-						value={selectedSite}
-						onChange={setSelectedSite}
-						placeholder="Search sites..."
+					<label className="text-[10px] font-medium text-foreground">Mode</label>
+					<SegmentedControl<"subject" | "group">
+						options={[
+							{ value: "subject", label: "Subject" },
+							{ value: "group", label: "Group Avg" },
+						]}
+						value={dataSource}
+						onChange={setDataSource}
 					/>
 				</div>
-				<div className="space-y-1">
-					<label className="text-[10px] font-medium text-foreground">Subject</label>
-					<SearchableSelect
-						options={subjectOptions}
-						value={selectedFile}
-						onChange={setSelectedFile}
-						placeholder="Search subjects..."
-						disabled={!selectedSite}
-					/>
-				</div>
+				{dataSource === "subject" ? (
+					<>
+						<div className="space-y-1">
+							<label className="text-[10px] font-medium text-foreground">Site</label>
+							<SearchableSelect
+								options={siteOptions}
+								value={selectedSite}
+								onChange={setSelectedSite}
+								placeholder="Search sites..."
+							/>
+						</div>
+						<div className="space-y-1">
+							<label className="text-[10px] font-medium text-foreground">Subject</label>
+							<SearchableSelect
+								options={subjectOptions}
+								value={selectedFile}
+								onChange={setSelectedFile}
+								placeholder="Search subjects..."
+								disabled={!selectedSite}
+							/>
+						</div>
+					</>
+				) : (
+					<div className="space-y-1">
+						<label className="text-[10px] font-medium text-foreground">Group</label>
+						<SegmentedControl<"ASD" | "HC">
+							options={[
+								{ value: "ASD", label: "ASD" },
+								{ value: "HC", label: "HC" },
+							]}
+							value={selectedGroup}
+							onChange={setSelectedGroup}
+						/>
+					</div>
+				)}
 			</CollapsibleSection>
 
 			{/* Correlation Section */}

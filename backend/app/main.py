@@ -11,12 +11,14 @@ from app.abide_processing import (
     CorrelationMethod,
     CorrelationParams,
     compute_correlation_matrices,
+    compute_group_average_matrices,
     get_rsn_labels,
     is_symmetric,
     list_subject_files,
 )
 from app.processing import (
     CorrelationRequest,
+    GroupCorrelationRequest,
     InterpolationAlgorithm,
     InterpolationParams,
     SmoothingAlgorithm,
@@ -47,9 +49,89 @@ def list_abide_files() -> dict:
     return {"files": files, "data_dir": str(DATA_DIR)}
 
 
+def _build_response(
+    matrices: list[np.ndarray],
+    corr_method: CorrelationMethod,
+    description: str,
+    smoothing_params: SmoothingParams | None,
+    interp_params: InterpolationParams | None,
+    frame_metadata: dict | None = None,
+) -> dict:
+    # Apply interpolation/smoothing
+    if interp_params is not None and interp_params.algorithm is not None:
+        matrices = apply_interpolation(matrices, interp_params)
+    if smoothing_params is not None and smoothing_params.algorithm is not None:
+        matrices = apply_smoothing(matrices, smoothing_params)
+
+    node_labels = get_rsn_labels(short=True)
+    node_long_labels = get_rsn_labels(short=False)
+    symmetric = is_symmetric(corr_method)
+
+    processed_frames = []
+    for timestamp, matrix in enumerate(matrices):
+        n = matrix.shape[0]
+        node_ids = node_labels
+
+        edges = []
+        degree_map: dict[str, int] = {nid: 0 for nid in node_ids}
+
+        for i in range(n):
+            j_start = i + 1 if symmetric else 0
+            for j in range(j_start, n):
+                if i == j:
+                    continue
+                weight = float(matrix[i, j])
+                edges.append(Edge(source=node_ids[i], target=node_ids[j], weight=weight))
+                degree_map[node_ids[i]] += 1
+                if symmetric:
+                    degree_map[node_ids[j]] += 1
+
+        nodes = [
+            Node(
+                id=node_id,
+                label=node_id,
+                full_name=node_long_labels[i],
+                degree=degree_map[node_id],
+            )
+            for i, node_id in enumerate(node_ids)
+        ]
+
+        processed_frames.append(
+            GraphFrame(timestamp=timestamp, nodes=nodes, edges=edges, metadata=frame_metadata or {})
+        )
+
+    # Calculate edge weight range from actual data
+    all_weights = []
+    for matrix in matrices:
+        mask = ~np.eye(matrix.shape[0], dtype=bool)
+        if symmetric:
+            mask = np.triu(mask, k=1)
+        all_weights.extend(matrix[mask].tolist())
+
+    if not all_weights:
+        raise HTTPException(
+            status_code=400,
+            detail="No correlation matrices could be computed from the provided data.",
+        )
+
+    meta = GraphMeta(
+        frame_count=len(matrices),
+        node_attributes=["label", "degree"],
+        edge_attributes=["weight"],
+        edge_weight_min=float(min(all_weights)),
+        edge_weight_max=float(max(all_weights)),
+        description=description,
+    )
+
+    return {
+        "frames": [frame.model_dump() for frame in processed_frames],
+        "meta": meta.model_dump(),
+        "symmetric": symmetric,
+    }
+
+
 @app.post("/abide/data")
 def get_abide_data(request: CorrelationRequest) -> dict:
-    # Validate file path
     full_path = DATA_DIR / request.file_path
     if not full_path.exists():
         raise HTTPException(
@@ -74,112 +156,36 @@ def get_abide_data(request: CorrelationRequest) -> dict:
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    # Apply interpolation/smoothing
-    if (
-        request.interpolation is not None
-        and request.interpolation.algorithm is not None
-    ):
-        matrices = apply_interpolation(matrices, request.interpolation)
-    if request.smoothing is not None and request.smoothing.algorithm is not None:
-        matrices = apply_smoothing(matrices, request.smoothing)
+    description = f"ABIDE data: {request.file_path} ({request.method} correlation)"
+    frame_metadata = {
+        "source": "abide",
+        "file": request.file_path,
+        "method": request.method,
+        "window_size": "full" if request.window_size is None else str(request.window_size),
+    }
+    return _build_response(matrices, corr_method, description, request.smoothing, request.interpolation, frame_metadata)
 
-    # Get node labels (short for IDs, long for display)
-    node_labels = get_rsn_labels(short=True)
-    node_long_labels = get_rsn_labels(short=False)
 
-    # For symmetric correlations, only create upper triangle edges
-    # to avoid duplicate A→B and B→A edges with same weight
-    symmetric = is_symmetric(corr_method)
+@app.post("/abide/group-data")
+def get_group_abide_data(request: GroupCorrelationRequest) -> dict:
+    try:
+        corr_method = CorrelationMethod(request.method)
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Invalid method: {request.method}")
 
-    # Build frames
-    processed_frames = []
-    for timestamp, matrix in enumerate(matrices):
-        n = matrix.shape[0]
-        node_ids = node_labels
-
-        edges = []
-        degree_map: dict[str, int] = {nid: 0 for nid in node_ids}
-
-        for i in range(n):
-            j_start = i + 1 if symmetric else 0
-            for j in range(j_start, n):
-                if i == j:
-                    continue
-                weight = float(matrix[i, j])
-                edges.append(
-                    Edge(
-                        source=node_ids[i],
-                        target=node_ids[j],
-                        weight=weight,
-                    )
-                )
-                # For symmetric edges, both nodes get degree incremented
-                degree_map[node_ids[i]] += 1
-                if symmetric:
-                    degree_map[node_ids[j]] += 1
-
-        nodes = [
-            Node(
-                id=node_id,
-                label=node_id,
-                full_name=node_long_labels[i],
-                degree=degree_map[node_id],
-            )
-            for i, node_id in enumerate(node_ids)
-        ]
-
-        processed_frames.append(
-            GraphFrame(
-                timestamp=timestamp,
-                nodes=nodes,
-                edges=edges,
-                metadata={
-                    "source": "abide",
-                    "file": request.file_path,
-                    "method": request.method,
-                    "window_size": (
-                        "full"
-                        if request.window_size is None
-                        else str(request.window_size)
-                    ),
-                },
-            )
-        )
-
-    # Calculate edge weight range from actual data
-    # Values are raw correlation coefficients (typically [-1, 1] for Pearson/Spearman)
-    # Frontend must use these values to scale visualizations - never assume a fixed range
-    all_weights = []
-    for matrix in matrices:
-        mask = ~np.eye(matrix.shape[0], dtype=bool)
-        if symmetric:
-            mask = np.triu(mask, k=1)
-        all_weights.extend(matrix[mask].tolist())
-
-    if not all_weights:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid data file: no correlation matrices could be computed. "
-            "The file may be empty, corrupted, or have insufficient data points.",
-        )
-
-    edge_weight_min = float(min(all_weights))
-    edge_weight_max = float(max(all_weights))
-
-    meta = GraphMeta(
-        frame_count=len(matrices),
-        node_attributes=["label", "degree"],
-        edge_attributes=["weight"],
-        edge_weight_min=edge_weight_min,
-        edge_weight_max=edge_weight_max,
-        description=f"ABIDE data: {request.file_path} ({request.method} correlation)",
+    params = CorrelationParams(
+        method=corr_method,
+        window_size=request.window_size,
+        step=request.step,
     )
 
-    return {
-        "frames": [frame.model_dump() for frame in processed_frames],
-        "meta": meta.model_dump(),
-        "symmetric": symmetric,
-    }
+    try:
+        matrices, n_subjects = compute_group_average_matrices(request.group, params, DATA_DIR)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    description = f"Group average: {request.group} (N={n_subjects}) ({request.method} correlation)"
+    return _build_response(matrices, corr_method, description, request.smoothing, request.interpolation)
 
 
 def apply_smoothing(

@@ -7,6 +7,7 @@ import { ControlPanel } from "./ui/ControlPanel";
 import {
 	useAbideData,
 	useAbideFiles,
+	useGroupAverageData,
 	SmoothingAlgorithm,
 	InterpolationAlgorithm,
 	CorrelationMethod,
@@ -23,6 +24,10 @@ const TAB_OPTIONS: { value: TabId; label: string }[] = [
 
 function App() {
 	const [activeTab, setActiveTab] = useState<TabId>("player");
+
+	// Data source mode
+	const [dataSource, setDataSource] = useState<"subject" | "group">("subject");
+	const [selectedGroup, setSelectedGroup] = useState<"ASD" | "HC" | null>(null);
 
 	// ABIDE file selection
 	const [selectedSite, setSelectedSite] = useState<string | null>(null);
@@ -50,9 +55,9 @@ function App() {
 	const [isPlaying, setIsPlaying] = useState(false);
 	const intervalRef = useRef<number | null>(null);
 
-	// Data fetching
-	const { frame, allFrames, isFetching, error, refetch, setTime, meta, time, symmetric } = useAbideData({
-		filePath: selectedFile,
+	// Data fetching — both hooks always called; only one enabled at a time
+	const singleData = useAbideData({
+		filePath: dataSource === "subject" ? selectedFile : null,
 		method,
 		windowSize,
 		step,
@@ -63,6 +68,20 @@ function App() {
 		interpolation,
 		interpolationFactor,
 	});
+	const groupData = useGroupAverageData({
+		group: dataSource === "group" ? selectedGroup : null,
+		method,
+		windowSize,
+		step,
+		smoothing,
+		smoothingWindow,
+		smoothingAlpha,
+		smoothingSigma,
+		interpolation,
+		interpolationFactor,
+	});
+	const { frame, allFrames, isFetching, error, refetch, setTime, meta, time, symmetric } =
+		dataSource === "subject" ? singleData : groupData;
 
 	// Stable node info from first frame (nodes are constant across frames)
 	const nodes = useMemo(() => {
@@ -98,7 +117,7 @@ function App() {
 		hiddenNodes,
 		smoothing,
 		interpolation,
-		subjectInfo: selectedSubjectInfo,
+		subjectInfo: dataSource === "subject" ? selectedSubjectInfo ?? undefined : undefined,
 		symmetric: symmetric || (method === "wavelet" && waveletEdgeMode === "dominant"),
 		dataRange,
 		qualityScale: 2, // 4K output
@@ -147,7 +166,7 @@ function App() {
 	useEffect(() => {
 		setTime(0);
 		setIsPlaying(false);
-	}, [selectedFile, method, windowSize, step, smoothing, smoothingWindow, smoothingAlpha, smoothingSigma, interpolation, interpolationFactor, setTime]);
+	}, [selectedFile, selectedGroup, dataSource, method, windowSize, step, smoothing, smoothingWindow, smoothingAlpha, smoothingSigma, interpolation, interpolationFactor, setTime]);
 
 	// Reset threshold only when correlation method changes (value range differs)
 	useEffect(() => {
@@ -158,6 +177,12 @@ function App() {
 	useEffect(() => {
 		setSelectedFile(null);
 	}, [selectedSite]);
+
+	// Clear stale selection when switching modes
+	useEffect(() => {
+		if (dataSource === "group") setSelectedFile(null);
+		if (dataSource === "subject") setSelectedGroup(null);
+	}, [dataSource]);
 
 	const handlePlayPause = useCallback(() => setIsPlaying((prev) => !prev), []);
 	const handleRefresh = useCallback(() => { refetch(); }, [refetch]);
@@ -185,10 +210,16 @@ function App() {
 										{String(error)}
 									</div>
 								)}
-								{(!selectedFile || !method) && !error && (
+								{dataSource === "subject" && (!selectedFile || !method) && !error && (
 									<div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
 										{!selectedFile && "Select a subject and correlation method to begin"}
 										{selectedFile && !method && "Select a correlation method to begin"}
+									</div>
+								)}
+								{dataSource === "group" && (!selectedGroup || !method) && !error && (
+									<div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+										{!selectedGroup && "Select a group (ASD/HC) and correlation method to begin"}
+										{selectedGroup && !method && "Select a correlation method to begin"}
 									</div>
 								)}
 								<GraphCanvas
@@ -198,7 +229,7 @@ function App() {
 									hiddenNodes={hiddenNodes}
 									symmetric={symmetric || (method === "wavelet" && waveletEdgeMode === "dominant")}
 									dataRange={dataRange}
-									diagnosis={selectedSubjectInfo?.diagnosis}
+									diagnosis={dataSource === "subject" ? selectedSubjectInfo?.diagnosis : selectedGroup ?? undefined}
 								/>
 							</div>
 						</CardContent>
@@ -207,6 +238,10 @@ function App() {
 					<Card className="w-64 flex-shrink-0 overflow-y-auto">
 						<CardContent className="p-2">
 							<ControlPanel
+								dataSource={dataSource}
+								setDataSource={setDataSource}
+								selectedGroup={selectedGroup}
+								setSelectedGroup={setSelectedGroup}
 								selectedSite={selectedSite}
 								setSelectedSite={setSelectedSite}
 								selectedFile={selectedFile}

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -43,6 +43,15 @@ class InterpolationParams(BaseModel):
 
 class CorrelationRequest(BaseModel):
     file_path: str = Field(..., description="Relative path to subject file")
+    method: str = Field(..., description="Correlation method: pearson, spearman, wavelet")
+    window_size: Optional[int] = Field(default=None, ge=5, description="Sliding window size (None = full series)")
+    step: Optional[int] = Field(default=None, ge=1, description="Step between windows (None = 1)")
+    smoothing: Optional[SmoothingParams] = Field(default=None, description="Smoothing parameters")
+    interpolation: Optional[InterpolationParams] = Field(default=None, description="Interpolation parameters")
+
+
+class GroupCorrelationRequest(BaseModel):
+    group: Literal["ASD", "HC"] = Field(..., description="Diagnostic group to average")
     method: str = Field(..., description="Correlation method: pearson, spearman, wavelet")
     window_size: Optional[int] = Field(default=None, ge=5, description="Sliding window size (None = full series)")
     step: Optional[int] = Field(default=None, ge=1, description="Step between windows (None = 1)")

@@ -1,3 +1,4 @@
+from functools import lru_cache
 from pathlib import Path
 from typing import List
 
@@ -84,12 +85,9 @@ def pearson_matrix(data: np.ndarray) -> np.ndarray:
 
 
 def spearman_matrix(data: np.ndarray) -> np.ndarray:
-    n = data.shape[1]
-    matrix = np.zeros((n, n))
-    for i in range(n):
-        for j in range(i, n):
-            r, _ = stats.spearmanr(data[:, i], data[:, j])
-            matrix[i, j] = matrix[j, i] = r if not np.isnan(r) else 0.0
+    ranks = np.apply_along_axis(stats.rankdata, 0, data)
+    matrix = np.corrcoef(ranks.T)
+    np.nan_to_num(matrix, nan=0.0, copy=False)
     return matrix
 
 
@@ -136,7 +134,9 @@ def compute_correlation_matrices(
 
     data = parse_dr_file(filepath)
     data = filter_rsn_columns(data)
-    window_size = params.window_size if params.window_size is not None else data.shape[0]
+    window_size = (
+        params.window_size if params.window_size is not None else data.shape[0]
+    )
     step = params.step if params.step is not None else 1
     matrices = windowed_correlation(data, params.method, window_size, step)
     return [matrices[i] for i in range(matrices.shape[0])]
@@ -149,3 +149,40 @@ def is_symmetric(method: CorrelationMethod) -> bool:
     }
 
 
+@lru_cache(maxsize=32)
+def _group_average_cached(
+    group: str,
+    method: CorrelationMethod,
+    window_size: int | None,
+    step: int | None,
+    data_dir: Path,
+) -> tuple[List[np.ndarray], int]:
+    params = CorrelationParams(method=method, window_size=window_size, step=step)
+    files = list_subject_files(data_dir)
+    group_files = [f for f in files if f["diagnosis"] == group]
+    if not group_files:
+        raise ValueError(f"No subjects found for group: {group}")
+
+    all_matrices: List[List[np.ndarray]] = []
+    for f in group_files:
+        filepath = data_dir / f["path"]
+        matrices = compute_correlation_matrices(filepath, params)
+        all_matrices.append(matrices)
+
+    min_frames = min(len(m) for m in all_matrices)
+    truncated = [m[:min_frames] for m in all_matrices]
+    stacked = np.stack(
+        [np.stack(m) for m in truncated]
+    )  # [n_subjects, n_frames, 14, 14]
+    mean_matrices = np.mean(stacked, axis=0)  # [n_frames, 14, 14]
+    return [mean_matrices[i] for i in range(mean_matrices.shape[0])], len(group_files)
+
+
+def compute_group_average_matrices(
+    group: str,
+    params: CorrelationParams,
+    data_dir: Path,
+) -> tuple[List[np.ndarray], int]:
+    return _group_average_cached(
+        group, params.method, params.window_size, params.step, data_dir
+    )
