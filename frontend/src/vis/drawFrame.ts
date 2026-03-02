@@ -18,8 +18,8 @@ export const NODE_SELECTION_GLOW_RADIUS = 4;
 export const NODE_SELECTION_GLOW_STROKE = 3;
 
 // ── Labels ───────────────────────────────────────────────────────────────────
-export const LABEL_FONT_SIZE = 20;
-export const LABEL_FONT_WEIGHT = 800;
+export const LABEL_FONT_SIZE = 35;
+export const LABEL_FONT_WEIGHT = 500;
 export const LABEL_GAP = 14; // extra distance from node edge to label anchor
 export const LABEL_MARGIN = 4; // min distance from canvas edge
 export const LABEL_CLAMP_RAISE = 30; // Y raise applied when X is clamped to bounds

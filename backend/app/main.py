@@ -81,7 +81,9 @@ def _build_response(
                 if i == j:
                     continue
                 weight = float(matrix[i, j])
-                edges.append(Edge(source=node_ids[i], target=node_ids[j], weight=weight))
+                edges.append(
+                    Edge(source=node_ids[i], target=node_ids[j], weight=weight)
+                )
                 degree_map[node_ids[i]] += 1
                 if symmetric:
                     degree_map[node_ids[j]] += 1
@@ -97,7 +99,12 @@ def _build_response(
         ]
 
         processed_frames.append(
-            GraphFrame(timestamp=timestamp, nodes=nodes, edges=edges, metadata=frame_metadata or {})
+            GraphFrame(
+                timestamp=timestamp,
+                nodes=nodes,
+                edges=edges,
+                metadata=frame_metadata or {},
+            )
         )
 
     # Calculate edge weight range from actual data
@@ -161,9 +168,18 @@ def get_abide_data(request: CorrelationRequest) -> dict:
         "source": "abide",
         "file": request.file_path,
         "method": request.method,
-        "window_size": "full" if request.window_size is None else str(request.window_size),
+        "window_size": (
+            "full" if request.window_size is None else str(request.window_size)
+        ),
     }
-    return _build_response(matrices, corr_method, description, request.smoothing, request.interpolation, frame_metadata)
+    return _build_response(
+        matrices,
+        corr_method,
+        description,
+        request.smoothing,
+        request.interpolation,
+        frame_metadata,
+    )
 
 
 @app.post("/abide/group-data")
@@ -180,12 +196,16 @@ def get_group_abide_data(request: GroupCorrelationRequest) -> dict:
     )
 
     try:
-        matrices, n_subjects = compute_group_average_matrices(request.group, params, DATA_DIR)
+        matrices, n_subjects = compute_group_average_matrices(
+            request.group, params, DATA_DIR
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
     description = f"Group average: {request.group} (N={n_subjects}) ({request.method} correlation)"
-    return _build_response(matrices, corr_method, description, request.smoothing, request.interpolation)
+    return _build_response(
+        matrices, corr_method, description, request.smoothing, request.interpolation
+    )
 
 
 def apply_smoothing(
