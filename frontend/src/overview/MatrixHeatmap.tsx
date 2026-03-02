@@ -28,7 +28,7 @@ export function MatrixHeatmap({ frame, size, dataRange, threshold }: Props) {
 		ctx.scale(dpr, dpr);
 
 		const cellSize = size / NUM_RSNS;
-		const colorScale = createColorScale(dataRange);
+		const colorScale = createColorScale("exponential", 1.5);
 		const absRange = getAbsoluteRange(dataRange);
 
 		// Build lookup from edges
@@ -62,7 +62,7 @@ export function MatrixHeatmap({ frame, size, dataRange, threshold }: Props) {
 					if (absVal === 0 || absRange.max === 0 || absVal <= threshold) {
 						ctx.fillStyle = "#0f172a";
 					} else {
-						ctx.fillStyle = colorScale(absVal);
+						ctx.fillStyle = colorScale(matrix[i][j]);
 					}
 				}
 				ctx.fillRect(x, y, cellSize, cellSize);

@@ -2,19 +2,22 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { GraphFrame } from "./types";
-import { drawFrame, computeNodePositions, createThicknessScale, filterEdgesForDisplay, Point, DataRange } from "./drawFrame";
+import { drawFrame, computeNodePositions, createThicknessScale, filterEdgesForDisplay, Point, DataRange, ScaleType } from "./drawFrame";
 
 type Props = {
   frame?: GraphFrame;
   symmetric: boolean;
+  showArrows?: boolean;
   isLoading?: boolean;
   edgeThreshold?: number;
   hiddenNodes?: Set<string>;
   dataRange: DataRange;  // Required - from meta.edge_weight_min/max
+  scaleType?: ScaleType;
+  exponent?: number;
   diagnosis?: string | null;
 };
 
-export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold = 0, hiddenNodes = new Set(), dataRange, diagnosis }: Props) {
+export default function GraphCanvas({ frame, symmetric, showArrows = false, isLoading, edgeThreshold = 0, hiddenNodes = new Set(), dataRange, scaleType = "exponential", exponent = 1.5, diagnosis }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -100,9 +103,12 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
       selectedNode,
       selectedEdge,
       symmetric,
+      showArrows,
       dataRange,
+      scaleType,
+      exponent,
     });
-  }, [filteredFrame, nodePositions, size.height, size.width, selectedNode, selectedEdge, hoveredNode, connectedNodes, edgeThreshold, activeNodeId, symmetric, dataRange]);
+  }, [filteredFrame, nodePositions, size.height, size.width, selectedNode, selectedEdge, hoveredNode, connectedNodes, edgeThreshold, activeNodeId, symmetric, showArrows, dataRange, scaleType, exponent]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -140,7 +146,7 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
           if (!source || !target) continue;
 
           const absWeight = Math.abs(edge.weight);
-          const thicknessScale = createThicknessScale(dataRange);
+          const thicknessScale = createThicknessScale(1, scaleType, exponent);
           const thickness = thicknessScale(absWeight);
           const hitRadius = Math.max(5, thickness + 3);
 
@@ -262,7 +268,7 @@ export default function GraphCanvas({ frame, symmetric, isLoading, edgeThreshold
       canvas.removeEventListener("click", handleClick);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [filteredFrame, nodePositions, selectedNode, selectedEdge, hoveredEdge, edgeThreshold, dataRange, symmetric]);
+  }, [filteredFrame, nodePositions, selectedNode, selectedEdge, hoveredEdge, edgeThreshold, dataRange, symmetric, scaleType, exponent]);
 
   const nodeFullName = hoveredNode && filteredFrame
     ? filteredFrame.nodes.find(n => n.id === hoveredNode)?.full_name ?? hoveredNode

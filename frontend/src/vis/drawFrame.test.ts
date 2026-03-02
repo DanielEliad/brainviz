@@ -9,6 +9,11 @@ import {
   createColorScale,
   createThicknessScale,
   PADDING_RATIO,
+  EDGE_COLOR_NEGATIVE,
+  EDGE_COLOR_NEUTRAL,
+  EDGE_COLOR_POSITIVE,
+  EDGE_THICKNESS_MIN,
+  EDGE_THICKNESS_MAX,
 } from "./drawFrame";
 
 // --- isEdgeVisible ---
@@ -208,75 +213,96 @@ describe("computeNodePositions", () => {
 
 // --- createColorScale ---
 
-describe("createColorScale", () => {
-  it("returns blue for minimum value", () => {
-    const scale = createColorScale({ min: 0, max: 1 });
-    expect(scale(0)).toBe("rgb(59, 130, 246)");
+describe("createColorScale (linear)", () => {
+  it("returns neutral color for zero", () => {
+    const scale = createColorScale("linear");
+    expect(scale(0)).toBe(EDGE_COLOR_NEUTRAL);
   });
 
-  it("returns red for maximum value", () => {
-    const scale = createColorScale({ min: 0, max: 1 });
-    expect(scale(1)).toBe("rgb(220, 38, 38)");
+  it("returns negative color for -1", () => {
+    const scale = createColorScale("linear");
+    expect(scale(-1)).toBe(EDGE_COLOR_NEGATIVE);
   });
 
-  it("interpolates for middle values", () => {
-    const scale = createColorScale({ min: 0, max: 1 });
-    const midColor = scale(0.5);
-    // Should be between blue and red
-    expect(midColor).toMatch(/^rgb\(\d+, \d+, \d+\)$/);
-    // Not blue
-    expect(midColor).not.toBe("rgb(59, 130, 246)");
-    // Not red
-    expect(midColor).not.toBe("rgb(220, 38, 38)");
-  });
-
-  it("uses absolute range for negative values", () => {
-    const scale = createColorScale({ min: -0.5, max: 0.8 });
-    // min is 0, so 0 should give blue
-    expect(scale(0)).toBe("rgb(59, 130, 246)");
-    // max is max(abs(-0.5), abs(0.8)) = 0.8
-    expect(scale(0.8)).toBe("rgb(220, 38, 38)");
+  it("returns positive color for +1", () => {
+    const scale = createColorScale("linear");
+    expect(scale(1)).toBe(EDGE_COLOR_POSITIVE);
   });
 
   it("clamps values beyond domain", () => {
-    const scale = createColorScale({ min: 0, max: 1 });
-    // Value beyond max should clamp to red
-    expect(scale(2)).toBe("rgb(220, 38, 38)");
+    const scale = createColorScale("linear");
+    expect(scale(2)).toBe(EDGE_COLOR_POSITIVE);
+    expect(scale(-2)).toBe(EDGE_COLOR_NEGATIVE);
+  });
+
+  it("interpolates for intermediate values", () => {
+    const scale = createColorScale("linear");
+    const mid = scale(0.5);
+    expect(mid).toMatch(/^rgb\(\d+, \d+, \d+\)$/);
+    expect(mid).not.toBe(EDGE_COLOR_NEUTRAL);
+    expect(mid).not.toBe(EDGE_COLOR_POSITIVE);
+  });
+});
+
+describe("createColorScale (exponential)", () => {
+  it("returns neutral color for zero", () => {
+    const scale = createColorScale("exponential");
+    expect(scale(0)).toBe(EDGE_COLOR_NEUTRAL);
+  });
+
+  it("returns negative color for -1", () => {
+    const scale = createColorScale("exponential");
+    expect(scale(-1)).toBe(EDGE_COLOR_NEGATIVE);
+  });
+
+  it("returns positive color for +1", () => {
+    const scale = createColorScale("exponential");
+    expect(scale(1)).toBe(EDGE_COLOR_POSITIVE);
+  });
+
+  it("clamps values beyond domain", () => {
+    const scale = createColorScale("exponential");
+    expect(scale(2)).toBe(EDGE_COLOR_POSITIVE);
+    expect(scale(-2)).toBe(EDGE_COLOR_NEGATIVE);
   });
 });
 
 // --- createThicknessScale ---
 
 describe("createThicknessScale", () => {
-  it("returns minimum thickness for minimum value", () => {
-    const scale = createThicknessScale({ min: 0, max: 1 });
-    expect(scale(0)).toBe(0.5);
+  it("returns minimum thickness for zero (exponential)", () => {
+    const scale = createThicknessScale(1, "exponential");
+    expect(scale(0)).toBe(EDGE_THICKNESS_MIN);
   });
 
-  it("returns maximum thickness for maximum value", () => {
-    const scale = createThicknessScale({ min: 0, max: 1 });
-    expect(scale(1)).toBe(8);
-  });
-
-  it("interpolates linearly", () => {
-    const scale = createThicknessScale({ min: 0, max: 1 });
-    expect(scale(0.5)).toBeCloseTo(4.25); // (0.5 + 8) / 2
+  it("returns maximum thickness for 1 (exponential)", () => {
+    const scale = createThicknessScale(1, "exponential");
+    expect(scale(1)).toBe(EDGE_THICKNESS_MAX);
   });
 
   it("applies scale factor", () => {
-    const scale = createThicknessScale({ min: 0, max: 1 }, 2);
-    expect(scale(0)).toBe(1); // 0.5 * 2
-    expect(scale(1)).toBe(16); // 8 * 2
-  });
-
-  it("uses absolute range for negative values", () => {
-    const scale = createThicknessScale({ min: -0.5, max: 1 });
-    expect(scale(0)).toBe(0.5);
-    expect(scale(1)).toBe(8);
+    const scale = createThicknessScale(2, "exponential");
+    expect(scale(0)).toBe(EDGE_THICKNESS_MIN * 2);
+    expect(scale(1)).toBe(EDGE_THICKNESS_MAX * 2);
   });
 
   it("clamps values beyond domain", () => {
-    const scale = createThicknessScale({ min: 0, max: 1 });
-    expect(scale(2)).toBe(8);
+    const scale = createThicknessScale(1, "exponential");
+    expect(scale(2)).toBe(EDGE_THICKNESS_MAX);
+  });
+
+  it("linear: maps midpoint to midpoint", () => {
+    const scale = createThicknessScale(1, "linear");
+    expect(scale(0.5)).toBeCloseTo((EDGE_THICKNESS_MIN + EDGE_THICKNESS_MAX) / 2);
+  });
+
+  it("linear: returns minimum for zero", () => {
+    const scale = createThicknessScale(1, "linear");
+    expect(scale(0)).toBe(EDGE_THICKNESS_MIN);
+  });
+
+  it("linear: returns maximum for 1", () => {
+    const scale = createThicknessScale(1, "linear");
+    expect(scale(1)).toBe(EDGE_THICKNESS_MAX);
   });
 });

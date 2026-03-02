@@ -77,6 +77,7 @@ export type GroupAverageParams = {
   method: CorrelationMethod | null;
   windowSize: number;
   step: number;
+  aggregation: "average" | "median";
   smoothing: SmoothingAlgorithm | null;
   smoothingWindow: number;
   smoothingAlpha: number;
@@ -90,6 +91,7 @@ const DEFAULT_GROUP_PARAMS: GroupAverageParams = {
   method: null,
   windowSize: 30,
   step: 1,
+  aggregation: "average",
   smoothing: null,
   smoothingWindow: 3,
   smoothingAlpha: 0.5,
@@ -229,6 +231,7 @@ export function useGroupAverageData(params: Partial<GroupAverageParams> = {}) {
       p.method,
       p.windowSize,
       p.step,
+      p.aggregation,
       p.smoothing,
       p.smoothingWindow,
       p.smoothingAlpha,
@@ -245,6 +248,7 @@ export function useGroupAverageData(params: Partial<GroupAverageParams> = {}) {
         method: p.method,
         window_size: p.windowSize,
         step: p.step,
+        aggregation: p.aggregation,
       };
 
       if (p.smoothing !== null) {

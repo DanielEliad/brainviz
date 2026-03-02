@@ -18,25 +18,26 @@ export const NODE_SELECTION_GLOW_RADIUS = 4;
 export const NODE_SELECTION_GLOW_STROKE = 3;
 
 // ── Labels ───────────────────────────────────────────────────────────────────
-export const LABEL_FONT_SIZE = 35;
+export const LABEL_FONT_SIZE = 40;
 export const LABEL_FONT_WEIGHT = 500;
 export const LABEL_GAP = 14; // extra distance from node edge to label anchor
 export const LABEL_MARGIN = 4; // min distance from canvas edge
-export const LABEL_CLAMP_RAISE = 30; // Y raise applied when X is clamped to bounds
+export const LABEL_CLAMP_RAISE = 50; // Y raise applied when X is clamped to bounds
 export const LABEL_OUTLINE_WIDTH = 4;
 
 // ── Edges ────────────────────────────────────────────────────────────────────
-export const EDGE_THICKNESS_MIN = 0.5;
-export const EDGE_THICKNESS_MAX = 16;
+export const EDGE_THICKNESS_MIN = 0.25;
+export const EDGE_THICKNESS_MAX = 20;
 export const EDGE_GLOW_WIDTH = 4; // extra stroke width behind selected edge
-export const EDGE_COLOR_WEAK = "rgb(59, 130, 246)";
-export const EDGE_COLOR_STRONG = "rgb(220, 38, 38)";
+export const EDGE_COLOR_NEGATIVE = "rgb(67, 56, 202)"; // deep blue-purple (−1)
+export const EDGE_COLOR_NEUTRAL = "rgb(200, 200, 200)"; // light gray (0)
+export const EDGE_COLOR_POSITIVE = "rgb(220, 38, 38)"; // bright red (+1)
 
-// Symmetric arrows
+// Symmetric straight-line arrows (wavelet in dominant-edge mode)
 export const EDGE_ARROW_MIN_SYMMETRIC = 8;
 export const EDGE_ARROW_MULTIPLIER_SYMMETRIC = 2.8;
 
-// Asymmetric (curved) arrows
+// Asymmetric (wavelet, curved) arrows
 export const EDGE_CURVE_OFFSET = 30; // perpendicular offset for curved edges
 export const EDGE_ARROW_SPACING = 40;
 export const EDGE_ARROW_MIN_ASYMMETRIC = 4;
@@ -59,6 +60,8 @@ export type DataRange = {
   max: number;
 };
 
+export type ScaleType = "linear" | "exponential";
+
 // Subject info for video export info box
 export type SubjectInfo = {
   subject_id: number;
@@ -74,24 +77,51 @@ export function getAbsoluteRange(range: DataRange): {
   return { min: 0, max: Math.max(Math.abs(range.min), Math.abs(range.max)) };
 }
 
-// Scale factory functions - create scales based on absolute value range
-// These expect |correlation| as input, not raw correlation
-export function createColorScale(range: DataRange) {
-  const absRange = getAbsoluteRange(range);
-  return d3
+// Scale factory functions - fixed domains for visual comparability across subjects
+export function createColorScale(
+  scaleType: ScaleType,
+  exponent: number = 1.5,
+): (v: number) => string {
+  if (scaleType === "linear") {
+    return d3
+      .scaleLinear<string>()
+      .domain([-1, 0, 1])
+      .range([EDGE_COLOR_NEGATIVE, EDGE_COLOR_NEUTRAL, EDGE_COLOR_POSITIVE])
+      .clamp(true);
+  }
+  // Exponential: apply power separately to each half of the diverging scale
+  const negScale = d3
     .scalePow<string>()
-    .exponent(2.5)
-    .domain([absRange.min, absRange.max])
-    .range([EDGE_COLOR_WEAK, EDGE_COLOR_STRONG])
+    .exponent(exponent)
+    .domain([0, 1])
+    .range([EDGE_COLOR_NEUTRAL, EDGE_COLOR_NEGATIVE])
     .clamp(true);
+  const posScale = d3
+    .scalePow<string>()
+    .exponent(exponent)
+    .domain([0, 1])
+    .range([EDGE_COLOR_NEUTRAL, EDGE_COLOR_POSITIVE])
+    .clamp(true);
+  return (v: number) => (v < 0 ? negScale(Math.abs(v)) : posScale(v));
 }
 
-export function createThicknessScale(range: DataRange, scale: number = 1) {
-  const absRange = getAbsoluteRange(range);
+// Fixed domain [0, 1] - expects |correlation| as input
+export function createThicknessScale(
+  scale: number = 1,
+  scaleType: ScaleType = "exponential",
+  exponent: number = 1.5,
+) {
+  if (scaleType === "linear") {
+    return d3
+      .scaleLinear()
+      .domain([0, 1])
+      .range([EDGE_THICKNESS_MIN * scale, EDGE_THICKNESS_MAX * scale])
+      .clamp(true);
+  }
   return d3
     .scalePow()
-    .exponent(2.5)
-    .domain([absRange.min, absRange.max])
+    .exponent(exponent)
+    .domain([0, 1])
     .range([EDGE_THICKNESS_MIN * scale, EDGE_THICKNESS_MAX * scale])
     .clamp(true);
 }
@@ -192,7 +222,10 @@ export function computeNodePositions(
 
 export type DrawOptions = {
   symmetric: boolean;
-  dataRange: DataRange; // Required - must come from actual data (meta.edge_weight_min/max)
+  showArrows?: boolean; // Show directional arrows on edges (wavelet method)
+  dataRange: DataRange; // Kept for threshold slider max; not used for scale domains
+  scaleType?: ScaleType; // default "exponential"
+  exponent?: number; // default 1.5, only used when scaleType === "exponential"
   edgeThreshold?: number;
   activeNodeId?: string | null;
   connectedNodes?: Set<string>;
@@ -220,7 +253,9 @@ export function drawFrame(
 ): void {
   const {
     symmetric,
-    dataRange,
+    showArrows = false,
+    scaleType = "exponential",
+    exponent = 1.5,
     edgeThreshold = 0,
     activeNodeId,
     connectedNodes,
@@ -233,9 +268,9 @@ export function drawFrame(
   // This ensures all elements scale proportionally at higher resolutions
   const scale = width / BASE_WIDTH;
 
-  // Create scales based on actual data range - never use hardcoded values
-  const colorScale = createColorScale(dataRange);
-  const thicknessScale = createThicknessScale(dataRange, scale);
+  // Fixed-domain scales: color uses signed value, thickness uses |correlation|
+  const colorScale = createColorScale(scaleType, exponent);
+  const thicknessScale = createThicknessScale(scale, scaleType, exponent);
 
   const positions = computeNodePositions(frame.nodes.length, width, height);
   const nodePositions = new Map<string, Point>();
@@ -259,8 +294,9 @@ export function drawFrame(
     if (!source || !target) return;
     const absWeight = Math.abs(edge.weight);
 
-    // Use absolute value for color/thickness - scales expect |correlation|
-    const baseColor = colorScale(absWeight);
+    // Color uses signed value (diverging: negative→blue, zero→gray, positive→red)
+    // Thickness uses |correlation| (magnitude only)
+    const baseColor = colorScale(edge.weight);
     let opacity = 1;
     let edgeIsSelectedCurrent = selectedEdge
       ? isEdgeSelected(edge, selectedEdge)
@@ -278,12 +314,7 @@ export function drawFrame(
       : baseColor;
     const thickness = thicknessScale(absWeight);
 
-    // Calculate direction vector for arrows
-    const dx = target.x - source.x;
-    const dy = target.y - source.y;
-
     if (symmetric) {
-      // Symmetric: draw straight line with arrow to show correlation direction
       // Draw yellow glow behind selected edge
       if (edgeIsSelectedCurrent) {
         ctx.beginPath();
@@ -301,31 +332,31 @@ export function drawFrame(
       ctx.lineWidth = thickness;
       ctx.stroke();
 
-      // Add 3 equally spaced arrows to show direction
-      const arrowSize = Math.max(
-        EDGE_ARROW_MIN_SYMMETRIC * scale,
-        thickness * EDGE_ARROW_MULTIPLIER_SYMMETRIC,
-      );
-      const arrowAngle = Math.atan2(dy, dx);
-
-      ctx.fillStyle = color;
-
-      for (const t of [0.25, 0.5, 0.75]) {
-        const arrowX = source.x + dx * t;
-        const arrowY = source.y + dy * t;
-
-        ctx.beginPath();
-        ctx.moveTo(arrowX, arrowY);
-        ctx.lineTo(
-          arrowX - arrowSize * Math.cos(arrowAngle - Math.PI / 6),
-          arrowY - arrowSize * Math.sin(arrowAngle - Math.PI / 6),
+      if (showArrows) {
+        const dx = target.x - source.x;
+        const dy = target.y - source.y;
+        const arrowSize = Math.max(
+          EDGE_ARROW_MIN_SYMMETRIC * scale,
+          thickness * EDGE_ARROW_MULTIPLIER_SYMMETRIC,
         );
-        ctx.lineTo(
-          arrowX - arrowSize * Math.cos(arrowAngle + Math.PI / 6),
-          arrowY - arrowSize * Math.sin(arrowAngle + Math.PI / 6),
-        );
-        ctx.closePath();
-        ctx.fill();
+        const arrowAngle = Math.atan2(dy, dx);
+        ctx.fillStyle = color;
+        for (const t of [0.25, 0.5, 0.75]) {
+          const arrowX = source.x + dx * t;
+          const arrowY = source.y + dy * t;
+          ctx.beginPath();
+          ctx.moveTo(arrowX, arrowY);
+          ctx.lineTo(
+            arrowX - arrowSize * Math.cos(arrowAngle - Math.PI / 6),
+            arrowY - arrowSize * Math.sin(arrowAngle - Math.PI / 6),
+          );
+          ctx.lineTo(
+            arrowX - arrowSize * Math.cos(arrowAngle + Math.PI / 6),
+            arrowY - arrowSize * Math.sin(arrowAngle + Math.PI / 6),
+          );
+          ctx.closePath();
+          ctx.fill();
+        }
       }
     } else {
       // Asymmetric: draw curved line with directional arrows

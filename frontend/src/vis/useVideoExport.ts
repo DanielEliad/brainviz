@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { GraphFrame } from "./types";
-import { DataRange } from "./drawFrame";
+import { DataRange, ScaleType } from "./drawFrame";
 import { AbideFile } from "./useGraphData";
 
 type ExportState = "idle" | "exporting" | "done" | "error";
@@ -11,7 +11,10 @@ type UseVideoExportOptions = {
   frames: GraphFrame[];
   playbackSpeed: number;
   symmetric: boolean;
+  showArrows?: boolean;
   dataRange: DataRange;  // Required - from meta.edge_weight_min/max
+  scaleType?: ScaleType;
+  exponent?: number;
   nodeNames?: string[];
   edgeThreshold?: number;
   hiddenNodes?: Set<string>;
@@ -27,7 +30,10 @@ export function useVideoExport({
   frames,
   playbackSpeed,
   symmetric,
+  showArrows = false,
   dataRange,
+  scaleType = "exponential",
+  exponent = 1.5,
   nodeNames,
   edgeThreshold = 0,
   hiddenNodes,
@@ -110,11 +116,14 @@ export function useVideoExport({
       interpolation: interpolation ?? "none",
       subjectInfo: subjectInfo ?? undefined,
       symmetric,
+      showArrows,
       dataRange,
+      scaleType,
+      exponent,
       width: scaledWidth,
       height: scaledHeight,
     });
-  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, smoothing, interpolation, subjectInfo, symmetric, dataRange, qualityScale, width, height]);
+  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, smoothing, interpolation, subjectInfo, symmetric, showArrows, dataRange, scaleType, exponent, qualityScale, width, height]);
 
   const cancel = useCallback(() => {
     if (workerRef.current) {

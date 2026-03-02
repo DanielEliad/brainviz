@@ -41,9 +41,9 @@ export function MiniGraph({ frame, size, dataRange, edgeThreshold, symmetric }: 
 			nodePositions.set(node.id, positions[i]);
 		});
 
-		const colorScale = createColorScale(dataRange);
+		const colorScale = createColorScale("exponential", 1.5);
 		// Scale thickness for thumbnail: thinner edges
-		const thicknessScale = createThicknessScale(dataRange);
+		const thicknessScale = createThicknessScale();
 
 		const edges = filterEdgesForDisplay(frame.edges, edgeThreshold, symmetric);
 
@@ -56,7 +56,7 @@ export function MiniGraph({ frame, size, dataRange, edgeThreshold, symmetric }: 
 			ctx.beginPath();
 			ctx.moveTo(source.x, source.y);
 			ctx.lineTo(target.x, target.y);
-			ctx.strokeStyle = colorScale(absWeight);
+			ctx.strokeStyle = colorScale(edge.weight);
 			// Scale thickness to thumbnail size (120px vs 1920px base)
 			const rawThickness = thicknessScale(absWeight);
 			ctx.lineWidth = Math.max(0.5, rawThickness * (size / 1920));

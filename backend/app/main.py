@@ -197,12 +197,12 @@ def get_group_abide_data(request: GroupCorrelationRequest) -> dict:
 
     try:
         matrices, n_subjects = compute_group_average_matrices(
-            request.group, params, DATA_DIR
+            request.group, params, DATA_DIR, request.aggregation
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    description = f"Group average: {request.group} (N={n_subjects}) ({request.method} correlation)"
+    description = f"Group average: {request.group} (N={n_subjects}, {request.aggregation}) ({request.method} correlation)"
     return _build_response(
         matrices, corr_method, description, request.smoothing, request.interpolation
     )

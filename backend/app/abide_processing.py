@@ -156,6 +156,7 @@ def _group_average_cached(
     window_size: int | None,
     step: int | None,
     data_dir: Path,
+    aggregation: str,
 ) -> tuple[List[np.ndarray], int]:
     params = CorrelationParams(method=method, window_size=window_size, step=step)
     files = list_subject_files(data_dir)
@@ -174,15 +175,19 @@ def _group_average_cached(
     stacked = np.stack(
         [np.stack(m) for m in truncated]
     )  # [n_subjects, n_frames, 14, 14]
-    mean_matrices = np.mean(stacked, axis=0)  # [n_frames, 14, 14]
-    return [mean_matrices[i] for i in range(mean_matrices.shape[0])], len(group_files)
+    if aggregation == "median":
+        result = np.median(stacked, axis=0)
+    else:
+        result = np.mean(stacked, axis=0)
+    return [result[i] for i in range(result.shape[0])], len(group_files)
 
 
 def compute_group_average_matrices(
     group: str,
     params: CorrelationParams,
     data_dir: Path,
+    aggregation: str = "average",
 ) -> tuple[List[np.ndarray], int]:
     return _group_average_cached(
-        group, params.method, params.window_size, params.step, data_dir
+        group, params.method, params.window_size, params.step, data_dir, aggregation
     )
