@@ -1,5 +1,15 @@
 import { Muxer, ArrayBufferTarget } from "mp4-muxer";
-import { drawFrame, DataRange, ScaleType, SubjectInfo } from "./drawFrame";
+import {
+  drawFrame,
+  DataRange,
+  ScaleType,
+  SubjectInfo,
+  BASE_WIDTH,
+  INFO_BOX_FONT_SIZE,
+  INFO_BOX_LINE_HEIGHT,
+  INFO_BOX_PADDING,
+  INFO_BOX_MARGIN,
+} from "./drawFrame";
 import { GraphFrame } from "./types";
 
 type WorkerMessage = {
@@ -16,8 +26,15 @@ type WorkerMessage = {
   nodeNames?: string[];
   edgeThreshold?: number;
   hiddenNodes?: string[];
+  method?: string;
+  windowSize?: number;
+  step?: number;
   smoothing?: string;
+  smoothingWindow?: number;
+  smoothingAlpha?: number;
+  smoothingSigma?: number;
   interpolation?: string;
+  interpolationFactor?: number;
   subjectInfo?: SubjectInfo;
 };
 
@@ -45,13 +62,21 @@ async function encodeVideo(
   exponent: number = 1.5,
   edgeThreshold: number = 0,
   hiddenNodes: string[] = [],
+  method: string = "unknown",
+  windowSize: number = 30,
+  step: number = 1,
   smoothing: string = "none",
+  smoothingWindow: number = 3,
+  smoothingAlpha: number = 0.5,
+  smoothingSigma: number = 1.0,
   interpolation: string = "none",
+  interpolationFactor: number = 2,
   subjectInfo?: SubjectInfo,
 ) {
   const hiddenSet = new Set(hiddenNodes);
   const frameDurationMs = BASE_INTERVAL_MS / playbackSpeed;
   const fps = 1000 / frameDurationMs;
+  const scale = width / BASE_WIDTH;
 
   const canvas = new OffscreenCanvas(width, height);
   const ctx = canvas.getContext("2d");
@@ -60,6 +85,24 @@ async function encodeVideo(
   }
 
   const target = new ArrayBufferTarget();
+
+  const padding = INFO_BOX_PADDING * scale;
+  const lineHeight = INFO_BOX_LINE_HEIGHT * scale;
+  const fontSize = INFO_BOX_FONT_SIZE * scale;
+  const legendHeight = 10 * scale;
+  const legendGap = 6 * scale;
+  const legendFontSize = Math.max(10 * scale, fontSize * 0.8);
+  const legendBlockHeight = legendFontSize + legendGap + legendHeight;
+  const linesCount = subjectInfo ? 2 : 1;
+  const infoBoxHeight = padding * 2 + linesCount * lineHeight + legendBlockHeight;
+  const infoBoxMargin = INFO_BOX_MARGIN * scale;
+  const sidePadding = 40 * scale;
+  const layoutPadding = {
+    top: infoBoxHeight + infoBoxMargin * 2,
+    right: sidePadding,
+    bottom: 0,
+    left: sidePadding,
+  };
   const muxer = new Muxer({
     target,
     video: {
@@ -127,9 +170,17 @@ async function encodeVideo(
       dataRange,
       scaleType,
       exponent,
+      layoutPadding,
       infoBox: {
+        method,
+        windowSize,
+        step,
         smoothing,
+        smoothingWindow,
+        smoothingAlpha,
+        smoothingSigma,
         interpolation,
+        interpolationFactor,
         speed: playbackSpeed,
         edgeThreshold,
         subjectInfo,
@@ -196,8 +247,15 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
         e.data.exponent ?? 1.5,
         e.data.edgeThreshold ?? 0,
         e.data.hiddenNodes ?? [],
+        e.data.method ?? "unknown",
+        e.data.windowSize ?? 30,
+        e.data.step ?? 1,
         e.data.smoothing ?? "none",
+        e.data.smoothingWindow ?? 3,
+        e.data.smoothingAlpha ?? 0.5,
+        e.data.smoothingSigma ?? 1.0,
         e.data.interpolation ?? "none",
+        e.data.interpolationFactor ?? 2,
         e.data.subjectInfo,
       );
       self.postMessage({ type: "done", buffer }, { transfer: [buffer] });

@@ -26,7 +26,7 @@ export const LABEL_CLAMP_RAISE = 54; // Y raise applied when X is clamped to bou
 export const LABEL_OUTLINE_WIDTH = 4;
 
 // ── Edges ────────────────────────────────────────────────────────────────────
-export const EDGE_THICKNESS_MIN = 0.25;
+export const EDGE_THICKNESS_MIN = 0.1;
 export const EDGE_THICKNESS_MAX = 20;
 export const EDGE_GLOW_WIDTH = 4; // extra stroke width behind selected edge
 export const EDGE_COLOR_NEGATIVE = "rgb(67, 56, 202)"; // deep blue-purple (−1)
@@ -46,8 +46,8 @@ export const EDGE_ARROW_MULTIPLIER_ASYMMETRIC = 2.2;
 // ── Info box ─────────────────────────────────────────────────────────────────
 export const INFO_BOX_FONT_SIZE = 20;
 export const INFO_BOX_PADDING = 14;
-export const INFO_BOX_LINE_HEIGHT = 20;
-export const INFO_BOX_WIDTH = 600;
+export const INFO_BOX_LINE_HEIGHT = 26;
+export const INFO_BOX_WIDTH = 800;
 export const INFO_BOX_MARGIN = 5;
 export const INFO_BOX_CORNER_RADIUS = 10;
 export const INFO_BOX_BORDER_WIDTH = 1.5;
@@ -231,9 +231,17 @@ export type DrawOptions = {
   connectedNodes?: Set<string>;
   selectedNode?: string | null;
   selectedEdge?: { source: string; target: string } | null;
+  layoutPadding?: { top: number; right: number; bottom: number; left: number };
   infoBox?: {
+    method: string;
+    windowSize: number;
+    step: number;
     smoothing: string;
+    smoothingWindow?: number;
+    smoothingAlpha?: number;
+    smoothingSigma?: number;
     interpolation: string;
+    interpolationFactor?: number;
     speed: number;
     edgeThreshold: number;
     subjectInfo?: SubjectInfo;
@@ -261,6 +269,7 @@ export function drawFrame(
     connectedNodes,
     selectedNode,
     selectedEdge,
+    layoutPadding,
     infoBox,
   } = options;
 
@@ -272,10 +281,18 @@ export function drawFrame(
   const colorScale = createColorScale(scaleType, exponent);
   const thicknessScale = createThicknessScale(scale, scaleType, exponent);
 
-  const positions = computeNodePositions(frame.nodes.length, width, height);
+  const pad = layoutPadding ?? { top: 0, right: 0, bottom: 0, left: 0 };
+  const layoutWidth = Math.max(0, width - pad.left - pad.right);
+  const layoutHeight = Math.max(0, height - pad.top - pad.bottom);
+  const positions = computeNodePositions(
+    frame.nodes.length,
+    layoutWidth,
+    layoutHeight,
+  );
   const nodePositions = new Map<string, Point>();
   frame.nodes.forEach((node, i) => {
-    nodePositions.set(node.id, positions[i]);
+    const pos = positions[i];
+    nodePositions.set(node.id, { x: pos.x + pad.left, y: pos.y + pad.top });
   });
 
   ctx.fillStyle = BG_COLOR;
@@ -493,8 +510,8 @@ export function drawFrame(
     const label = node.full_name ?? node.label;
 
     // Position label radially outward from the circle center
-    const cx = width / 2;
-    const cy = height / 2;
+    const cx = pad.left + layoutWidth / 2;
+    const cy = pad.top + layoutHeight / 2;
     const angle = Math.atan2(pos.y - cy, pos.x - cx);
     const labelDist = radius + LABEL_GAP * scale;
     let labelX = pos.x + Math.cos(angle) * labelDist;
@@ -533,20 +550,25 @@ export function drawFrame(
       return { left, right: left + textWidth, top, bottom: top + fontSize };
     };
 
-    // Clamp X to canvas bounds; when clamped, also raise Y to avoid node overlap
+    const layoutLeft = pad.left + margin;
+    const layoutRight = pad.left + layoutWidth - margin;
+    const layoutTop = pad.top + margin;
+    const layoutBottom = pad.top + layoutHeight - margin;
+
+    // Clamp X to layout bounds; when clamped, also raise Y to avoid node overlap
     let b = getTextBounds(labelX, labelY);
-    if (b.left < margin) {
+    if (b.left < layoutLeft) {
       labelY -= LABEL_CLAMP_RAISE * scale;
-      labelX += margin - b.left;
-    } else if (b.right > width - margin) {
+      labelX += layoutLeft - b.left;
+    } else if (b.right > layoutRight) {
       labelY -= LABEL_CLAMP_RAISE * scale;
-      labelX -= b.right - (width - margin);
+      labelX -= b.right - layoutRight;
     }
 
-    // Clamp Y to canvas bounds
+    // Clamp Y to layout bounds
     b = getTextBounds(labelX, labelY);
-    if (b.top < margin) labelY += margin - b.top;
-    else if (b.bottom > height - margin) labelY -= b.bottom - (height - margin);
+    if (b.top < layoutTop) labelY += layoutTop - b.top;
+    else if (b.bottom > layoutBottom) labelY -= b.bottom - layoutBottom;
 
     // Dark outline for contrast against edges and background
     ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
@@ -568,17 +590,58 @@ export function drawFrame(
     const padding = INFO_BOX_PADDING * scale;
     const lineHeight = INFO_BOX_LINE_HEIGHT * scale;
     const fontSize = INFO_BOX_FONT_SIZE * scale;
+    const legendHeight = 10 * scale;
+    const legendGap = 6 * scale;
+    const legendFontSize = Math.max(10 * scale, fontSize * 0.8);
+    const legendBlockHeight = legendFontSize + legendGap + legendHeight;
 
     // Compact two-line format
     const subjectLine = infoBox.subjectInfo
       ? `${infoBox.subjectInfo.version} / ${infoBox.subjectInfo.site} / ${infoBox.subjectInfo.subject_id} (${infoBox.subjectInfo.diagnosis})`
       : "";
-    const paramsLine = `Smooth: ${infoBox.smoothing} | Interp: ${infoBox.interpolation} | Speed: ${infoBox.speed}x | Thresh: ${infoBox.edgeThreshold.toFixed(2)}`;
+    const tokens: string[] = [
+      `Method: ${infoBox.method}`,
+      `Win:${infoBox.windowSize}`,
+      `Step:${infoBox.step}`,
+    ];
+    if (infoBox.smoothing && infoBox.smoothing !== "none") {
+      let smoothToken = `Smooth:${infoBox.smoothing}`;
+      if (
+        infoBox.smoothing === "moving_average" &&
+        infoBox.smoothingWindow !== undefined
+      ) {
+        smoothToken += ` w=${infoBox.smoothingWindow}`;
+      }
+      if (
+        infoBox.smoothing === "exponential" &&
+        infoBox.smoothingAlpha !== undefined
+      ) {
+        smoothToken += ` a=${infoBox.smoothingAlpha}`;
+      }
+      if (
+        infoBox.smoothing === "gaussian" &&
+        infoBox.smoothingSigma !== undefined
+      ) {
+        smoothToken += ` s=${infoBox.smoothingSigma}`;
+      }
+      tokens.push(smoothToken);
+    }
+    if (infoBox.interpolation && infoBox.interpolation !== "none") {
+      let interpToken = `Interp:${infoBox.interpolation}`;
+      if (infoBox.interpolationFactor !== undefined) {
+        interpToken += ` x${infoBox.interpolationFactor}`;
+      }
+      tokens.push(interpToken);
+    }
+    tokens.push(`Speed:${infoBox.speed}x`);
+    tokens.push(`Thresh:${infoBox.edgeThreshold.toFixed(2)}`);
+    const paramsLine = tokens.join(" | ");
 
     const lines = subjectLine ? [subjectLine, paramsLine] : [paramsLine];
 
     const boxWidth = INFO_BOX_WIDTH * scale;
-    const boxHeight = padding * 2 + lines.length * lineHeight;
+    const boxHeight =
+      padding * 2 + lines.length * lineHeight + legendBlockHeight;
     const boxX = INFO_BOX_MARGIN * scale;
     const boxY = INFO_BOX_MARGIN * scale;
 
@@ -613,5 +676,35 @@ export function drawFrame(
     lines.forEach((line, i) => {
       ctx.fillText(line, boxX + padding, boxY + padding + i * lineHeight);
     });
+
+    const legendX = boxX + padding;
+    const legendY = boxY + padding + lines.length * lineHeight;
+    const legendWidth = boxWidth - padding * 2;
+    const labelY = legendY;
+    const barY = labelY + legendFontSize + legendGap;
+
+    ctx.font = `500 ${legendFontSize}px system-ui, -apple-system, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+
+    const labels = ["-1", "-0.5", "0", "0.5", "1"];
+    labels.forEach((label, i) => {
+      const t = i / (labels.length - 1);
+      const x = legendX + t * legendWidth;
+      ctx.fillText(label, x, labelY);
+    });
+
+    const gradient = ctx.createLinearGradient(
+      legendX,
+      barY,
+      legendX + legendWidth,
+      barY,
+    );
+    gradient.addColorStop(0, EDGE_COLOR_NEGATIVE);
+    gradient.addColorStop(0.5, EDGE_COLOR_NEUTRAL);
+    gradient.addColorStop(1, EDGE_COLOR_POSITIVE);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(legendX, barY, legendWidth, legendHeight);
   }
 }

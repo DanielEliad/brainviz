@@ -18,8 +18,15 @@ type UseVideoExportOptions = {
   nodeNames?: string[];
   edgeThreshold?: number;
   hiddenNodes?: Set<string>;
+  method?: string | null;
+  windowSize?: number;
+  step?: number;
   smoothing?: string | null;
+  smoothingWindow?: number;
+  smoothingAlpha?: number;
+  smoothingSigma?: number;
   interpolation?: string | null;
+  interpolationFactor?: number;
   subjectInfo?: AbideFile | null;
   qualityScale?: VideoQuality;
   width?: number;
@@ -37,8 +44,15 @@ export function useVideoExport({
   nodeNames,
   edgeThreshold = 0,
   hiddenNodes,
+  method = null,
+  windowSize = 30,
+  step = 1,
   smoothing = null,
+  smoothingWindow = 3,
+  smoothingAlpha = 0.5,
+  smoothingSigma = 1.0,
   interpolation = null,
+  interpolationFactor = 2,
   subjectInfo,
   qualityScale = 1,
   width = 1920,
@@ -112,8 +126,15 @@ export function useVideoExport({
       nodeNames,
       edgeThreshold,
       hiddenNodes: hiddenNodes ? Array.from(hiddenNodes) : [],
+      method: method ?? "unknown",
+      windowSize,
+      step,
       smoothing: smoothing ?? "none",
+      smoothingWindow,
+      smoothingAlpha,
+      smoothingSigma,
       interpolation: interpolation ?? "none",
+      interpolationFactor,
       subjectInfo: subjectInfo ?? undefined,
       symmetric,
       showArrows,
@@ -123,7 +144,7 @@ export function useVideoExport({
       width: scaledWidth,
       height: scaledHeight,
     });
-  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, smoothing, interpolation, subjectInfo, symmetric, showArrows, dataRange, scaleType, exponent, qualityScale, width, height]);
+  }, [frames, playbackSpeed, nodeNames, edgeThreshold, hiddenNodes, method, windowSize, step, smoothing, smoothingWindow, smoothingAlpha, smoothingSigma, interpolation, interpolationFactor, subjectInfo, symmetric, showArrows, dataRange, scaleType, exponent, qualityScale, width, height]);
 
   const cancel = useCallback(() => {
     if (workerRef.current) {
