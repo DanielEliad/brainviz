@@ -1,0 +1,58 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{\uppercase{PBVDV16}}
+
+\bibitem[BAZ17]{bernas-2017}
+\textsc{Bernas A., Aldenkamp A.~P., Zinger S.}:
+\newblock {Wavelet coherence-based classifier: A resting-state functional MRI study on neurodynamics in adolescents with high-functioning autism}.
+\newblock \emph{Computer Methods and Programs in Biomedicine 154} (11 2017), 143--151.
+\newblock URL: \url{https://doi.org/10.1016/j.cmpb.2017.11.017}, \href {http://dx.doi.org/10.1016/j.cmpb.2017.11.017} {\path{doi:10.1016/j.cmpb.2017.11.017}}.
+
+\bibitem[CG09]{chang-2009}
+\textsc{Chang C., Glover G.~H.}:
+\newblock {Time--frequency dynamics of resting-state brain connectivity measured with fMRI}.
+\newblock \emph{NeuroImage 50}, 1 (12 2009), 81--98.
+\newblock URL: \url{https://doi.org/10.1016/j.neuroimage.2009.12.011}, \href {http://dx.doi.org/10.1016/j.neuroimage.2009.12.011} {\path{doi:10.1016/j.neuroimage.2009.12.011}}.
+
+\bibitem[CPB{\etalchar{*}}23]{cirstian-2023}
+\textsc{Cîrstian R., Pilmeyer J., Bernas A., Jansen J. F.~A., Breeuwer M., Aldenkamp A.~P., Zinger S.}:
+\newblock {Objective biomarkers of depression: A study of Granger causality and wavelet coherence in resting-state fMRI}.
+\newblock \emph{Journal of Neuroimaging 33}, 3 (1 2023), 404--414.
+\newblock URL: \url{https://doi.org/10.1111/jon.13085}, \href {http://dx.doi.org/10.1111/jon.13085} {\path{doi:10.1111/jon.13085}}.
+
+\bibitem[GMJ04]{grinsted-2004}
+\textsc{Grinsted A., Moore J.~C., Jevrejeva S.}:
+\newblock {Application of the cross wavelet transform and wavelet coherence to geophysical time series}.
+\newblock \emph{Nonlinear processes in geophysics 11}, 5/6 (11 2004), 561--566.
+\newblock URL: \url{https://doi.org/10.5194/npg-11-561-2004}, \href {http://dx.doi.org/10.5194/npg-11-561-2004} {\path{doi:10.5194/npg-11-561-2004}}.
+
+\bibitem[HWA{\etalchar{*}}13]{hutchison-2013}
+\textsc{Hutchison R.~M., Womelsdorf T., Allen E.~A., Bandettini P.~A., Calhoun V.~D., Corbetta M., Della~Penna S., Duyn J.~H., Glover G.~H., Gonzalez-Castillo J., Handwerker D.~A., Keilholz S., Kiviniemi V., Leopold D.~A., De~Pasquale F., Sporns O., Walter M., Chang C.}:
+\newblock {Dynamic functional connectivity: Promise, issues, and interpretations}.
+\newblock \emph{NeuroImage 80} (5 2013), 360--378.
+\newblock URL: \url{https://doi.org/10.1016/j.neuroimage.2013.05.079}, \href {http://dx.doi.org/10.1016/j.neuroimage.2013.05.079} {\path{doi:10.1016/j.neuroimage.2013.05.079}}.
+
+\bibitem[PBVDV16]{preti-2016}
+\textsc{Preti M.~G., Bolton T.~A., Van De~Ville D.}:
+\newblock {The dynamic functional connectome: State-of-the-art and perspectives}.
+\newblock \emph{NeuroImage 160} (12 2016), 41--54.
+\newblock URL: \url{https://doi.org/10.1016/j.neuroimage.2016.12.061}, \href {http://dx.doi.org/10.1016/j.neuroimage.2016.12.061} {\path{doi:10.1016/j.neuroimage.2016.12.061}}.
+
+\bibitem[SPA{\etalchar{*}}25]{schielen-2025}
+\textsc{Schielen S. J.~C., Pilmeyer J., Aldenkamp A.~P., Ruijters D., Zinger S.}:
+\newblock {ICA-Based Resting-State networks obtained on large Autism FMRI dataset ABIDE}.
+\newblock \emph{Data 10}, 7 (7 2025), 109.
+\newblock URL: \url{https://doi.org/10.3390/data10070109}, \href {http://dx.doi.org/10.3390/data10070109} {\path{doi:10.3390/data10070109}}.
+
+\bibitem[SPAZ24]{schielen-2024}
+\textsc{Schielen S. J.~C., Pilmeyer J., Aldenkamp A.~P., Zinger S.}:
+\newblock {The diagnosis of ASD with MRI: a systematic review and meta-analysis}.
+\newblock \emph{Translational Psychiatry 14}, 1 (8 2024), 318.
+\newblock URL: \url{https://doi.org/10.1038/s41398-024-03024-5}, \href {http://dx.doi.org/10.1038/s41398-024-03024-5} {\path{doi:10.1038/s41398-024-03024-5}}.
+
+\bibitem[TC98]{torrence-1998}
+\textsc{Torrence C., Compo G.~P.}:
+\newblock {A practical Guide to Wavelet analysis}.
+\newblock \emph{Bulletin of the American Meteorological Society 79}, 1 (1 1998), 61--78.
+\newblock URL: \url{https://doi.org/10.1175/1520-0477(1998)079<0061:apgtwa>2.0.co;2}, \href {http://dx.doi.org/10.1175/1520-0477(1998)079} {\path{doi:10.1175/1520-0477(1998)079}}.
+
+\end{thebibliography}

@@ -1,0 +1,5 @@
+# This EG/VCBM template is designed for pdfLaTeX: it uses legacy Type-1 Times
+# fonts (ptmr8t) and [pdftex] graphicx. Compiling with xelatex/lualatex causes
+# "missing character" errors and only emits a .xdv (no PDF). Force pdflatex so
+# latexmk produces a PDF directly and the ORCID logo / fonts render correctly.
+$pdf_mode = 1;   # 1 = pdflatex (direct PDF)

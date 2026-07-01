@@ -1,0 +1,114 @@
+=== PDF: report.pdf ===
+
+BrainViz: Dynamic Functional Connectivity Visualization
+for the ABIDE Dataset
+**1 Introduction**
+BrainViz is a web-based tool for exploring dynamic functional connectivity in resting-state fMRI
+data from the ABIDE (Autism Brain Imaging Data Exchange) dataset. It renders time-varying
+correlation graphs between 14 Resting State Networks (RSNs) as an interactive animation, supporting both individual subject views and group-level aggregates (average or median across ASD or
+HC cohorts). Users can choose between three connectivity measures (Pearson, Spearman, wavelet
+coherence) and apply temporal smoothing or interpolation to shape the output.
+**2 Accessing the Application**
+The application is live at ` (https://brainviz.ideabattery.org)` and runs in any modern browser
+(Chrome, Firefox, Safari, Edge). No installation is required.
+**3 Using the Interface**
+The UI is organized into collapsible panels on the sidebar, with playback controls along the bottom.
+**Data Source.** Choose between two modes:
+**Subject** — pick a site (from ABIDE I or II), then a subject from that site. The diagnosis
+(ASD or HC) is shown alongside.
+- **Collection** — view an aggregate across all subjects of a given group (ASD or HC), using
+either the average or median across subjects.
+**Correlation.** Select the connectivity measure:
+- **Pearson** or **Spearman** — sliding-window correlation. Configurable window size (5–100) and
+step (1–100).
+- **Wavelet** — wavelet coherence with phase-lead analysis. Offers a toggle between Both (show
+both directions of every pair) and Dominant (show only the stronger direction).
+**Processing.** Optional post-processing of the correlation time series:
+- **Interpolation** — Linear, Cubic spline, or B-spline, at factors 2–10 × to upsample frames.
+**Smoothing** — Moving average, Exponential, or Gaussian, each with a configurable parameter
+$(window, \alpha, or \sigma ).$
+**Playback.** Playback speed presets (0.5 ×, 1 ×, 2 ×, 4 ×, 8 × ); choice of Linear or Exponential
+scale (with adjustable exponent) for mapping edge weights to color and thickness; and an **Edge**
+**Threshold** slider that hides edges below the chosen |w| .
+1
+**Nodes.** Per-RSN visibility toggles, with Hide All / Show All shortcuts.
+**Playback controls.** Below the sidebar sit Play/Pause (also bound to the `Space` key), Refresh
+(reload data), and Download Video (exports a 4K MP4 of the current animation). A separate
+timeline strip along the bottom of the canvas lets the user scrub through frames.
+**4 Data Processing Pipeline**
+The pipeline transforms raw per-subject BOLD signals into animated graph frames in the browser.
+Two sources feed the backend: per-subject time-series text files (used for Pearson and Spearman
+correlation) and a single pre-computed HDF5 file (used for wavelet coherence). Both are stored
+under `data/` and kept read-only.
+**4.1** **Raw data sources**
+**ABIDE I and II time series.** The underlying resting-state fMRI data comes from the ABIDE
+I and ABIDE II open datasets. On disk, subjects are grouped by dataset and acquisition site:
+`data/ABIDE/ABIDE{I,II}/` `site` `/drstage1subject` `NNNNNNN`_ `.txt` . Each file is the output of a
+group-ICA plus dual-regression preprocessing step performed externally: 32 group-level spatial
+components are estimated across subjects, and stage-1 dual regression projects them back to yield
+a [ T × 32] per-subject time-course matrix (hence the “dr_stage1” prefix). These text files feed the
+real-time correlation path (Pearson/Spearman).
+**Phenotypics.** `data/phenotypics.csv` maps integer subject IDs ( `partnum` ) to a diagnosis ( `ASD`
+or `HC` ). The backend matches filenames such as `drstage1subject0050649.txt` to CSV rows by
+parsing the ID as an integer (stripping leading zeros). Duplicate IDs and missing diagnoses both
+raise hard errors at startup.
+**Wavelet coherence (pre-computed).** Wavelet coherence is too expensive to compute per request, so it is produced offline in two stages:
+1. A MATLAB pipeline ( `data/waveletnew/WCMsABIDE.m` and `Waveletcoherences_function.m` )
+iterates over all 182 directed RSN pairs. For each pair it loads the per-subject time series, computes the Morlet wavelet transform and cross-wavelet transform (Grinsted toolbox), derives
+coherence R 2 with Monte Carlo significance testing (300 surrogates, 50 scales, TR = 2 s), and
+classifies each (time , scale) cell of the phase angle into one of five categories (Table 2). Output:
+one `CoherenceRSN1RSN2.mat` file per ordered pair.
+2. A Python conversion script ( `backend/scripts/convertwavelettosubjectfiles.py` ) reads
+all `Coherence_*.mat` files, validates that their subject order matches `phenotypics.csv` and
+`participantStructs.mat`, and emits a single `data/wavelet.h5` with the structure below. Only
+`angle_maps` (the classified phase codes) is persisted, as the leadership ratio computed at runtime
+is all the frontend needs.
+```
+wavelet.h5
+waveletsubjects (subject IDs, int)
+periodpersubject
+pairs/
+aDMNV1/anglemaps
+aDMNSAL/anglemaps
+... (one entry per directed RSN pair)
+```
+2
+**4.2** **Runtime pipeline**
+1. **Raw ABIDE files.** Each subject is a plain-text file of shape [ T × 32], where T is the number
+of fMRI timepoints and the columns are the 32 group-ICA components. Repetition time (TR)
+is 2 seconds.
+2. **RSN filtering.** A fixed subset of 14 of the 32 ICA components is retained as the Resting
+State Networks: aDMN, V1, SAL, pDMN, AUD, lFPN, rFPN, latVIS, latSM, CER, SM1,
+DAN, LANG, occVIS.
+3. **Windowed correlation.** A sliding window of size W and step S produces a stack of correlation matrices, [ F × 14 × 14] with F = ⌊ ( T − W ) /S⌋ + 1. Pearson/Spearman values lie in
+[ − 1 , 1]; wavelet values lie in 0 , 1 and represent a leadership ratio (see below).
+4. **Optional smoothing / interpolation.** Smoothing is applied per edge time series; interpolation upsamples the frame axis. Both are optional and can be combined.
+5. **Graph frame construction.** Each correlation matrix becomes a graph frame: 14 nodes
+plus edges. Symmetric methods produce 91 edges (upper triangle); the asymmetric wavelet
+method produces up to 182.
+6. **Rendering.** The frontend lays nodes out on a circle, colors and thickens edges according to
+|w| on a blue → red scale, and filters edges by the user’s threshold. The animation advances
+through frames at the selected speed.
+Stage Input shape Output shape Key operation
+Parse file `.txt` [ T × 32] `np.loadtxt`
+$RSN filter [ T \times 32] [ T \times 14] Column selection Windowed corr. [ T \times 14] [ F \times 14 \times 14] Sliding-window stats$
+Interpolation [ F × 14 × 14]  F [′ × 14 × 14] Temporal upsampling
+$Smoothing [ F \times 14 \times 14] [ F \times 14 \times 14] Per-edge smoothing$
+Frame build [ F × 14 × 14] `GraphFrame[]` Matrix → nodes + edges
+Render `GraphFrame` Canvas pixels d3 scales + canvas API
+Table 1: Shape transformations through the pipeline.
+**Wavelet method (special case).** Wavelet coherence bypasses steps 1–3: instead of computing
+correlations on demand, the backend reads the pre-computed `wavelet.h5` file described above. At
+request time, for each sliding window it counts `PHASE_LEAD` events within an allowed scale band
+(periods 10–100 s) and reports a leadership ratio. Both matrix entries ( i, j ) and ( j, i ) are populated,
+making the graph asymmetric. The five phase codes produced by the MATLAB pipeline are:
+Code Label Meaning
+$+1 `PHASELEAD` Network A leads network B ( \sim +90 \textopenbullet\_ ) - 1 `PHASELAG` Network A lags network B ( \sim- 90 \textopenbullet\_ )$
++2 `PHASEINPHASE` Networks are in phase
+$- 2 `PHASE\_ANTI` Networks are anti-phase$
+0 `PHASENONE` No significant coherence (outside COI or R 2 < 0 ._ 5)
+Table 2: Wavelet phase-angle categories.
+The leadership ratio is n lead /n all ∈ 0 , 1 over all (time , scale) cells in the window, after masking cells
+where either direction reports `PHASE_NONE` .
+3
+=== END: report.pdf (5 equations) ===

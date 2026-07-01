@@ -1,0 +1,777 @@
+=== PDF: Journal of Neuroimaging - 2023 - C rstian - Objective biomarkers of depression  A study of Granger causality and wavelet (1) 4.pdf ===
+
+Received: 1 October 2022 Revised: 9 January 2023 Accepted: 10 January 2023
+DOI: 10.1111/jon.13085
+**C L I N I C A L I N V E S T I G AT I V E S T U D Y**
+**Objective biomarkers of depression: A study of Granger** **causality and wavelet coherence in resting-state fMRI**
+**Ramona Cîrstian** **1** **Jesper Pilmeyer** **1,6** **Antoine Bernas** **2**
+**Jacobus F. A. Jansen** **1,3** **Marcel Breeuwer** **4** **Albert P. Aldenkamp** **1,5**
+**Svitlana Zinger** **1,6**
+1 Department of Electrical Engineering,
+Eindhoven University of Technology,
+Eindhoven, The Netherlands
+2 Department of Biophysics, Radboud
+University Nijmegen, Nijmegen, The
+Netherlands
+3 Department of Radiology, Maastricht
+University Medical Center, Maastricht, The
+Netherlands
+4 Department of Biomedical Engineering,
+Eindhoven University of Technology,
+Eindhoven, The Netherlands
+5 Department of Neurology, Maastricht
+University Medical Center, Maastricht, The
+Netherlands
+6 Department of Research and Development,
+Epilepsy Center Kempenhaeghe, Heeze, The
+Netherlands
+**Correspondence**
+Jesper Pilmeyer, Department of Electrical
+Engineering, Eindhoven University of
+Technology, De Groene Loper 19, Flux, 5612
+AP Eindhoven, The Netherlands.
+[Email: j.pilmeyer@tue.nl](mailto:j.pilmeyer@tue.nl)
+**Funding information**
+Topconsortium voor Kennis en Innovatie,
+Grant/Award Number: TK11812P07; Philips;
+Eindhoven Engine
+**Abstract**
+**Background and Purpose:** The lack of a robust diagnostic biomarker makes understand
+ing depression from a neurobiological standpoint an important goal, especially in the
+context of brain imaging.
+**Methods:** In this study, we aim to create novel image-based features for objective
+diagnosis of depression. Resting-state network time series are used to investigate neu
+rodynamics with the help of wavelet coherence and Granger causality (G-causality).
+Three new features are introduced: total wavelet coherence, wavelet lead coherence, and
+wavelet coherence blob analysis. The fourth feature, pair-wise conditional G-causality,
+is used to establish the causality between resting-state networks. We use the proposed
+features to classify depression in adult subjects.
+**Results:** We obtained an accuracy of 86% in the wavelet lead coherence, 80% in Granger
+causality, and 86% in wavelet coherence blob analysis. Subjects with depression showed
+hyperconnectivity between the dorsal attention network and the auditory network as
+well as between the posterior default mode network and the dorsal attention network.
+Hypoconnectivity was found between the anterior default mode network and the audi
+tory network as well as the right frontoparietal network and the lateral visual network.
+An abnormal co-activation pattern was found between cerebellum and the lateral motor
+network according to the wavelet coherence blob analysis.
+**Conclusion:** Based on abnormal functional dynamics between brain networks, we were
+able to identify subjects with depression with high accuracy. The findings of this study
+contribute to the understanding of the impaired emotional and attention processing
+associated with depression, as well as decreased motor activity.
+**KEYWORDS**
+causality, depression, fMRI, neurodynamics, resting-state networks, wavelet coherence
+[This is an open access article under the terms of the Creative Commons Attribution-NonCommercial License, which permits use, distribution and reproduction in any](http://creativecommons.org/licenses/by-nc/4.0/)
+medium, provided the original work is properly cited and is not used for commercial purposes.
+© 2022 The Authors. Journal of Neuroimaging published by Wiley Periodicals LLC on behalf of American Society of Neuroimaging.
+J Neuroimaging. 2023;1–11. (https://wileyonlinelibrary.com/journal/jon) **1**
+**2** OBJECTIVE BIOMARKERS OF DEPRESSION
+**INTRODUCTION**
+Depression is a highly prevalent neuropsychiatric disorder and is char
+acterized by depressed mood (feeling sad, empty), loss of interest
+and pleasure, sleep disturbances (insomnia or hypersomnia), fatigue,
+and feelings of worthlessness and guilt. 1 Currently, it is diagnosed
+based on symptomatic criteria, making the diagnosis of depression
+highly subjective. Up until now, there are no objective diagnostic tests
+available. 2
+Objective biomarkers of depression can help to improve the selec
+tion of particular treatments and constitute a step further toward
+personalized medicine. One of the most widely used brain imaging
+techniques is functional magnetic resonance imaging (fMRI). Resting
+state functional MRI (rs-fMRI) is sensitive to blood-oxygenation level
+changes in the brain while the subject performs no particular task.
+These changes in blood oxygenation are indirectly associated with neu
+ral activity and therefore reflect brain activity alterations over time.
+Brain connectivity refers to the idea that the brain is a network
+consisting of different regions or networks that are involved in exe
+cuting one or more tasks. Effective connectivity is concerned with the
+influence of one neuronal system over another. 3–5 Functional connec
+tivity (FC) represents the temporal correlation between different brain
+regions or networks, reflecting synchronous activation and has been an
+important topic among rs-fMRI studies in the recent years. 6–9 Quanti
+tative analyses of rs-fMRI have shown that depressed subjects exhibit
+network abnormalities. 10,11
+Hu et al. used a deep learning-based Granger causality (G-causality)
+estimator on rs-fMRI and structural MRI data to identify subjects
+with Alzheimer’s disease using a support vector machine (SVM) clas
+sifier, yielding an accuracy of up to 91.49%. 12 In another study by Luo
+et al., G-causality analysis was used to identify the direct functional
+connectivity between resting-state networks (RSNs) in participants
+with depression. The study found that subjects with depression had
+significantly decreased intra-FC within the lateral visual network
+(VIS), parietal network, and posterior default mode network (DMN);
+decreased inter-FC between the frontoparietal network (FPN) and
+subcortical network and between the posterior DMN and anterior
+DMN; and increased inter-FC between the salience network (SAN)
+and FPN. Moreover, subjects with depression demonstrated enhanced
+effective connectivity from the VIS to both the parietal network and
+cerebellum network. 13
+The G-causality analysis algorithm was used in another study by
+Zheng et al. to demonstrate that patients with depression show
+enhanced effective connectivity from the left superior parietal gyrus
+and superior and middle occipital gyrus to the left hippocampus. 14
+Additionally, the G-causality method was used in the investigation of
+other neuropsychiatric disorders: in a study by Deshpande et al., a clas
+sifier for Autism Spectrum Disorder (ASD) was proposed. 15 Further
+more, a study by Haghighat et al. used bivariate G-causality in RSNs for
+classification of ASD with a maximum accuracy of only 66.66%. 16
+Yu et al. identified seven main networks in a study about connec
+tivity in subjects with depression suffering from childhood trauma.
+The mentioned networks are as follows: FPN, DMN, dorsal attention
+network (DAN), sensorimotor network (SMN), SAN, cingulo-opercular
+network, and VIS. The study reported an increased connection
+between DMN and FPN, DMN and DAN, as well as between DMN and
+SAN. Moreover, a decreased connectivity was found between DMN
+and SAN. 17
+Wavelet decomposition is yet another method that can be used to
+analyze functional connectivity. Although this method has not yet been
+used for depression classification and is rather unexplored, there are a
+couple promising studies suggesting that the wavelet method is worth
+investigating.
+Bernas et al. presented a classifier based on wavelet coherence
+maps that could be used to analyze fMRI signals in both the time
+and frequency domains. The coherent patterns or time synchronic
+ities between different network activations could be visualized and
+used to discriminate between subjects with ASD and neurotypical sub
+jects with a reported accuracy of 86.7%. 18 In a study by Khan et al.,
+wavelet coherence was applied to electroencephalogram signals within
+the DMN of 30 subjects with depression and 30 healthy controls. The
+obtained biomarker was used to train a 2-dimensional convolutional
+neural network that obtained a test accuracy of 98.1% for detecting
+depression. 19
+A feature selection algorithm is a desirable addition to this study
+since it is important to identify the most relevant RSN pairs for each
+classification experiment in order to ensure that the most informative
+features are selected while minimizing overfitting. For this reason, the
+Maximum Relevance and Minimum Redundancy (MRMR) algorithm is
+used. MRMR is an algorithm that aims to identify a small set of fea
+tures that, when put together, yield the maximum possible predictive
+power. 20
+In this study, we propose three new features based on the wavelet
+coherence map as well as using the pairwise conditional G-causality.
+The RSNs that appear to be abnormal in subjects with depression,
+as found by previous studies, include the DMN, executive network,
+SAN, SMN, DAN, FPN, and visual cortex. This constitutes our hypoth
+esis as we expect to identify atypical correlations as well as abnormal
+dynamical patterns between pairs consisting of these networks that
+are present in subjects with depression.
+For the classification of the subjects with and without depression,
+two popular classifiers were used: SVM and decision tree. SVM is a
+supervised discriminative classifier that constructs hyperplanes to sep
+arate data into groups using labeled data with which it is trained. The
+decision tree classifier uses a tree representation of nodes to test sev
+eral attributes of the data and learn decision rules inferred from the
+features to predict the label of a target variable. Both classifiers have
+been successfully applied in neuroimaging studies and are therefore
+implemented in this study. 21–23
+**METHODS**
+The dataset, containing a total of 72 subjects, was obtained from
+OpenNeuro.org. 24 The participant selection as well as the image acqui
+sition were performed by Bezmaternykh et al. and the methods are
+OBJECTIVE BIOMARKERS OF DEPRESSION **3**
+**TABLE 1** Demographic and clinical characteristics of the groups
+involved in the study
+**Control** **Depressed**
+Sex 6 M, 15 F 13 M, 38 F
+$Age (years) 33.8 \pm 8.5 33.1 \pm 9.5$
+$IQ 106.0 \pm 16.1 103.7 \pm 14.6$
+MADRS Not applicable 26.7 ± 4.4
+$BDI 4.6 \pm 4.5 20.7 \pm 10.0$
+$ZSRDS 32.1 \pm 5.9 46.4 \pm 7.0$
+Note : All the data represent mean ± standard deviation unless otherwise
+indicated.
+Abbreviations: BDI, Beck Depression Inventory; F, females; IQ, intelligence
+quotient; M, males; MADRS, Montgomery-Asberg Depression Rating Scale;
+ZSRDS, Zung Self-Rating Depression Scale. 30.
+presented in detail in their study. 25 The study involves 51 medication
+free patients with a diagnosis of mild depressive episode, moderate
+depressive episode, or dysthymia according to the International Clas
+sification of Diseases 10th Revision, as established in the multiprofile
+clinic Pretor and International Institute of Psychology and Psychother
+apy, Novosibirsk, Russia. The control group consists of 21 healthy
+control subjects without a psychotic, neurological, or somatic disorder
+or any MRI contraindication. There is no significant difference between
+the two groups in terms of gender, age, and intelligence level (Raven’s
+Progressive Matrices test). All subjects signed informed consent to par
+ticipate in the experiment. 25 Demographic and clinical characteristics
+of the groups involved in the study are presented in Table 1.
+The fMRI scans were obtained using a 3T Ingenia Philips scan
+ner. The following parameters were used to acquire the T2*-weighted
+single-shot echo planar imaging scans: 2 × 2 × 5 mm spatial resolution,
+repetition time (TR)/echo time 2500/35 ms, and fat suppression mode.
+The reference anatomical image was acquired using a T1-weighted
+3-dimensional turbo-field echo sequence with a spatial resolution of
+1 × 1 × 1 mm. All subjects were instructed to lie still without performing
+any specific task for a duration of 4 minutes. With a TR of 2.5 seconds,
+Data preprocessing is necessary in order to reduce the effects of
+artifacts, caused by movement and physiological confounders, sepa
+rate brain tissue from nonbrain tissue such as the skull, as well as
+bringing all participants scans in the same reference space by regis
+tration. The preprocessing of the data was carried out using FMRIB
+Software Library (FSL) and it consisted of two main stages. 26 In the
+initial stage, the following set of operations was applied using the
+MELODIC 3.0 (multivariate exploratory linear optimized decompo
+sition into independent components ICs) tool within FSL: motion
+correction (MCFLIRT), nonbrain tissue removal, slice timing correction,
+spatial smoothing using a Gaussian kernel of 5.0 mm full width at half
+maximum, intensity normalization, and high-pass temporal filtering at
+0.01 Hz. Single-session independent component analysis (ICA) was
+performed on each subject using automatic dimensionality estimation
+to find components that are of neuronal origin. With ICA, we separate
+fMRI signal sources in the brain that allows us to find spatially inde
+pendent, yet coherent brain activation patterns present in the data,
+resulting in so-called ICs. These can be of neural or nonneural origin.
+The denoising stage consisted of classifying and removing noise
+components that were found by the single-session ICA. The FSLeyes
+tool within FSL was used to visualize and label each component within
+the single-session ICA as either signal or noise. The labeling process
+was performed manually by following the guidelines and methods
+imposed by Griffanti et al. 27 The removal of noisy components was car
+ried out using the “regfilt” tool within FSL, which applies regression to
+remove the unwanted components and create a “clean” version of the
+ICA signal. The reason for manually removing the noisy components
+from the single-session ICA was to ensure that no useful signal was
+discarded that could decrease the quality of the data.
+Using the denoised signal obtained from the preprocessing stage
+described above, group ICA is carried out on each subject group:
+depressed and control. At this stage, one depression subject had to be
+discarded due to corrupted data and, therefore, the analysis continued
+with 50 depressed subjects and 21 controls. Group ICA was performed
+using the MELODIC tool within FSL to find the common components
+shared by all the subjects within one group. Registration to Montreal
+Neurological Institute standard space was applied before group ICA.
+From the obtained ICs, 10 were selected as RSN based on the
+Smith et al. RSN atlas. 28 This atlas is established following network
+analysis of resting-state functional imaging studies with over 30,000
+healthy subjects and is therefore a condensation of the most commonly
+found networks in the brain. The RSNs in this study were selected
+using a “goodness-of-fit” approach, 18 where the degree of resemblance
+between each of the IC map and the RSN atlas was calculated. The
+resulting RSNs were identified based on the highest score obtained as
+well as by visual inspection to verify and confirm the results obtained
+in the previous steps. Lastly, dual regression was applied to obtain the
+RSN spatial maps and time series for each subject separately. 29
+The RSNs selected from the Smith et al. atlas were the follow
+ing: Primary/Medial Visual Network (VISU1), Lateral Visual (VISU2),
+Default Mode Network Anterior (DMN1), Default Mode Network Pos
+terior (DMN2), Cerebellum (CEREB), SMN, Auditory Network (AUDI),
+Executive Network, Frontoparietal Right Network (FPR), Frontopari
+etal Left Network as well as two additional networks, the Lateral Motor
+Network (LMN) and DAN. 30,31 Figure 1 is a representation of the 12
+identified RSNs that will be used in this study. [28,30,31]
+After obtaining the time series from all the RSNs, the wavelet coher
+ence maps and the pair-wise G-causality are computed. All possible
+permutations of RSN pairs were used (12 × 12 networks = 144), while
+removing identical network pairs (e.g., DMN-DMN). This resulted in a
+total of 132 network pairs.
+The wavelet coherence map was obtained for each RSN pair. Three
+distinct features were extracted from the wavelet coherence map as
+described in the methodology: total wavelet coherence, wavelet lead
+coherence, and wavelet coherence blob analysis. Subsequently, pair
+wise conditional G-causality was calculated between all RSN pairs
+using the multivariate G-causality MATLAB toolbox. 32
+For each of the features mentioned above, the feature selec
+tion algorithm was employed to rank the most relevant features for
+**4** OBJECTIVE BIOMARKERS OF DEPRESSION
+**FIGURE 1** The visual representation of
+the 12 resting-state networks
+depression classification. Subsequently, an SVM and decision tree clas
+sifier were used to classify subjects with and without depression. The
+classifications were validated using leave-one-out cross-validation.
+To compare the results obtained from the experiments with previ
+ous findings, a validation session was performed that consisted of the
+same methods applied on only the RSN pairs that have been found to be
+abnormal in depression in the literature. A list of 19 RSN pairs between
+which altered connectivity patterns were found in depression, accord
+ing to the studies mentioned in the introduction, was compiled. The
+same feature selection and classification algorithms were used as in the
+original experiments. Comparisons were made between the results of
+the original and literature-based validation feature sets. Figure 2 is a
+schematic of the methodology of this study, starting from acquisition
+of the raw fMRI data and ending with the detection of subjects with
+depression, based on the proposed features.
+**Wavelet coherence**
+Wavelet analysis has become a useful tool in seismology studies
+because it allows the analysis of both time and frequency content in a
+time series. In other words, the wavelet analysis decomposes the time
+OBJECTIVE BIOMARKERS OF DEPRESSION **5**
+**FIGURE 2** Flowchart of the feature extraction and classification process containing the main steps: extraction of RSN time series, analysis of
+the RSN pair connectivity with wavelet coherence and Granger causality, the extraction of the three wavelet-based features and PCGC feature,
+feature selection with MRMR, and finally classification using SVM and decision tree classifiers. The classification takes place using each of the four
+metrics separately and obtains performance scores corresponding to each individual metric. RSN, resting-state network; PCGC, pairwise
+conditional Granger causality; SVM, support vector machine; MRMR, maximum relevance minimum redundancy
+**FIGURE 3** Wavelet coherence maps between Primary/Medial Visual Network (VISU1) and Lateral Visual Network (VISU2) of subject 1. The
+map offers information about the type of coherence present at each time and period. The faded area on the margins of the map represents the
+cone of influence where edge effects might be present. The color bar shows the type of phasing between signals. s, second; Sig, signal
+series into several time blocks to determine the dominant frequency
+components in a given period. 33
+In this paper, wavelet coherence is used to find out how activa
+tion patterns between two network signals interact (synchronous,
+anticorrelated, causal, or no interaction) within a given time period
+per frequency. Specifically, the wavelet coherence determines the
+level of coherence of the cross-wavelet transform of two signals.
+Based on the cross-wavelet phase, we can deduce a directionality
+in the coherence between time series (in-phase, antiphase, lead, and
+lag). This indicates how the brain activation between two networks
+changes over time for each frequency. Two network time series in
+phase are activated synchronously, whereas two time series antiphase
+might indicate anticorrelated activation. Lead and lag patterns reflect
+potential causality (one network activates another network or vice
+versa). A detailed explanation on the construction of wavelet coher
+ence maps can be found in the study by Grinsted et al. 33 We can
+extract wavelet coherence maps from the RSNs time series by calcu
+lating the cross-spectrum between the two signals. In this way, the
+common power is measured as well as their phase information at var
+ious times and scales. Figure 3 is an example of a wavelet coherence
+map.
+**Wavelet total coherence**
+The total wavelet coherence map is calculated by binarizing the
+obtained wavelet coherence matrices. This binarization step assigns 0s
+to elements with no coherence and 1s to any coherence regardless of
+the type (lead, lag, in-phase, antiphase). Therefore, it reflects the dura
+tion and presence of any type of coherence between the activation of
+two networks. An example of a total wavelet coherence map is visual
+ized in Figure 4A. The total time of coherence is measured by counting
+the number of elements equal to 1 and averaging over the number of
+periods in the coherence map ( n = 50). This feature matrix contains for
+each participant one number—the total coherence between RSN1 and
+RSN2—and has the size equal to the number of participants by number
+of pairs (71 × 132).
+**Coherence blob analysis**
+The coherence blob count reflects the amount of discontinuity in the
+coherence of activation between RSN1 and RSN2. This can be visu
+alized in Figure 4B. Simply put, this algorithm counts the coherence
+blobs in the map, and indicates how often the participant switched on
+and off the coherence between RSN1 and RSN2. This algorithm utilizes
+a simple blob analysis method, identifying clusters of more than two
+adjacent nonzero elements in the matrix and counting it as one blob.
+A blob indicates a period of time in which there is any type of temporal
+coherence in the activation between two networks, often covering a
+specific frequency range. This feature matrix contains one number per
+participant—the number of blobs in the coherence map of RSN1 and
+RSN2—and has the size equal to the number of participants by number
+of pairs (71 × 132).
+**6** OBJECTIVE BIOMARKERS OF DEPRESSION
+**Wavelet lead coherence**
+The lead coherence was extracted from the wavelet coherence map
+obtained in the previous stage (sum of elements indicating a lead of
+activation of RSN1 with regard to RSN2). This is visualized in Figure 4C.
+Lead coherence tells us how much time signal X spent leading signal
+Y and is therefore comparable to the G-causality since it is an indica
+tor that network Y causes X. Wavelet coherence also yields frequency
+information about the coherence of our signals. In this case, we have
+obtained 50 separate Fourier periods that we have averaged to simplify
+the interpretation of the results of this metric. Therefore, for each par
+ticipant the wavelet lead coherence algorithm counts the time RSN1
+leads RSN2 for each period and then averages over all 50 periods to
+obtain a matrix where each participant is assigned one number—the
+average lead time between RSN1 and RSN2—and has the size equal to
+the number of participants by the number of possible pairs (71 × 132).
+**Granger causality**
+The G-causality algorithm used in the analysis of the time series of this
+study is based on the multivariate G-causality MATLAB toolbox. 32 This
+toolbox utilizes vector autoregression modeling.
+In essence, G-causality is used to find out whether the activation
+of one RSN is causing the activation of another RSN. By using the
+aforementioned toolbox, we obtained the G-causality matrix for each
+subject where each element of the matrix represents a directed pair
+wise G-causal (PCGC) connection. Since the PCGC matrix contains a
+causalityscoreforeveryRSNpair,thismatrixisusedasafeaturevector
+for the classifiers.
+**Feature selection and classification**
+A feature selection algorithm is a desirable addition to this study since
+it is important to identify the most relevant RSN pairwise connectivity
+for each classification experiment and aims to prevent overfitting. For
+this reason, the MRMR algorithm was implemented. 20 MRMR ranks
+thefeatureimportancebyapplyingeachmetricseparatelyaccordingto
+their relevance/redundancy score. This algorithm operates iteratively
+calculating the factor of the relevance and the redundancy of the fea
+ture (relevance/redundancy). 20 With each iteration, the relevance is
+computed as the F-test between the feature and the target variable,
+while the redundancy is computed as the Pearson correlation between
+the feature and all the features previously computed. MRMR is a strict
+algorithm, selecting only the most valuable features. 20
+Two classifiers were used: an SVM classifier with a polynomial
+kernel of order 4 and a decision tree classifier.
+**FIGURE 4** (A) Wavelet total coherence map of the RSN pair
+Primary/Medial Visual Network (VISU1) and Lateral Visual Network
+(VISU2) for subject 1. (B) Wavelet coherence blob count for the same
+RSN and subject; each blob of coherence on the map is marked with a
+red circle. (C) Wavelet lead coherence of the same RSN pair and
+subject; only the lead coherence type is present, that is, when VISU1
+signal leads VISU2. s, second
+**RESULTS**
+The classification results discussed in this section can be found in
+Table 2.
+OBJECTIVE BIOMARKERS OF DEPRESSION **7**
+**TABLE 2** Performance of classifiers
+**Wavelet total coherence**
+**Nr feat** **AUC** **Accuracy** **Sensitivity** **Specificity** **Precision**
+$SVM 2 .70 75\textbackslash% 33\textbackslash% 92\textbackslash% 67\textbackslash%$
+$Tree 49 .76 80\textbackslash% 67\textbackslash% 86\textbackslash% 67\textbackslash%$
+**Wavelet coherence blob analysis**
+**Nr feat** **AUC** **Accuracy** **Sensitivity** **Specificity** **Precision**
+$SVM 2 .75 79\textbackslash% 57\textbackslash% 88\textbackslash% 67\textbackslash%$
+$Tree 3 .84 86\textbackslash% 71\textbackslash% 92\textbackslash% 79\textbackslash%$
+**Wavelet lead coherence**
+**Nr feat** **AUC** **Accuracy** **Sensitivity** **Specificity** **Precision**
+$SVM 7 .72 76\textbackslash% 71\textbackslash% 78\textbackslash% 58\textbackslash%$
+$Tree 7 .83 86\textbackslash% 76\textbackslash% 90\textbackslash% 76\textbackslash%$
+**Granger causality**
+**Nr feat** **AUC** **Accuracy** **Sensitivity** **Specificity** **Precision**
+$SVM 6 .62 68\textbackslash% 52\textbackslash% 76\textbackslash% 46\textbackslash%$
+$Tree 2 .76 80\textbackslash% 71\textbackslash% 84\textbackslash% 65\textbackslash%$
+Abbreviations: AUC, area under the curve; Nr feat, number of features; SVM, support vector machine classifier; Tree, decision tree classifier.
+**The wavelet coherence map**
+Figure 3 represents an example of a wavelet coherence map obtained
+from subject 1 (depression) from the VISU1-VISU2 pair. The maps tell
+us at each period ( y -axis) and point in time ( x -axis) what coherence type
+was present. The coherence type is color coded, and it can be either
+in-phase, antiphase, signal 1 leads, signal 1 lags, or no coherence at all.
+From Figure 3, it appears that subject 1 exhibits a lot of in-phase coher
+ence between the two networks that suggests that VISU1 and VISU2
+are synchronously activated in this case.
+**Wavelet total coherence**
+Figure 4A shows an example of a wavelet total coherence map. For
+this metric, the most informative pairs, according to the MRMR feature
+selection algorithm, were VISU1-DAN and VISU1-VISU2. An accuracy
+of 80% and area under the curve (AUC) of .76 was obtained for the
+decision tree classifier when trained with the values of wavelet total
+coherence of the top 49 RSN pairs. Figure 5A represents the box
+plots of the two most relevant RSN pairs per group and shows that the
+depression group exhibits more variation and outliers in the average
+time of total wavelet coherence than the control group. The RSN pairs
+VISU1-DAN and VISU1-VISU2 are not on the list of most relevant RSN
+pairs that was ensembled based on the results of previous studies.
+**Wavelet coherence blob analysis**
+Figure 4B shows the wavelet coherence map and an illustration of
+the blob counting process. This metric measures how many times the
+coherence, independent of coherence type, of the two RSNs activates
+and deactivates by counting the number of blobs in each map. The
+best performing RSN pairs according to the MRMR feature selection
+algorithm were CEREB-LMN and DMN2-AUDI. The highest classifica
+tion performance was obtained when trained with the blob numbers of
+threeRSNpairsandyieldedanaccuracyof86%andanAUCof.84using
+the decision tree classifier. From the trends illustrated in the boxplots
+in Figure 5B, it can be observed that in the case of CEREB-LMN pair,
+the depression subjects contain more blobs in the wavelet map than
+the controls. On the other side, the boxplots of the DMN2-AUDI pair
+show that the depression subjects have less blobs than the controls.
+The wavelet coherence blob analysis is a novel metric and cannot be
+directly compared with the literature.
+**Wavelet lead coherence**
+The map of the wavelet lead coherence contains only nonzero values
+for the elements of the coherence map that correspond to the time
+when RSN1 leads RSN2 and can be seen in Figure 4C. The top selected
+features for this metric are DAN-AUDI and DMN1-DAN according to
+the employed feature selection algorithm. The classification accuracy,
+according to the decision tree classifier and leave-one-out cross
+validation, is 86%, while the AUC is .83 when trained with the values
+of the top seven RSN pairs. This is one of the best performing metrics in
+terms of accuracy and AUC and matches well with the validation set
+where the top two most relevant pairs are the same in both experi
+ments. From Figure 5C, we can see that the depression group tends to
+have higher means and larger ranges for the wavelet lead coherence
+values than the control group. The depression group also displays more
+outliers.
+**8** OBJECTIVE BIOMARKERS OF DEPRESSION
+**FIGURE 5** Boxplots showing the distributions for each subject group for each metric. (A) Wavelet total coherence—the depressed group
+exhibits more variation and outliers than the control group. The median for the depressed group is lower than the control in VISU1-DAN, while for
+VISU1-VISU2 it is higher. (B) Wavelet coherence blob analysis—the pair CEREB-Lateral Motor Network (LMN) shows a higher number of blobs in
+the depressed group. DMN2-AUDI presents a lower median value for the depressed group. (C) Wavelet lead coherence—the pairs DAN-AUDI and
+DMN1-DAN present higher variation and medians for the depressed group. (D) Granger causality—the pairs DMN2-AUDI and Right
+Frontoparietal Network (FPR)-VISU2 show a lower median causality score in depressed subjects. s, second; nr, number; PCGC, pairwise
+conditional Granger causality
+**Granger causality**
+The G-causality top selected RSN pairs consist of DMN2-AUDI and
+FPR-VISU2. The best classification performance for this metric was
+obtained using the PCGC values of the two RSN pairs mentioned above
+and yielded 80% accuracy and .76 AUC. The general trend between
+groups is illustrated in the boxplots from Figure 5D where it appears
+that the depression subjects show smaller PCGC values than the con
+trol group for both top RSN pairs. Agreement with the literature
+was found when classifying based on PCGC between the original and
+validation features as one RSN pair appears in the highest feature
+importance list for both feature sets (FPR-VISU2).
+**DISCUSSION**
+The top performing metrics are wavelet lead coherence and wavelet
+coherence blob analysis with an accuracy score of over 85%. Figure 6
+visualizes the most important interactions between the RSN pairs that
+have yielded the highest classification scores in predicting depression.
+The DMN encompasses multiple brain regions including the ante
+rior medial prefrontal cortex, posterior cingulate cortex, and angular
+gyrus. 34 It has been found to be responsible of several functions
+including emotion processing as well as the allocation of attention
+resources for cognitive processing. 35–36 Many studies show that sub
+jects with depression have an hyperactive DMN as compared to control
+subjects. [11,13,17,20] These findings correspond with our own results,
+which show the increased activity between posterior DMN and DAN in
+subjects with depression when employing the wavelet lead coherence
+metric.
+The DAN is responsible for tasks that require attention to external
+stimuli and includes the visual motion area, frontal eye fields, superior
+parietal lobule, intraparietal sulcus, and ventral premotor cortex. 31 In
+our study, the depression subjects show on average more wavelet lead
+coherence between the DAN and DMN1 than the control group. This
+is in accordance with previous studies and suggests that the abnor
+mal interaction between the two brain regions may be responsible
+for anomalous attention to the external world and internally directed
+mentation. 36 Hu et al. also found abnormal connectivity within the
+DMN. 12 These findings are comparable with our results for the wavelet
+OBJECTIVE BIOMARKERS OF DEPRESSION **9**
+The wavelet coherence maps were generated using the Morlet
+wavelet due to the highest frequency/time resolution ratio. A study
+compared three popular wavelet types such as PAUL wavelet, a deriva
+tive of Gaussian, and Morlet wavelet for the classification of ASD
+adolescents. They demonstrated that the Morlet wavelet is the most
+suitable for analyzing neurodynamics, hence our choice for the wavelet
+type used in the generation of the coherence maps between RSN time
+series. 44
+The feature selection algorithm is a strength of this study since it
+**FIGURE 6** Diagram describing the main interactions between
+RSNs that contributed to the highest performance scores for
+depression classification. The arrows in wavelet lead coherence and
+Granger causality represent the importance of direction between RSN
+pairs. The plus sign shows when the mean value was greater for the
+depressed group than the control group, while the minus sign shows
+when the mean value was lower for the depressed group than the
+controls. The wavelet total coherence and the wavelet coherence blob
+analysis do not depend on direction. LMN, Lateral Motor Network;
+VISU1, Primary/Medial Visual Network; VISU2, Lateral Visual
+Network; FPR, Frontoparietal Right Network
+total coherence metric that is decreased between DAN and VISU in
+participants with depression.
+The abnormalities within and between AUDI and VIS have also
+been linked to depression. Studies show that dysfunctions in these
+sensory systems, specifically hypoconnectivity, may lead to impaired
+facial processing, sound processing, and integration of visual and audi
+tory information in subjects with depression. 36–38 In our study, both
+AUDI and VISU appear frequently in the top selected features of the
+best performing metrics. Moreover, Yu et al. also discuss the increased
+connectivity between the FPN and visual system, while in our study
+the FPR-VISU2 pair showed decreased G-causality scores for the
+depressed subjects. 17
+One of the best performing metrics utilized in this study is the
+novel concept of wavelet coherence blob analysis that measures the
+discontinuity in coherence between RSN pairs. This method is novel
+and its results are therefore not comparable to any existing literature
+so far. However, the involvement of the cerebellum and the lateral
+motor network in depression has been previously documented and
+linked to cognitive control and emotional processing. 39 In our study,
+CEREB-LMN is one of the best performing pairs in the blob analysis
+metric showing more discontinuity on average in the depression group
+than in the control subjects. This may suggest that in depression sub
+jects, the coherence between the cerebellum and the control network
+switches on and off more often, while the control subjects maintain
+the connectivity between the two RSNs for longer periods of time. The
+literature shows that a significant decrease in motor activity is linked
+to depression. 40–43 The abnormal co-activation pattern between the
+cerebellum and the lateral motor network may explain this lack of
+movement-related activation compared to the control subjects.
+provides the opportunity to test all possible RSN pair combinations and
+select only the most informative pairs while minimizing overfitting. Ini
+tially, three feature selection algorithms were tested on a sample of the
+data: MRMR, chi-squared test, and neighborhood component analysis.
+Since MRMR outperformed chi-squared test and neighborhood com
+ponent analysis in almost all situations, we decided to exclude these
+two algorithms for the other experiments. In the classification phase,
+four classifiers were initially tested: SVM with a polynomial kernel,
+SVM with a radial basis function kernel, linear discriminant analysis,
+and a decision tree. Based on the performance scores obtained using
+these four classifiers, only two—the SVM with polynomial kernel and
+the decision tree—were selected.
+In some of the cases, the sensitivity of the prediction is quite low
+(33% for wavelet total coherence SVM) despite high specificity scores.
+This may be a result from training and testing on an imbalanced dataset,
+which contained more than double the amount of depression subjects
+compared to healthy control subjects (50 vs. 21). In this case, the clas
+sifier learns and adapts the model for depression quite well due to the
+larger sample size. Therefore, the model tends to classify more sub
+jects as depression, rather than healthy control. This fact inevitably
+lowers the overall AUC and decreases the reliability of the results. A
+good improvement for the future of this study would be to introduce
+a dataset balancing technique such as undersampling, oversampling, or
+nested cross-validation.
+In terms of future work and limitations of this study, it is important
+to mention the relatively small sample size of subjects (50 depressed
+and 21 control) and short acquisition time. As suggestions for future
+work, a larger and more balanced sample size as well as including more
+hyperparameter variation in terms of classification and feature selec
+tionalgorithmsisrecommended. Inadditiontothis, a longer acquisition
+time with a shorter TR would benefit this study.
+The aim of this study was to develop novel image-based features for
+the objective diagnosis of depression. We introduced novel highly dis
+criminating features based on wavelet coherence and G-causality that
+led to depression classification accuracies of 80% and above. These
+algorithms, being explainable, offered new insights into the role of
+brain dynamics in depression and therefore have potential of being
+adopted in clinical practice.
+The highest performing metrics involved in depression were the
+wavelet lead coherence, G-causality, and wavelet coherence blob
+analysis (86%, 80%, and 86% accuracy, respectively) showing the
+importance of dynamic features of resting-state activity. The first two
+metrics measure the amount of causality between brain regions and
+show that the DMN, DAN, AUDI, VISU, and FPR are heavily involved
+**10** OBJECTIVE BIOMARKERS OF DEPRESSION
+in medication-free adults with depression. These RSNs are known to
+be linked to emotional and attention processing as well as facial and
+sound processing that can be anomalous in subjects with depression.
+The third highest performing metric shows abnormal activation pat
+terns between DMN2 and AUDI but also between CEREB and LMN in
+depression subjects that may be linked to the decreased motor activity.
+**ACKNOWLEDGEMENTS AND DISCLOSURES**
+The authors declare no conflict of interest.
+**ORCID**
+Jesper Pilmeyer (https://orcid.org/0000-0002-8419-8207)
+AntoineBernas (https://orcid.org/0000-0002-2006-4891)
+JacobusF.A.Jansen (https://orcid.org/0000-0002-5271-8060)
+MarcelBreeuwer (https://orcid.org/0000-0003-1822-8970)
+AlbertP.Aldenkamp (https://orcid.org/0000-0003-3362-9756)
+SvitlanaZinger (https://orcid.org/0000-0001-9357-3067)
+**REFERENCES**
+1. Vos T, Abajobir AA, Abate KH, et al. Global, regional, and national
+incidence, prevalence, and years lived with disability for 328 diseases
+and injuries for 195 countries, 1990–2016: a systematic analysis for
+the Global Burden of Disease Study 2016. Lancet. 2017;390:1211
+59.
+2. American Psychiatric Association A, American Psychiatric Associa
+tion. Diagnostic and Statistical Manual of Mental Disorders: DSM-5.
+Washington, DC: American Psychiatric Association; 2013.
+3. Goldenberg D, Galván A. The use of functional and effective connectiv
+ity techniques to understand the developing brain. Dev Cogn Neurosci.
+2015;12:155-64.
+4. Friston KJ. Functional and effective connectivity: a review. Brain
+Connect. 2011;1:13-36
+5. Zarghami TS, Friston KJ. Dynamic effective connectivity. Neuroimage.
+2020;207:116453
+6. Li BJ, Friston K, Mody M, et al. A brain network model for depression:
+from symptom understanding to disease intervention. CNS Neurosci
+Ther. 2018;24:1004-19.
+7. Brakowski J, Spinelli S, Dörig N, et al. Resting state brain network func
+tion in major depression–depression symptomatology, antidepressant
+treatment effects, future research. J Psychiatr Res. 2017;92:147
+59.
+8. Chen VC, Chou YS, Tsai YH, et al. Resting-state functional connectivity
+and brain network abnormalities in depressive patients with suicidal
+ideation. Brain Topogr. 2021;34:234-44
+9. Marchitelli R, Paillère-Martinot ML, Bourvis N, et al. Dynamic func
+tional connectivity in adolescence-onset major depression: relation
+ships with severity and symptom dimensions. Biol Psychiatry Cogn
+Neurosci Neuroimaging. 2022;7:385-96.
+10. Albert KM, Potter GG, Boyd BD, et al. Brain network functional con
+nectivity and cognitive performance in major depressive disorder. J
+Psychiatric Res. 2019;110:51-6.
+11. Sambataro F, Visintin E, Doerig N, et al. Altered dynamics of brain
+connectivity in major depressive disorder at-rest and during task
+performance. Psychiatry Res Neuroimaging. 2017;259:1-9.
+12. Hu Y, Wen C, Cao G, et al. Brain network connectivity feature
+extraction using deep learning for Alzheimer’s disease classification.
+Neurosci Lett. 2022;782:136673.
+13. Luo L, Wu H, Xu J, et al. Abnormal large-scale resting-state functional
+networks in drug-free major depressive disorder. Brain Imagin Behav.
+2021;15:96-106.
+14. Zheng LJ, Yang GF, Zhang XY, et al. Altered amygdala and hippocam
+pus effective connectivity in mild cognitive impairment patients with
+depression: a resting-state functional MR imaging study with Granger
+causality analysis. Oncotarget. 2017;8:25021-31
+15. Deshpande G, Libero LE, Sreenivasan KR, et al. Identification of neural
+connectivity signatures of autism using machine learning. Front Hum
+Neurosci. 2013;7:670.
+16. Haghighat H, Mirzarezaee M, Araabi BN, et al. An age-dependent
+connectivity-based computer aided diagnosis system for autism spec
+trum disorder using resting-state fMRI. Biomed Signal Process Con
+trol. 2022;71:103108
+17. Yu M, Linn KA, Shinohara RT, et al. Childhood trauma history is linked
+to abnormal brain connectivity in major depression. Proc Natl Acad Sci
+USA. 2019;116:8582-90.
+18. Bernas A, Aldenkamp AP, Zinger S. Wavelet coherence-based clas
+sifier: a resting-state functional MRI study on neurodynamics in
+adolescents with high-functioning autism. Comput Methods Programs
+Biomed. 2018;154:143-51
+19. Khan DM, Masroor K, Jailani MF, et al. Development of wavelet coher
+ence EEG as a biomarker for diagnosis of major depressive disorder.
+IEEE Sens J. 2022;22:4315-25.
+20. Peng H, Long F, Ding C. Feature selection based on mutual informa
+tion criteria of max-dependency, max-relevance, and min-redundancy.
+IEEE Trans Pattern Anal Mach Intell. 2005;27:1226-38.
+21. Yassin W, Nakatani H, Zhu Y, et al. Machine-learning classification
+using neuroimaging data in schizophrenia, autism, ultra-high risk and
+first-episode psychosis. Transl Psychiatry. 2020;10:278.
+22. Gao S, Calhoun VD, Sui J. Machine learning in major depression: from
+classification to treatment outcome prediction. CNS Neurosci Ther.
+2018;24:1037-52.
+23. Orru G, Pettersson-Yeo W, Marquand AF, et al. Using support vector
+machinetoidentifyimagingbiomarkersofneurologicalandpsychiatric
+disease: a critical review. Neurosci Biobehav Rev. 2012;36:1140-52.
+24. Bezmaternykh DD, Melnikov ME, Savelov AA, et al. Resting state
+with closed eyes for patients with depression and healthy partici
+(https://openneuro.org/datasets/ds002748/versions/1.0.0)
+(https://openneuro.org/datasets/ds002748/versions/1.0.0)
+25. Bezmaternykh DD, Melnikov MY, Savelov AA, et al. Brain networks
+connectivity in mild to moderate depression: resting state fMRI study
+with implications to nonpharmacological treatment. Neural Plast.
+2021;2021:8846097.
+26. Jenkinson M, Beckmann CF, Behrens TE, et al. FSL. Neuroimage.
+2012;62:782-90
+27. Griffanti L, Douaud G, Bijsterbosch J, et al. Hand classification of fMRI
+ICA noise components. Neuroimage. 2017;154:188-205.
+28. Smith SM, Fox PT, Miller KL, et al. Correspondence of the brain’s func
+tional architecture during activation and rest. Proc Natl Acad Sci USA.
+2009;106:13040-5.
+29. Nickerson LD, Smith SM, Öngür D, et al. Using dual regression to
+investigate network shape and amplitude in functional connectivity
+analyses. Front Neurosci. 2017;11:115.
+30. Oldehinkel M, Mennes M, Marquand A, et al. Altered connectivity
+between cerebellum, visual, and sensory-motor networks in autism
+spectrum disorder: results from the EU-AIMS longitudinal Euro
+pean autism project. Biol Psychiatry Cogn Neurosci Neuroimaging.
+2019;4:260-70.
+31. Vossel S, Geng JJ, Fink GR. Dorsal and ventral attention sys
+tems: distinct neural circuits but collaborative roles. Neuroscientist.
+2014;20:150-9.
+32. Barnett L, Seth AK. The MVGC multivariate Granger causality tool
+box: a new approach to Granger-causal inference. J Neurosci Methods.
+2014;223:50-68.
+33. Grinsted A, Moore JC, Jevrejeva S. Application of the cross wavelet
+transform and wavelet coherence to geophysical time series. Nonlin
+ear Process Geophys. 2004;11:561-6.
+OBJECTIVE BIOMARKERS OF DEPRESSION **11**
+34. Andrews-Hanna JR, Smallwood J, Spreng RN. The default network and
+self-generated thought: component processes, dynamic control, and
+clinical relevance. Ann N Y Acad Sci. 2014;1316:29-52.
+35. Hamilton JP, Farmer M, Fogelman P, et al. Depressive rumination, the
+default-mode network, and the dark matter of clinical neuroscience.
+Biol Psychiatr. 2015;78:224-30.
+36. Kaiser RH, Andrews-Hanna JR, Wager TD, et al. Large-scale net
+work dysfunction in major depressive disorder: a meta-analysis of
+resting-state functional connectivity. JAMA Psychiatry. 2015;72:603
+11.
+37. Lu F, Cui Q, Huang X, et al. Anomalous intrinsic connectivity within
+and between visual and auditory networks in major depressive
+disorder. Prog Neuropsychopharmacol Biol Psychiatry. 2020;100:
+109889.
+38. Zwanzger P, Zavorotnyy M, Diemer J, et al. Auditory processing in
+remitted major depression: a long-term follow-up investigation using
+3T-fMRI. J Neural Transm. 2012;119:1565-73.
+39. Alalade E, Denny K, Potter G, et al. Altered cerebellar-cerebral
+functional connectivity in geriatric depression. PLoS One. 2011;6:
+e20035.
+40. Chocron O, Aybek S, Paraschiv-Ionescu A, et al. Measuring real life
+motor activity in depression. J Transl Sci. 2020;7:1-4
+41. Finazzi ME, Mesquita ME, Lopes JR, et al. Motor activity and
+depression severity in adolescent outpatients. Neuropsychobiology.
+2010;61:33-40.
+42. Sandmeir A, Schoenherr D, Altmann U, et al. Depression severity
+is related to less gross body movement: a motion energy analysis.
+Psychopathology. 2021;54:106-12.
+43. Tonon AC, Constantino DB, Amando GR, et al. Sleep disturbances, cir
+cadian activity and nocturnal light exposure characterize high risk for
+and current depression in adolescence. Sleep. 2022;45:zsac104.
+44. Cîrstian R, Bernas A, Zinger S, et al. Wavelet function evaluation for
+ASD classification in adolescents based on functional MRI (abstract).
+Presented at the 8th Dutch Bio-Medical Engineering Conference;
+January 29, 2021: Egmond aan Zee.
+**How to cite this article:** Cîrstian R, Pilmeyer J, Bernas A, et al.
+Objective biomarkers of depression: A study of Granger
+causality and wavelet coherence in resting-state fMRI. J
+[Neuroimaging. 2023;1–11. https://doi.org/10.1111/jon.13085](https://doi.org/10.1111/jon.13085)
+=== END: Journal of Neuroimaging - 2023 - C rstian - Objective biomarkers of depression  A study of Granger causality and wavelet (1) 4.pdf (12 equations) ===

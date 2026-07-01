@@ -1,0 +1,1234 @@
+=== PDF: s41398-024-03024-5.pdf ===
+
+Translational Psychiatry www.nature.com/tp
+SYSTEMATIC REVIEW **OPEN**
+The diagnosis of ASD with MRI: a systematic review and meta-analysis
+Sjir J. C. Schielen 1 ✉, Jesper Pilmeyer 1, Albert P. Aldenkamp 1,2 and Svitlana Zinger 1
+© The Author(s) 2024
+|Col1|Col2|Col3|
+|---|---|---|
+||While diagnosing autism spectrum disorder (ASD) based on an objective test is desired, the current diagnostic practice involves<br>observation-based criteria. This study is a systematic review and meta-analysis of studies that aim to diagnose ASD using magnetic<br>resonance imaging (MRI). The main objective is to describe the state of the art of diagnosing ASD using MRI in terms of<br>performance metrics and interpretation. Furthermore, subgroups, including different MRI modalities and statistical heterogeneity,<br>are analyzed. Studies that dichotomously diagnose individuals with ASD and healthy controls by analyses progressing from<br>magnetic resonance imaging obtained in a resting state were systematically selected by two independent reviewers. Studies were<br>sought on Web of Science and PubMed, which were last accessed on February 24, 2023. The included studies were assessed on<br>quality and risk of bias using the revised Quality Assessment of Diagnostic Accuracy Studies tool. A bivariate random-effects model<br>was used for syntheses. One hundred and thirty-four studies were included comprising 159 eligible experiments. Despite the<br>overlap in the studied samples, an estimated 4982 unique participants consisting of 2439 individuals with ASD and 2543 healthy<br>controls were included. The pooled summary estimates of diagnostic performance are 76.0% sensitivity (95% CI 74.1–77.8), 75.7%<br>speciﬁcity (95% CI 74.0–77.4), and an area under curve of 0.823, but uncertainty in the study assessments limits conﬁdence. The<br>main limitations are heterogeneity and uncertainty about the generalization of diagnostic performance. Therefore, comparisons<br>between subgroups were considered inappropriate. Despite the current limitations, methods progressing from MRI approach the<br>diagnostic performance needed for clinical practice. The state of the art has obstacles but shows potential for future clinical<br>||
+$|<br>|<br>|| |<br>|<br>|| |<br>|<br>|| |<br>|<br>|| |<br>|<br>|| |<br>|<br>|| |<br>|<br>|| |<br>|<br>|| |<br>|<br>|| |<br>|<br>|| |<br>|<br>||$
+||||
+$|<br>|<br>|| |<br>|<br>|| |<br>|<br>||$
+||application.||
+||||
+||||
+||Translational Psychiatry  (2024) 14:318 ; https://doi.org/10.1038/s41398-024-03024-5||
+||||
+INTRODUCTION
+Autism spectrum disorder (ASD) is a spectrum of neuropsychiatric
+disorders that typically comes paired with challenges in social
+interaction. Children with ASD tend to show repetitive behavior in
+activities and interests and deficits in communication and
+reciprocal ability. Though most visible during childhood, the
+effects of ASD persist for a lifetime 1.
+The prevalence of ASD is estimated to be one in a hundred
+people worldwide 2. As individuals with ASD lag behind their
+healthy peers in development, they are at a higher risk of
+comorbidities such as depression, stress, and anxiety 1, 3. This
+burden not only affects the individual with ASD but is known to
+spill over to the caregiver 3–6. Carrying this burden comes with
+healthcare costs estimated to range from $2.4 million to $3.2
+million (US$) over the lifetime of an individual 7.
+After its first description in 1943, the definition of autism has
+changed many times over the years 8, 9. Currently, the fifth
+edition of the Diagnostic and Statistical Manual of Mental
+Disorders (DSM-5) is the standard handbook for authoritative
+guidance in the diagnosis of mental disorders, among which ASD,
+in several countries, including the United States 1. The diagnostic
+criteria in the DSM-5 have been debated, specifically during the
+revision period leading up to its publication. A significant part of
+the debate finds its root in the subjectivity surrounding the
+observation-based diagnosis 9, 10. Observation-based diagnosis
+has been agreed to be imperfect, which is why the National
+Institute of Mental Health (NIMH) called for the paradigm to
+change toward a diagnosis based on analyses progressing from
+objective measurements [11, 12].
+Magnetic resonance imaging (MRI) offers a noninvasive, highlevel measurement of the brain from which analysis can progress
+toward clinically relevant variation used for diagnosis. Many studies
+have explored the dichotomous classification between individuals
+with ASD and healthy control subjects (HCs) using different
+modalities of MRI scans: functional MRI (fMRI), structural MRI (sMRI),
+and diffusion MRI (dMRI; i.e., diffusion tensor imaging) [13, 14]. A
+partly similar review that focused only on resting-state fMRI
+(rsfMRI) was conducted by Santana et al. (2022) 15. In their review,
+they presented that the number of included studies exponentially
+increased up until the year 2019. If this trend continues, each
+subsequent year will contain more studies. Therefore, including the
+3 succeeding years results in a significant increase in papers, which
+motivates an update. We also aim to expand by incorporating
+different MRI modalities. Furthermore, we wholly adhered to the
+Preferred Reporting Items for Systematic Reviews and MetaAnalyses (PRISMA) 2020 guidelines 16.
+1 Department of Electrical Engineering, Eindhoven University of Technology, Eindhoven, the Netherlands. 2 Department of Behavioral Sciences, Epilepsy Center Kempenhaeghe,
+Heeze, the Netherlands. ✉ (mailto:s.j.c.schielen@tue.nl)
+Received: 12 July 2023 Revised: 25 June 2024 Accepted: 15 July 2024
+on the same dataset were reported, the results of the experiment
+outlined by the authors were used. If the authors did not outline a
+result, the experiment that yielded the best diagnostic accuracy
+was selected.
+Data items
+The data items that were extracted from the studies span the
+following domains: the dataset (sample size, demographics,
+whether it is obtained at one or more sites), features (atlas, type
+of features, type of processing, and dimension of feature vector),
+the classifier (type and validation method), performance metrics
+(sensitivity, specificity, and accuracy). The year of publication,
+number of experiments, and imaging modality were also
+collected. The performance metrics are the most important to
+the review’s conclusions, as it is considered most in the statistical
+syntheses. A full overview of the data extraction form is present in
+the registry and in Supplementary Materials A2. The time frame
+was not considered, as per the selection criteria only crosssectional experiments were eligible. If studies did not report the
+sensitivity, specificity, and accuracy, additional information that
+allows these to be calculated was sought in the paper. The
+information needed to calculate the required performance metrics
+is given in the registry and in Supplementary Materials A1.
+Study assessment
+The included studies’ risks of bias and quality were assessed on four
+domains: patient selection, index test, reference standard, and flow
+and timing, as we used the revised Quality Assessment of Diagnostic
+Accuracy Studies (QUADAS-2) tool 17. The QUADAS-2 tool consists
+of questions for each of the domains which help in an assessment of
+the respective domain’s risk of bias and overall quality. Concerns
+regarding applicability were also described for the domains of
+patient selection, index test, and reference standard. The assessments were made by two reviewers (SJCS and JP) independently
+and discrepancies were resolved by discussion. The QUADAS-2 tool
+was tailored to this review by adding and deleting some questions
+from the original template. The domain of the index test, for
+example, was tailored to assess the risk of overfitting, as too many
+included features tend to cause overfitting [18, 19]. The template
+and amendments with motivation can be found in the registry and
+in Supplementary Materials A3.
+A judgment that summarized the studies’ risk of bias was made
+per domain. The overall judgment was mainly based on the
+majority of the answers: a majority of yeses, nos, or “unclears”,
+respectively resulted in a low, high, or unclear risk of bias
+assessment. If there was no majority, the overall assessment is
+unclear.
+One exception was made for studies where only data from a
+single site were used to validate results based on a single train-test
+split. We gave this a high risk of bias for the index test, as there is a
+risk that the reported result was based on a lucky split which could
+have been avoided by using cross-validation. If a study trained its
+classifier on data obtained from one site and then tested it on data
+obtained from another site, we considered this risk lower for the
+following reasons. The split is transparent and testing on the data
+of a different site introduces variation through different scanning
+parameters, which has an adverse effect on the performance of
+overfitted classifiers.
+Meta-analysis
+We used Reitsma’s bivariate random-effect model to analyze
+aggregated diagnostic performance metrics 20. The reported
+performance metrics and group sizes were used to calculate
+confusion matrices required for the mada (Meta-Analysis of
+Diagnostic Accuracy) package in R [21, 22]. Using this model, we
+obtained the following statistical syntheses: the sensitivity,
+specificity, summary receiver operator characteristics curve
+(SROC), and the area under the SROC (AUC). These results were
+Translational Psychiatry (2024) 14:318
+2
+S.J.C. Schielen et al.
+In this study, we mainly aim to describe the state of the art of
+diagnosing ASD using MRI in terms of aggregated diagnostic
+performance metrics. We also aim to compare imaging modalities
+and analyze statistical heterogeneity.
+METHODS
+Registration
+This review was registered at Open Science Framework Registries
+(https://doi.org/10.17605/OSF.IO/DRS3Q)
+protocol, amendments, and explanations are provided in the
+registry. The scripts central to the conclusions drawn in this review
+are also provided in the registry.
+Eligibility criteria
+Two reviewers (SJCS and JP) independently screened and
+selected peer-reviewed, cross-sectional studies that described
+dichotomous, individual-level classification between individuals
+with ASD and HCs through an analysis progressing from data
+obtained from a resting-state MRI scan. We made the decision to
+exclude task-based studies. While task-based fMRI merits
+research in the field of neuropsychiatric disorders, we deem
+the factor of analysis to be leading. It is an attempt to limit the
+heterogeneity between the tasks subjects are instructed to
+perform, which is more consistent for studies where participants
+perform the resting task. Furthermore, the studies had to be
+written in English and published between January 1, 2018, and
+December 31, 2022. Studies had to report information on their
+included participants (at least the number of individuals with
+ASD and HCs) and how their sample was used for training,
+validation, and testing, along with the resulting diagnostic
+accuracy, sensitivity, and specificity. Conflicts concerning a
+study’s eligibility were resolved by consensus. An overview of
+the eligibility criteria is available in the registration protocol and
+in Supplementary Materials A1.
+The included studies were used for statistical syntheses in the
+following divisions. Besides synthesizing results on all studies
+combined, subgroups were made for syntheses in two ways: per
+modality (dMRI, rsfMRI, sMRI, multimodal) and whether the data
+was obtained from single or multiple imaging sites. In a post hoc
+analysis to assess the performance of different features, studies
+that used Pearson-correlation-based functional connectivity were
+compared to studies that applied the Fisher transformation to the
+correlation values, as Santana et al. found that the Fisher
+transformation leads to significantly better sensitivity and
+specificity 15.
+Source and search
+Web of Science and PubMed were used to conduct searches, of
+which the last occurred on February 24, 2023, for both databases.
+The following search term was used: (“Autism” OR “Asperger” OR
+“autism spectrum disorder” OR “ASD”) AND (“classification” OR
+$\textquotedblleftmachine learning\textquotedblright OR \textquotedblleftSVM\textquotedblright OR \textquotedblleftNN\textquotedblright OR \textquotedblleftprediction\textquotedblright OR \textquotedblleftdeep$
+learning” OR “computer-aided diagnosis”) AND (“magnetic resonance
+$imaging\textquotedblright OR \textquotedblleftMRI\textquotedblright), where the search range was set between$
+January 1, 2018, and December 31, 2022. We used Web of
+Science’s option to exclude reviews from the search results.
+Selection and collection
+A template was made of the relevant information (variables) to
+extract from the studies. A consensus was reached on the
+template before data collection. Afterward, the information
+specified by the template was extracted from included reports
+by two reviewers (SJCS and JP) independently. Discrepancies in
+the extracted variables were resolved by discussion.
+If a study reported multiple experiments, only the experiments
+conducted on different datasets were included to avoid a
+disproportionate weight in the analyses. If various experiments
+3
+obtained for the specified groups: all experiments, subgroups per
+modality, and whether single or multiple imaging sites were used.
+All included studies were eligible for synthesis due to the eligibility
+criteria.
+To assess the variation that cannot be attributed to sampling
+(i.e. heterogeneity), we used Higgins’ I 2 -statistic computed on the
+diagnostic odds ratios (DORs) obtained with a univariate randomeffect model 23. As objective measures of heterogeneity have
+been argued to be conservative for accuracy studies or
+$\textquoterightconfounded\textquoteright by sample size, we supplemented the objective$
+measure with a visual inspection of both the univariate randomeffect forest plot and the prediction region of the bivariate
+random-effect SROC [24, 25]. The confidence regions for bivariate
+syntheses and confidence intervals of DORs were computed at
+95% confidence. We also performed a sensitivity analysis by
+excluding studies that were judged high risk in any of the
+QUADAS-2 domains, as this bias limits certainty in the evidence of
+an outcome. Potential sample size effects or publication bias were
+assessed using Deek’s test 26.
+RESULTS
+Study selection and characteristics
+The manual selection process is shown in Fig. 1. Our search yielded
+774 results, of which 561 were screened after duplicate removal.
+After the screening, 339 studies were included for reading, of
+which 134 were included in the review [27–160]. The most
+common reason for exclusion was the absence of the required
+metrics or sufficient information that allows these to be calculated.
+In this excluded study, for example, only the AUC and accuracy
+were reported 161. Some studies did show the required metrics
+but in a figure rather than explicitly in a numeric expression, e.g.,
+162. These studies were also excluded. The following studies
+reported more than one experiment eligible for inclusion
+[28, 29, 49, 52, 57, 60, 62, 67, 68, 74, 77, 79, 85, 93, 121, 129]. A
+total of 159 experiments were included.
+A plot of the included studies per year and per modality is
+provided in Supplementary Materials A4. The number of included
+studies increased every year. The characteristics of each experiment are listed in Supplementary Materials B1. It was not possible
+to precisely determine the number of unique participants
+aggregated over the included studies because some studies did
+not mention which participants they selected from publicly
+available datasets. By summing the largest samples per dataset
+used in an included experiment, we conservatively estimated the
+number to be 4982 unique participants consisting of 2439
+individuals with ASD and 2543 healthy controls. Of the included
+experiments, 88.1% used the Autism Brain Imaging Data Exchange
+(ABIDE), 5.7% used an in-house sample, 3.1% used the National
+Database for Autism Research (NDAR), and 3.1% used other
+datasets [163, 164]. A pie chart with an overview is provided in
+Supplementary Materials A5. Since ABIDE was used in most of the
+included studies, there likely was an overlap between the acquired
+samples. Overall, 16.2% of the participants included in the
+experiments were female. As not all studies reported the sex
+distribution of their sample, this statistic only includes the
+experiments that mentioned it.
+The majority (74.8%) of included experiments were performed
+$on rsfMRI data. Furthermore, 13.8\textbackslash% used sMRI and 3.1\textbackslash% used$
+dMRI. Any combination of modalities fell under the category
+multimodal, which accounted for 8.2% of the experiments. The
+number of experiments is plotted per modality in Supplementary
+Materials A6.
+Approval for the studies and informed consent from the
+subjects are either directly reported in the reviewed papers or the
+reviewed papers provide a reference to an online dataset. As
+reviewers, we rely on the accuracy of these reports and we do not
+have the means to independently verify them.
+Translational Psychiatry (2024) 14:318
+S.J.C. Schielen et al.
+Fig. 1 A flowchart of the selection process, where n indicates the
+(https://www.lucidchart.com)
+Study assessment
+The summary judgments on the risk of bias and the concern
+regarding applicability for each study are summarized per domain
+in Fig. 2. These summary judgments were based on answers to the
+questions of the QUADAS-2 tool, which can be found along with
+descriptions in Supplementary Materials B2. No concerns about
+applicability were found, likely as a result of the selection criteria.
+The vast majority of studies scored an unclear risk of bias in the
+domains of the index test and patient selection. In the domain of
+the index test, we took a conservative approach to be risk-averse
+to potential overfitting. The validation method was deemed high
+risk for ten studies, resulting in a summary judgment of high risk.
+Furthermore, in most studies, the number of features was not
+specified. This often led to an unclear risk of bias.
+In the domain of patient selection, many studies gave a
+reference to a publicly available dataset without specifying the
+information required to answer the questions. Since most studies
+selected participants from the dataset, only the reference to the
+whole dataset was not reproducible. In this study, for example,
+subjects were excluded because of ”incomplete brain coverage,
+high motion peaks, ghosting and other scanner artifacts” 80. The
+selection criteria ”high motion peaks” and ”other scanner artifacts”
+were not reproducible because of subjectivity and incompleteness, respectively. This made it impossible to obtain demographic
+0.76
+|Col1|rsfMRI<br>sMRI<br>dMRI<br>multimodal<br>summaryestimate<br>SROC<br>confidenceregion<br>predictionr egion|Col3|
+|---|---|---|
+||||
+||||
+||||
+||||
+|||rsfMRI<br>sMRI<br>dMRI<br>multimodal<br>summary estimate<br>SROC<br>confidence region<br>prediction region|
+||||
+0.0 0.1 0.2 0.3 0.4 0.5 0.6
+False Positive Rate
+Fig. 3 Summary receiver operating characteristics curve for all
+$included experiments, sensitivity 76.0\textbackslash% (95\textbackslash% CI 74.1\textendash77.8), specificity 75.7\textbackslash% (95\textbackslash% CI 74.0\textendash77.4), AUC 0.823. Uncertainty$
+limited the confidence in these results. Note that the axes do not
+span from 0 to 1 to aid readability. No data was left out of the figure.
+{rsf, s, d}MRI: {resting-state functional, structural, diffusion} magnetic
+resonance imaging, SROC summary receiver operating characteristics, AUC area under SROC curve.
+Objective measures of heterogeneity (I 2 ) are listed in Table 1.
+The objective measures suggested moderate heterogeneity in the
+syntheses of all experiments and the subgroups of rsfMRI,
+multimodal, and multi-site. The syntheses of the subgroups of
+sMRI, dMRI, and single-site suggested no important level of
+heterogeneity 24. To supplement the objective measures of
+heterogeneity, we visually inspected the prediction region shown
+in Fig. 3 and the forest plot of the natural logarithm of the
+diagnostic odds ratios shown in Supplementary Materials C1. In
+Fig. 3, 31 (19.5% of) experiments were visually scattered outside of
+the prediction ellipse, also indicating heterogeneity. The nonoverlapping confidence intervals shown in Supplementary Materials C1 further confirmed moderate heterogeneity in the syntheses
+of all experiments and the subgroups of rsfMRI and multimodal. A
+larger overlap between the confidence intervals of the subgroup
+sMRI indicated that less inter-study variation was captured in this
+synthesis. The subgroup dMRI showed near full overlap in
+confidence intervals, which indicated no relevant heterogeneity.
+When comparing single-site and multi-site experiments, we
+observed an overlap between the confidence intervals of singlesite studies that was larger than the overlap between the
+confidence intervals of multi-site studies. The larger overlap for
+single-site experiments was partly aided by larger confidence
+intervals as a result of smaller sample sizes. The absence of this
+overlap in multi-site experiments, nevertheless, could not be
+attributed to sampling and hence was statistical heterogeneity by
+definition.
+Deek’s test indicated a statistically significant negative correlation between the diagnostic odds ratio and sample size in all
+groups used for synthesis apart from the groups dMRI and singlesite (Supplementary Materials A8). After correcting these results
+for multiple comparisons using Bonferroni correction, only the
+subgroup of multimodal no longer showed a statistically
+significant correlation (P = 0.034). The negative correlation
+between the diagnostic odds ratio and sample size indicated
+the presence of small-study effects.
+The results of the post hoc test on whether the Fisher
+transformation of functional connectivity yields better diagnostic
+Translational Psychiatry (2024) 14:318
+4
+S.J.C. Schielen et al.
+Fig. 2 Graphical summary of QUADAS-2 assessments. The top figure
+shows the risk of bias summary assessments and the bottom figure
+shows the level of concern summary assessments.
+information like age, sex, or potential comorbidity, even though a
+reference to ABIDE was provided. Therefore, we only considered
+the information provided in the papers themselves, which often
+resulted in questions being answered unclear. In turn, the
+summary judgment often resulted in unclear.
+Meta-analysis
+The main outcome resulted from pooling over all (159) included
+experiments. In this quantitative analysis, experiments conducted
+using different MRI modalities, disjoint and overlapping patient
+samples, and samples obtained with different scanning parameters were included. This resulted in the following summary
+estimates for the performance metrics: 76.0% sensitivity (95% CI
+74.1–77.8), 75.7% specificity (95% CI 74.0–77.4), and an AUC of
+0.823. Uncertainty in study assessment limited the confidence in
+these results. The SROC curve, along with its 95% confidence
+region and 95% prediction region, is shown in Fig. 3.
+The summary estimates of the performance metrics and the
+DOR, along with the measure of statistical heterogeneity, are listed
+for each of the groups used for synthesis in Table 1. Per group, the
+included studies, the number of studies (n) and the number of
+studies that scored a high risk of bias in any of the QUADAS-2
+domains (n hrob ), and the share of experiments conducted on a
+multi-site sample are also listed. Note that the number of studies
+included in the single-site and multisite subgroups does not add
+up to the total number of studies because two studies did not
+specify whether multiple or a single site were used [36, 55]. As
+shown in Fig. 2, only high risks of bias occurred in the domains of
+the index test and patient selection. A high risk of bias in either of
+these domains might result in slightly inflated performance
+metrics, as they might generalize poorly to new patients as a
+result of selection or being overfitted. A sensitivity analysis was
+conducted to assess this impact.
+We repeated the primary analyses after excluding the studies
+that scored a high risk of bias in any of the QUADAS-2 domains.
+The results are listed in Supplementary Materials A7. We observed
+no significant changes after excluding high-risk studies, as the
+confidence intervals of the sensitivity, specificity, and DOR
+significantly overlapped with those listed for the respective
+groups in Table 1.
+The vast majority of studies scored unclear in the domains of
+the index test and patient selection. If we excluded studies that
+scored unclear in any of the domains, only two studies remained
+[73, 117]. We considered these too few for a separate analysis. Due
+to the extent of uncertainty, we have limited confidence in the
+results of the syntheses.
+S.J.C. Schielen et al.
+performance than the Pearson-correlation values are listed in
+Supplementary Materials A9. Based on the studies included in this
+review, no significantly higher diagnostic odds ratio was observed
+for studies that use the Fisher transformation (P = 0.593).
+DISCUSSION
+We aimed to describe the state of the art in diagnosing ASD with
+MRI and found the overall summary estimates of 76.0% sensitivity
+$\textendash \textendash$
+(95% CI 74.1 77.8), 75.7% specificity (95% CI 74.0 77.4), and an
+AUC of 0.823, however, there is limited certainty in these results as
+the vast majority of studies scored unclear in at least one of the
+assessment domains. Furthermore, we aimed to compare imaging
+modalities and analyze statistical heterogeneity.
+The modalities included in this review are sMRI, dMRI, rsfMRI,
+and multimodal, i.e., any combination of the modalities. It is worth
+mentioning that magnetic resonance spectroscopy (MRS) was
+originally not considered as we focused on imaging. Still, studies
+have shown neurometabolic differences between individuals with
+ASD and healthy controls with MRS 165. In a post hoc search
+tailored to MRS with the same selection criteria (the terms
+magnetic resonance imaging and MRI were respectively replaced
+with magnetic resonance spectroscopy and MRS in the search
+term), we explored whether studies used these neurometabolic
+differences for diagnosis using MRS. This search resulted in
+27 studies of which none were eligible. The most common reason
+for exclusion was evaluation of group differences rather than
+individual-level classification. While these studies were not eligible
+per our selection criteria, the neurometabolic differences identified with MRS potentially are a valuable supplement to the
+aberrations found with MRI.
+As listed in Table 1, the degree of heterogeneity captured in the
+subgroups varied greatly. As objective measures of heterogeneity
+are debated, we supplemented with visual inspection of the
+univariate random-effect forest plot (Supplementary Materials C1)
+and the prediction region of the SROC obtained with the bivariate
+random-effects model [24, 25]. The visual inspection allowed more
+certainty in the objective measures, as we observed the
+percentage described by the I 2 -statistic to be proportional to
+the visual discrepancies between the confidence intervals in the
+forest plot. While we acknowledged that the obtained I 2 -statistics
+likely do not exactly describe the degree of heterogeneity
+captured in the syntheses, we deemed it sufficient to draw
+conclusions based on the visual supplement.
+With the observed differences in the degrees of heterogeneity
+in mind, we did not consider it appropriate to statistically test
+whether one modality was more favorable than another. We
+could, for example, compare rsfMRI and sMRI as they were the two
+most represented modalities in the meta-analysis. One can
+observe a better outcome for the synthesis of sMRI with a
+–
+sensitivity of 79.9% (95% CI 75.4 83.8) and specificity of 77.7%
+$\textendash \textquoteright (95\textbackslash% CI 71.3 83.0) compared to rsfMRI s sensitivity of 74.8\textbackslash%$
+$\textendash \textendash$
+(72.7 76.8) and specificity of 75.4% (95% CI 73.5 77.1). This
+difference might be statistically significant, but conclusions based
+on this would not take the captured extent of heterogeneity into
+account, making it an ill comparison. Out of the experiments
+included in the synthesis for sMRI, 37.9% were multi-site
+experiments, whereas the share of multi-site experiments was
+77.6% for the synthesis of rsfMRI experiments. There is no
+guarantee the diagnostic performance found for the synthesis of
+sMRI experiments will hold up when tested to the extent to which
+the rsfMRI experiments were tested, which included larger, more
+heterogeneous samples. Moreover, most studies scored unclear in
+at least one of the QUADAS-2 assessment domains, which
+indicates limited confidence in generalization ability.
+As the degree of captured heterogeneity varies over the
+included studies, it is not straightforward to assess what features
+are most valuable for ASD diagnosis. Santana et al. found higher
+5
+Translational Psychiatry (2024) 14:318
+2:1 male-to-female ratio to a 5:1 male-to-female ratio 172. Out of
+the included experiments, 88.1% used ABIDE, which is mainly
+supplied by American and European sites. Therefore, a limitation
+in the evidence is the overlap in the samples, which limits
+certainty in the generalization ability toward broader gender
+inclusion and ethnic diversity.
+Deek’s test was recommended for meta-analyses of diagnostic
+test accuracies [26, 173]. We observed a statistically significant
+negative correlation between diagnostic accuracy and sample size
+for the synthesis on all experiments and the syntheses of the
+subgroups rsfMRI, sMRI, and multi-site. No statistically significant
+correlations were found for the subgroups dMRI and single-site.
+After Bonferroni correction, the correlation found for the subgroup
+of multimodal studies was no longer significant. For the plot and
+P-values, please refer to Supplementary Materials A8. The
+statistically significant correlations showed the presence of
+small-study effects, as smaller studies tended to have higher
+diagnostic accuracies than larger studies.
+The presence of small-study effects may indicate publication
+bias. However, the contributions of publication bias and other
+forms of heterogeneity cannot always be disentangled in metaanalyses 174. As publication bias is a form of heterogeneity,
+small-study effects cannot be explained by only looking at the
+measures of heterogeneity, as cause and effect cannot be
+disentangled. Considering the proxy for cross-site heterogeneity,
+however, a clear distinction is observable between subgroups that
+included multi-site experiments (rsfMRI, sMRI, multimodal, and
+multi-site) and subgroups that did not (dMRI and single-site). As
+researchers are limited in their resources, larger samples are likely
+gathered from multi-site cohorts like ABIDE. As described before,
+multi-site samples come paired with a larger degree of captured
+heterogeneity. This is known to have an adverse effect on the
+performance of machine-learning-based algorithms, which in turn
+results in lower diagnostic accuracy [167, 168]. While we cannot
+completely exclude the possible presence of publication bias, we
+think the observed small-study effects are rather an artifact of
+cross-site heterogeneity.
+We assessed studies using the QUADAS-2 tool of which the full
+results are listed in Supplementary Materials B2 and the summary
+judgments in Fig. 2 17. The QUADAS-2 tool was tailored to the
+review. The questions, together with amendments and rationale, are
+reported in Supplementary Materials A3. A limitation of this
+approach is that it may have been too risk-averse. Assessing studies’
+methodology (the index test) based on two questions is ultimately a
+simplification of an approach that may be hard to represent in two
+questions. We considered that the number of features should be
+proportional to the sample size, as more features than samples are
+known to cause overfitting. This is known as the Hughes
+phenomenon or the curse of dimensionality [18, 19].
+We considered training on a set and testing on a hold-out set
+from the same site to be a high risk of bias because it allows
+manipulation of the results. There is no transparency in the split
+and there is no information on whether the performance will hold
+up if different distributions of the set are used for training and
+testing. This limitation likely has a small effect on the evidence as
+only ten studies were flagged as high risk because of this, which
+after sensitivity analysis did not show significant effects in the
+synthesis outcomes of any of the analyses.
+A high risk of bias in patient selection indicated that the
+reported performance might be too specific to the selected
+sample. If the index test was judged at a high risk of bias, it
+indicated that the methodology was prone to overfitting. Both the
+former and the latter domains indicated a risk in the generalization ability of the experiment’s methodology. As all but two
+studies scored unclear in at least one of these domains, the main
+limitation in the evidence is the uncertainty [73, 117].
+This uncertainty was mainly caused by what the authors
+explicitly reported. In our review, most studies used ABIDE. Only a
+Translational Psychiatry (2024) 14:318
+6
+S.J.C. Schielen et al.
+sensitivity and specificity for studies that used the Fisher
+transform of functional connectivity compared to studies that
+did not use the transform in their review of rsfMRI 15.
+Therefore, we tested if Fisher transformed functional connectivity also led to better diagnostic performance than the studies
+that used functional connectivity without Fisher transform in
+this review. We did not find significantly higher diagnostic
+performance when studies used the Fisher transform (P = 0.593,
+Supplementary Materials A9). We cannot conclude that the
+Fisher transform is favorable when using functional connectivity
+based on the studies we included, but this may be due to the
+observed heterogeneity.
+To analyze part of the observed heterogeneity, we used
+whether an experiment was conducted on a sample gathered
+from a single site or multiple sites as a proxy for cross-site
+heterogeneity. This can be considered a separate subgroup
+analysis, which was one of the suggested approaches 166.
+Unseen data obtained in a different way (e.g., different scanning
+parameters) were described to introduce variation, which forms an
+obstacle to the clinical application of machine-learning-based
+approaches [167, 168]. Listed in the “I 2 ” and “share multi-site”
+columns of Table 1, the captured heterogeneity I 2 can be
+observed to be correlated to the share of multisite experiments.
+While this proxy seemed to explain at least a part of the
+heterogeneity, it came with limitations. The proxy itself is a
+dichotomization of whether one or multiple sites were included in
+the experiment’s sample. The degree of heterogeneity caused by
+different sites is likely proportional to the number of sites. The
+degrees of captured heterogeneity between multi-site samples
+varied, which was not accounted for by dichotomizing between
+experiments conducted on single-site and multi-site samples. This
+meant that although we expected heterogeneity in all multi-site
+experiments, the extent differed based on how many different
+sites were included. This was not accounted for in the
+dichotomization.
+In addition, the proxy only accounted for potential variation
+between the sites where the samples used for experiments came
+from. The syntheses on single-site experiments and dMRI
+experiments, respectively showed an I 2 -statistic of 17.3% and
+0.0%, which both fell in the range considered not important 24.
+Despite that these levels might not be considered important, the
+captured heterogeneity in the synthesis of single-site experiments
+showed heterogeneity that cannot be attributed to cross-site
+effects. This indicates that not all heterogeneity in the multi-site
+samples can be attributed to cross-site variation. Despite the
+limitations of the proxy, it explained the observable differences in
+measured heterogeneity between the syntheses on multi-site and
+single-site experiments.
+We have used the term heterogeneity mostly in the statistical
+sense in this study, but it is universally accepted as a keyword to
+describe ASD itself 169. ASD has been described to be
+heterogeneous in etiology, phenotypes, and manifestation
+170. Therefore, it is likely that any sample will capture some
+degree of heterogeneity inherent to ASD, even without the
+introduction of cross-site effects. This source of heterogeneity is
+likely captured to a larger extent if individuals with different
+places on the spectrum are included. If a larger sample is
+acquired, it is likely that more of the heterogeneity inherent to
+ASD is captured. The heterogeneity inherent to ASD is a possible
+explanation of the observed heterogeneity in single-site
+experiments. Also, the differences in modalities, methodology,
+and patient selection are possible explanations.
+Sex differences in ASD were also observed to add to the
+inherent heterogeneity [170, 171]. Not all of the included
+experiments specified the sex distribution of their samples, but
+the aggregated distribution over experiments that did report the
+sex distribution is 16.2% female and 83.8% male. This likely is an
+effect of the imbalance in prevalence, as estimates range from a
+7
+reference to ABIDE is insufficient to determine whether inappropriate exclusions were made, comorbidity was avoided, and
+whether the sample was continuous or random. Even if
+reproducible selection criteria are reported, public databases
+may be updated, which invalidates the reproducibility. We
+consulted two other systematic reviews that also used the
+QUADAS-2 tool [15, 175]. They also reported the vast majority of
+studies were at high or uncertain risk of bias in the domain of
+patient selection. Therefore, we urge authors to describe the
+samples they used for their experiments in the study. This
+description should include the distribution of patients and healthy
+controls and their sex, age, and other potentially applicable
+information like the subject’s intelligence quotient. Information on
+how the sample was recruited should also be provided: if it was
+continuous or random and how selections were made 17. A
+reference to the dataset should not replace this information.
+The main obstacles in the way of clinical application are
+uncertainty and heterogeneity. While the former may be solved by
+making authors aware of what should be reported, the latter
+might also benefit from clear communication about specifications.
+Efforts have been made to harmonize the data obtained from
+different sites, in an attempt to minimize the imaging-protocolinduced heterogeneity 176. Another idea is to not place a
+diagnostic tool in a universal framework altogether but to avoid
+cross-site heterogeneity by developing locally applied diagnostic
+tools [175, 177]. With these ideas in mind, we recommend that
+authors start reporting the imaging parameters on which their
+system works and the sample used together with its demographic
+information. Then, these studies can be assessed in a review which
+may outline consistent findings. The combined results may allow
+the creation of different protocols that each encompass part of
+the heterogeneity rather than a universal protocol that attempts
+to solve the heterogeneity altogether.
+If heterogeneity’s impact and uncertainty can be sufficiently
+reduced, the results look promising. Sensitivity and specificity
+of 80% are proposed as the minimum diagnostic performance
+required for clinical application [175, 178]. The main summary
+estimate of 76.0% sensitivity and 75.7% specificity is not far off
+the clinical minimum, especially considering the captured
+heterogeneity has an adverse effect on diagnostic performance. The results of the synthesis on single-site experiments
+may be more appropriate to compare to the clinical guidelines,
+as no small-study effects were found, and the overall degree
+captured heterogeneity was lower. These results are very near
+the level of clinical application: 79.1% sensitivity and 80.0%
+specificity.
+While critical assessment of new tools is necessary, we should
+not forget that the current diagnostic practice is not perfect. A
+systematic review, in which the performance of observation-based
+diagnostic methods was compared to the assessment of a multidisciplinary team (considered the gold standard), concluded that
+any tool that correctly classifies ASD with 80% accuracy or more
+could be considered as accurate as the gold standard 179. This
+underscores the need for and importance of an objective
+diagnosis based on a measurement. Despite the limitations, the
+results obtained in this review approach the level of the gold
+standard.
+Current efforts of creating an objective diagnostic tool based on
+a measurement are usually trained and validated with groundtruth diagnoses obtained with methods prone to subjectivity, e.g.,
+following the DSM-5 guidelines. All studies in the review provided
+a reference to an online dataset (e.g., ABIDE), or information on
+the used reference standard and their selection criteria, hence all
+studies scored a low risk of bias in the domain of the reference
+standard. These studies are all built upon a selection process that
+is more rigorous in distinguishing between individuals with ASD
+and healthy controls than diagnostics that are likely routinely
+practiced. For example, some studies mentioned using the Autism
+Translational Psychiatry (2024) 14:318
+S.J.C. Schielen et al.
+Diagnostic Observation Schedule-Generic or the Autism Diagnostic Interview-Revised, which are rigorous methods but often too
+time-consuming to be routinely performed [180, 181].
+Based on the additional attention provided to the selection
+of individuals for the samples used in the reviewed studies, we
+think the effect of subjectivity on the ground-truth labels used
+in these studies is minimized. We also see this as an
+opportunity for MRI as an objective tool to translate this
+rigorous selection effort to practice in a time-efficient way, as it
+is trained and validated on these carefully selected data.
+Nevertheless, traces of the subjective nature of the current
+ground-truth data cannot be excluded completely from
+methods trained or validated on them. Therefore, an additional
+method of validation may be explored in the future. An
+objective diagnosis progressing from one measurement (e.g.,
+MRI) could be used to validate an objective diagnosis
+progressing from a different measurement (e.g., blood-based)
+and vice versa. In this way, MRI and potentially other candidate
+objective tests could complement each other, and consensus
+between them may further add confidence to the true
+diagnosis of the tested individual. An approach like this would
+be largely in line with the NIMH’s Research Domain Criteria
+initiative, which suggests a framework that accommodates
+different objective measurements to complement the current
+psychopathological approach 182.
+The diagnosis of ASD using MRI shows promise as consistent
+findings indicate that biomarkers capable of differentiating
+individuals with ASD and healthy controls exist and MRI is able
+to capture them. The main obstacles in the way of clinical
+application are heterogeneity and uncertainty about generalization. The state of the art in diagnosing ASD using MRI is best
+described as potent and desired, but not ready for clinical
+application yet.
+DATA AVAILABILITY
+Data collection forms and data extracted from included studies are publicly available
+in the registry and in supplementary materials. All data used for analyses came from
+the extracted data. The scripts central to the conclusions in this review are available
+[in the registry: https://osf.io/z3aeu. Furthermore, the most represented datasets in](https://osf.io/z3aeu)
+the review are publicly available [163, 164].
+REFERENCES
+1. American Psychiatric Association. Diagnostic and statistical manual of mental
+disorders: DSM-5 (American Psychiatric Publishing, 2013).
+2. Zeidan J, Fombonne E, Scorah J, Ibrahim A, Durkin MS, Saxena S, et al. Global
+prevalence of autism: a systematic review update. Autism Res. 2022;15:778–90.
+3. Kuhlthau K, Orlich F, Hall TA, Sikora D, Kovacs EA, Delahaye J, et al. Healthrelated quality of life in children with autism spectrum disorders: results from
+the autism treatment network. J Autism Dev Disord. 2010;40:721–9.
+4. Stuart M, McGrew JH. Caregiver burden after receiving a diagnosis of an autism
+spectrum disorder. Res Autism Spectr Disord. 2009;3:86–97.
+5. Hoefman R, Payakachat N, van Exel J, Kuhlthau K, Kovacs E, Pyne J, et al. Caring
+for a child with autism spectrum disorder and parents’ quality of life: application
+of the carerqol. J Autism Dev Disord. 2014;44:1933–45.
+6. Lindly OJ, Shui AM, Stotts NM, Kuhlthau KA. Caregiver strain among north
+american parents of children from the autism treatment network registry callback study. Autism. 2022;26:1460–76.
+7. Rogge N, Janssen J. The economic costs of autism spectrum disorder: a literature review. J Autism Dev Disord. 2019;49:2873–2900.
+8. Kanner L. Autistic disturbances of affective contact. Nervous Child.
+1943;2:217–50.
+9. Singer E. Diagnosis: redefining autism. Nature. 2012;491:S12–S13.
+10. Johnson RA, Barrett MS, Sisti DA. The ethical boundaries of patient and advocate
+influence on dsm-5. Har Rev Psychiatry. 2013;21:334–44.
+11. Craddock N, Mynors-Wallis L. Psychiatric diagnosis: impersonal, imperfect and
+important. Br J Psychiatry. 2014;204:93–95.
+12. Insel T, Cuthbert B, Garvey M, Heinssen R, Pine DS, Quinn K, et al. Research
+domain criteria (rdoc): toward a new classification framework for research on
+mental disorders. Am J Psychiatry. 2010;167:748–51.
+39. Cao M, Yang M, Qin C, Zhu X, Chen Y, Wang J, et al. Using deepgcn to identify
+the autism spectrum disorder from multisite resting-state data. Biomed Signal
+Process Control. 2021;70:103015.
+40. Cao P, Wen G, Liu X, Yang J, Zaiane OR. Modeling the dynamic brain network
+representation for autism spectrum disorder diagnosis. Med Biol Eng Comput.
+2022;60:1897–913.
+41. Chen T, Chen Y, Yuan M, Gerstein M, Li T, Liang H, et al. The development of a
+practical artificial intelligence tool for diagnosing and evaluating autism spectrum disorder: multicenter study. JMIR Med Inform. 2020;8:e15767.
+42. Chen X, Wang Z, Zhan Y, Cheikh FA, Ullah M. Interpretable learning approaches
+in structural mri: 3d-resnet fused attention for autism spectrum disorder classification. Proc SPIE. 2022;12033:611–8.
+43. Chen Y, Yan J, Jiang M, Zhang T, Zhao Z, Zhao W, et al. Adversarial learning
+based node-edge graph attention networks for autism spectrum disorder
+identification. In IEEE Transactions on Neural Networks and Learning Systems.
+2022.
+44. Chen Z, Ji J, Liang Y. Convolutional neural network with an element-wise filter to
+classify dynamic functional connectivity. In 2019 IEEE International Conference
+on Bioinformatics and Biomedicine (BIBM). 2019; 643-6.
+45. Chu Y, Wang G, Cao L, Qiao L, Liu M. Multi-scale graph representation learning
+for autism identification with functional mri. Front Neuroinform. 2022;15:
+802305.
+46. Dammu PS, Bapi RS. Employing temporal properties of brain activity for classifying autism using machine learning. In Pattern Recognition and Machine
+Intelligence: 8th International Conference. 2019; 193–200.
+47. Dekhil O, Hajjdiab H, Shalaby A, Ali MT, Ayinde B, Switala A, et al. Using resting
+state functional mri to build a personalized autism diagnosis system. PLoS ONE.
+2018;13:e0206351.
+48. Dekhil O, Ali M, El-Nakieb Y, Shalaby A, Soliman A, Switala A, et al. A personalized autism diagnosis cad system using a fusion of structural mri and restingstate functional mri data. Front Psychiatry. 2019;10:392.
+49. Deng X, Zhang J, Liu R, Liu K. Classifying asd based on timeseries fmri using
+spatial–temporal transformer. Comput Biol Med. 2022;151:106320.
+50. Denier N, Steinberg G, van Elst LT, Bracht T. The role of head circumference and
+cerebral volumes to phenotype male adults with autism spectrum disorder.
+Brain Behav. 2022;12:e2460.
+51. Duan Y, Zhao W, Luo C, Liu X, Jiang H, Tang Y, et al. Identifying and predicting
+autism spectrum disorder based on multi-site structural mri with machine
+learning. Front Human Neurosci. 2022;15:820.
+52. Dvornek NC, Li X, Zhuang J, Duncan JS. Jointly discriminative and generative
+recurrent neural networks for learning from fMRI. Mach Learn Med Imaging.
+2019;11861:382–90.
+53. Eill A, Jahedi A, Gao Y, Kohli JS, Fong CH, Solders S, et al. Functional connectivities are more informative than anatomical variables in diagnostic classification of autism. Brain Connect. 2019;9:604–12.
+54. El Gazzar A, Cerliani L, van Wingen G, Thomas RM. Simple 1-d convolutional
+networks for resting-state fmri based classification in autism. In 2019 International Joint Conference on Neural Networks (IJCNN). 2019:1–6.
+55. ElNakieb Y, Soliman A, Mahmoud A, Dekhil O, Shalaby A, Ghazal M, et al. Autism
+spectrum disorder diagnosis framework using diffusion tensor imaging. In 2019
+IEEE International Conference on Imaging Systems and Techniques (IST).
+2019:1–5.
+56. Epalle TM, Song Y, Liu Z, Lu H. Multi-atlas classification of autism spectrum
+disorder with hinge loss trained deep architectures: ABIDE I results. Appl Soft
+Comput. 2021;107:107375.
+57. Epalle TM, Song Y, Lu H, Liu Z. Characterizing and identifying autism disorder
+using regional connectivity patterns and extreme gradient boosting classifier. In
+Neural Information Processing: 26th International Conference. 2019;570–9.
+58. Fu Y, Zhang J, Li Y, Shi J, Zou Y, Guo H, et al. A novel pipeline leveraging surfacebased features of small subcortical structures to classify individuals with autism
+spectrum disorder. Progr Neuropsychopharmacol Biol Psychiatry. 2021;104:
+109989.
+59. Gao J, Chen M, Li Y, Gao Y, Li Y, Cai S, et al. Multisite autism spectrum disorder
+classification using convolutional neural network classifier and individual morphological brain networks. Front Neurosci. 2021;14:629630.
+60. Gao K, Sun Y, Niu S, Wang L. Unified framework for early stage status prediction
+of autism based on infant structural magnetic resonance imaging. Autism Res.
+2021;14:2512–23.
+61. Guo X, Wang J, Wang X, Liu W, Yu H, Xu L, et al. Diagnosing autism spectrum
+disorder in children using conventional mri and apparent diffusion coefficient
+based deep learning algorithms. Eur Radiol. 2022;32:761–70.
+62. Haghighat H, Mirzarezaee M, Araabi BN, Khadem A. A sex-dependent computeraided diagnosis system for autism spectrum disorder using connectivity of
+resting-state fmri. J Neural Eng. 2022;19:056034.
+Translational Psychiatry (2024) 14:318
+8
+S.J.C. Schielen et al.
+13. Glover GH. Overview of functional magnetic resonance imaging. Neurosurg Clin.
+2011;22:133–9.
+14. Soares JM, Marques P, Alves V, Sousa N. A hitchhiker’s guide to diffusion tensor
+imaging. Front Neurosci 2013;7:31.
+15. Santana C, Carvalho E, Rodrigues I, Bastos G, Souza A, Brito L. rs-fmri and
+machine learning for asd diagnosis: a systematic review and meta-analysis. Sci
+Rep. 2022;12:6030.
+16. Page MJ, Moher D, Bossuyt PM, Boutron I, Hoffmann TC, Mulrow CD, et al.
+Prisma 2020 explanation and elaboration: updated guidance and exemplars for
+reporting systematic reviews. BMJ. 2021;372:n160.
+17. Whiting PF, Rutjes AW, Westwood ME, Mallett S, Deeks JJ, Reitsma JB, et al.
+Quadas-2: a revised tool for the quality assessment of diagnostic accuracy
+studies. Ann Intern Med. 2011;155:529–36.
+18. Maxwell AE, Warner TA, Fang F. Implementation of machine-learning classifi
+cation in remote sensing: an applied review. Int J Remote Sens. 2018;39:
+2784–817.
+19. Berisha V, Krantsevich C, Hahn PR, Hahn S, Dasarathy G, Turaga P, et al. Digital
+medicine and the curse of dimensionality. NPJ Digi Med. 2021;4:153.
+20. Reitsma JB, Glas AS, Rutjes AW, Scholten RJ, Bossuyt PM, Zwinderman AH.
+Bivariate analysis of sensitivity and specificity produces informative summary
+measures in diagnostic reviews. J Clin Epidemiol. 2005;58:982–90.
+21. Doebler P, Holling H, Sousa-Pinto B. mada: meta-analysis of diagnostic accuracy.
+(https://R-Forge.R-project.org/projects/mada/)
+22. R Core Team. R: a language and environment for statistical computing. R
+(https://www.R-project.org/)
+(2023).
+23. Higgins JP, Thompson SG, Deeks JJ, Altman DG. Measuring inconsistency in
+meta-analyses. BMJ. 2003;327:557–60.
+24. Macaskill P, Gatsonis C, Deeks J, Harbord R, Takwoingi Y. Cochrane handbook for
+systematic reviews of diagnostic test accuracy. Wiley; 2010.
+25. Holling H, Böhning W, Masoudi E, Böhning D, Sangnawakij P. Evaluation of a
+new version of i2 with emphasis on diagnostic problems. Commun Stat Simul
+Comput. 2020;49:942–72.
+26. Deeks JJ, Macaskill P, Irwig L. The performance of tests of publication bias and
+other sample size effects in systematic reviews of diagnostic test accuracy was
+assessed. J Clin Epidemiol. 2005;58:882–93.
+27. Aghdam MA, Sharifi A, Pedram MM. Combination of rs-fmri and smri data to
+discriminate autism spectrum disorders in young children using deep belief
+network. J Digit Imaging. 2018;31:895–903.
+28. Aghdam MA, Sharifi A, Pedram MM. Diagnosis of autism spectrum disorders
+in young children based on resting-state functional magnetic resonance
+imaging data using convolutional neural networks. J Digit Imaging. 2019;32:
+899–918.
+29. Ahammed MS, Niu S, Ahmed MR, Dong J, Gao X, Chen Y. Bag-of-features model
+for asd fmri classification using svm. In 2021 Asia-Pacific Conference on Communications Technology and Computer Science (ACCTCS); 2021.
+30. Ahmed MR, Ahammed MS, Niu S, Zhang Y. Deep learning approached features
+for ASD classification using SVM. IEEE Int Conf Artif Intell Inform
+Syst.2020:287–90.
+31. Al-Hiyali MI, Yahya N, Faye I, Hussein AF. Identification of autism subtypes based
+on wavelet coherence of bold fmri signals using convolutional neural network.
+Sensors. 2021;21:5256.
+32. Al-Hiyali MI, Yahya N, Faye I, Al-Quraishi MS, Al-Ezzi A. Principal subspace of
+dynamic functional connectivity for diagnosis of autism spectrum disorder. Appl
+Sci. 2022;12:9339.
+33. Bernas A, Aldenkamp AP, Zinger S. Wavelet coherence-based classifier: a
+resting-state functional mri study on neurodynamics in adolescents with highfunctioning autism. Comput Methods Programs Biomed. 2018;154:143–51.
+34. Bhaumik R, Pradhan A, Das S, Bhaumik DK. Predicting autism spectrum disorder
+using domain-adaptive cross-site evaluation. Neuroinformatics. 2018;16:
+197–205.
+35. Bi X-a, Wu H, Hu X, Fu Y, Peng S. Clustering-evolutionary random support vector
+machine ensemble for fmri-based asperger syndrome diagnosis. Comp J.
+2022;65:251–60.
+36. Bilgen I, Guvercin G, Rekik I. Machine learning methods for brain network
+classification: application to autism diagnosis using cortical morphological
+networks. J Neurosci Methods. 2020;343:108799.
+37. Brahim A, Farrugia N. Graph fourier transform of fmri temporal signals based on
+an averaged structural connectome for the classification of neuroimaging. Artif
+Intell Med. 2020;106:101870.
+38. Byeon K, Kwon J, Hong J, Park H. Artificial neural network inspired by neuroimaging connectivity: application in autism spectrum disorder. In 2020 IEEE
+International Conference on Big Data and Smart Computing (BigComp). 2020:
+575-8.
+9
+63. Han Y, Rizzo DM, Hanley JP, Coderre EL, Prelock PA. Identifying neuroanatomical
+and behavioral features for autism spectrum disorder diagnosis in children
+using machine learning. PLos ONE. 2022;17:e0269773.
+64. Hao X, An Q, Li J, Min H, Guo Y, Yu M, et al. Exploring high-order correlations
+with deep-broad learning for autism spectrum disorder diagnosis. Front Neu
+rosci. 2022;16:1046268.
+65. Hu J, Cao L, Li T, Liao B, Dong S, Li P. Interpretable learning approaches in
+resting-state functional connectivity analysis: the case of autism spectrum disorder. Comput Math Methods Med. 2020; 2020:1394830.
+66. Hu J, Cao L, Li T, Dong S, Li P. Gat-li: a graph attention network based learning
+and interpreting method for functional brain network classification. BMC
+Bioinformatics. 2021;22:1–20.
+67. Hu Z, Wang J, Zhang C, Luo Z, Luo X, Xiao L, et al. Uncertainty modeling for
+multicenter autism spectrum disorder classification using takagi–sugeno–kang
+fuzzy systems. IEEE Trans Cognitive Dev Syst. 2021;14:730–9.
+68. Hu Y, Huang Z-A, Liu R, Xue X, Song L, Tan KC. A dualstage pseudo-labeling
+method for the diagnosis of mental disorder on MRI scans. In 2022 International
+Joint Conference on Neural Networks (IJCNN). 2022:1–8.
+69. Huang H, Liu X, Jin Y, Lee S-W, Wee C-Y, Shen D. Enhancing the representation
+of functional connectivity networks by fusing multi-view information for autism
+spectrum disorder diagnosis. Human Brain Mapp. 2019;40:833–54.
+70. Huang Z-A, Zhu Z, Yau CH, Tan KC. Identifying autism spectrum disorder from
+resting-state fmri using deep belief network. IEEE Trans Neural Netw Learn Syst.
+2020;32:2847–61.
+71. Huang Z-A, Liu R, Tan KC. Multi-task learning for efficient diagnosis of ASD and
+ADHD using resting-state fMRI data. In 2020 International Joint Conference on
+Neural Networks (IJCNN). 2020: 1–7.
+72. Ingalhalikar M, Shinde S, Karmarkar A, Rajan A, Rangaprakash D, Deshpe G.
+Functional connectivity-based prediction of autism on site harmonized abide
+dataset. IEEE Trans Biomed Eng. 2021;68:3628–37.
+73. Irimia A, Lei X, Torgerson CM, Jacokes ZJ, Abe S, Van Horn JD. Support vector
+machines, multidimensional scaling and magnetic resonance imaging reveal
+structural brain abnormalities associated with the interaction between autism
+spectrum disorder and sex. Front Comput Neurosci. 2018;12:93.
+74. Jafadideh AT, Asl BM. Topological analysis of brain dynamics in autism based on
+graph and persistent homology. Comput Biol Med. 2022;150:106202.
+75. Jain V, Selvaraj A, Mittal R, Rani P, Ramaniharan AK, Ronickom JFA. Automated diagnosis of autism spectrum disorder condition using shape based
+features extracted from brainstem. Stud Health Technol Inform.
+2022;294:53–7.
+76. Jha RR, Bhardwaj A, Garg D, Bhavsar A, Nigam A. Mhatc: Autism spectrum
+disorder identification utilizing multi-head attention encoder along with
+temporal consolidation modules. In 2022 44th Annual International Conference of the IEEE Engineering in Medicine & Biology Society (EMBC). 2022:
+337–41.
+77. Ji J, Yao Y. Convolutional neural network with graphical lasso to extract sparse
+topological features for brain disease classification. IEEE/ACM Trans Comput Biol
+Bioinform. 2020;18:2327–38.
+78. Ji J, Xing X, Yao Y, Li J, Zhang X. Convolutional kernels with an element-wise
+weighting mechanism for identifying abnormal brain connectivity patterns.
+Pattern Recognit. 2021;109:107570.
+79. Ji J, Zhang Y. Functional brain network classification based on deep graph
+hashing learning. IEEE Trans Med Imaging. 2022;41:2891–902.
+80. Jiang W, Liu S, Zhang H, Sun X, Wang S, Zhao J, et al. CNNG: a convolutional
+neural networks with gated recurrent units for asd classification. Front Aging
+Neurosci. 2022;14:948704.
+81. Jung M, Tu Y, Park J, Jorgenson K, Lang C, Song W, et al. Surface-based shared
+and distinct resting functional connectivity in attention-deficit hyperactivity
+disorder and autism spectrum disorder. Br J Psychiatry. 2019;214:339–44.
+82. Jung W, Heo D-W, Jeon E, Lee J, Suk H-I. Inter-regional high-level relation
+learning from functional connectivity via selfsupervision. In Medical Image
+Computing and Computer Assisted Intervention–MICCAI 2021: 24th International Conference. 2021: 284–93.
+83. Kang E, Heo D-W, Suk H-I. Prototype learning of internetwork connectivity for
+asd diagnosis and personalized analysis. In Medical Image Computing and
+Computer Assisted Intervention– MICCAI 2022: 25th International Conference.
+2022: 334–43.
+84. Karampasi AS, Savva AD, Korfiatis VC, Kakkos I, Matsopoulos GK. Informative
+biomarkers for autism spectrum disorder diagnosis in functional magnetic
+resonance imaging data on the default mode network. Appl Sci. 2021;11:
+6216.
+85. Kazeminejad A, Sotero RC. Topological properties of restingstate fmri functional
+networks improve machine learning-based autism classification. Front Neurosci.
+2019;12:1018.
+Translational Psychiatry (2024) 14:318
+S.J.C. Schielen et al.
+86. Kazeminejad A, Sotero RC. The importance of anti-correlations in graph theory
+based classification of autism spectrum disorder. Front Neurosci. 2020;
+14:676.
+87. Ke F, Yang R. Classification and biomarker exploration of autism spectrum disorders based on recurrent attention model. IEEE Access. 2020;8:216298–307.
+88. Ke F, Liu H, Zhou M, Yang R, Cao H-M. Diagnostic biomarker exploration of
+autistic patients with different ages and different verbal intelligence quotients
+based on random forest model. IEEE Access. 2021;9:123861–72.
+89. Khadem-Reza ZK, Zare H. Automatic detection of autism spectrum disorder
+(asd) in children using structural magnetic resonance imaging with machine
+vision system. Middle East Curr Psychiatry. 2022;29:54.
+90. Kim JI, Bang S, Yang J-J, Kwon H, Jang S, Roh S, et al. Classification of preschoolers with low-functioning autism spectrum disorder using multimodal mri
+data. J Autism Devl Disord. 2022;53:25–37.
+91. Kong Y, Gao J, Xu Y, Pan Y, Wang J, Liu J. Classification of autism spectrum
+disorder by combining brain connectivity and deep neural network classifier.
+Neurocomputing. 2019;324:63–68.
+92. Lee J, Kang E, Jeon E, Suk H-I. Meta-modulation network for domain generalization in multi-site fmri classification. In Medical Image Computing and Computer Assisted Intervention–MICCAI 2021: 24th International Conference. 2021:
+500–9.
+93. Li H, Parikh NA, He L. A novel transfer learning approach to enhance deep
+neural network classification of brain functional connectomes. Front Neurosci.
+2018;12:491.
+94. Li Q, Becker B, Jiang X, Zhao Z, Zhang Q, Yao S, et al. Decreased interhemispheric functional connectivity rather than corpus callosum volume as a
+potential biomarker for autism spectrum disorder. Cortex. 2019;119:258–66.
+95. Li J, Wang F, Pan J, Wen Z. Identification of autism spectrum disorder with
+functional graph discriminative network. Front Neurosci. 2021;15:1282.
+96. Liang Y, Xu G, Rehman SU. Multi-scale attention-based deep neural network for
+brain disease diagnosis. Comput Mater Continua. 2022;72:4645–61.
+97. Liang Y, Liu B, Zhang H. A convolutional neural network combined with prototype learning framework for brain functional network classification of autism
+spectrum disorder. IEEE Trans Neural Syst Rehabil Eng. 2021;29:2193–202.
+98. Liu Y, Xu L, Li J, Yu J, Yu X. Attentional connectivitybased prediction of autism
+using heterogeneous rs-fmri data from cc200 atlas. Exper Neurobiol. 2020;29:27.
+99. Liu J, Sheng Y, Lan W, Guo R, Wang Y, Wang J. Improved asd classification using
+dynamic functional connectivity and multi-task feature selection. Pattern
+Recognit Lett. 2020;138:82–87.
+100. Liu R, Huang Z-A, Hu Y, Zhu Z, Wong K-C, Tan KC. Attention-like multimodality
+fusion with data augmentation for diagnosis of mental disorders using mri. IEEE
+Trans Neural Netw Learn Syst. 2022;35:7627–41.
+101. Lu Z, Wang J, Mao R, Lu M, Shi J. Jointly composite feature learning and autism
+spectrum disorder classification using deep multi-output takagi-sugeno-kang
+fuzzy inference systems. IEEE/ACM Trans Comput Biol Bioinform. 2022;20:
+476–88.
+102. Mastrovito D, Hanson C, Hanson SJ. Differences in atypical resting-state effective
+connectivity distinguish autism from schizophrenia. Neuroimage Clin. 2018;18:
+367–76.
+103. Mishra M, Pati UC. Autism spectrum disorder detection using surface morphometric feature of smri in machine learning. In 2021 8th International Conference
+on Smart Computing and Communications (ICSCC). 2021:7–20.
+104. Mishra M, Pati UC. Autism detection using surface and volumetric morphometric feature of smri with machine learning approach. In Advanced Network
+Technologies and Intelligent Computing: First International Conference. 2022:
+625-33.
+105. Payabvash S, Palacios EM, Owen JP, Wang MB, Tavassoli T, Gerdes M, et al. White
+matter connectome edge density in children with autism spectrum disorders:
+potential imaging biomarkers using machine-learning models. Brain Connect.
+2019;9:209–20.
+106. Peng L, Liu X, Ma D, Chen X, Xu X, Gao X. The altered pattern of the functional
+connectome related to pathological biomarkers in individuals for autism spectrum disorder identification. Front Neurosci. 2022;16:913377.
+107. Peng L, Wang N, Xu J, Zhu X, Li X. Gate: Graph cca for temporal self-supervised
+learning for label-efficient fmri analysis. IEEE Trans Med Imaging. 2022;42:
+391–402.
+108. Prasad PKC, Khare Y, Dadi K, Vinod P, Surampudi BR. Deep learning approach for
+classification and interpretation of autism spectrum disorder. In 2022 International Joint Conference on Neural Networks (IJCNN). 2022:1–8.
+109. Qiao J, Wang R, Liu H, Xu G, Wang Z. Brain disorder prediction with dynamic
+multivariate spatio-temporal features: Application to alzheimer’s disease and
+autism spectrum disorder. Front Aging Neurosci. 2022;14:912895.
+110. Qin C, Zhu X, Ye L, Peng L, Li L, Wang J, et al. Autism detection based on
+multiple time scale model. J Neural Eng. 2022;19:056001.
+134. Wang H, Jiang X, De Leone R, Zhang Y, Qiao L, Zhang L. Extracting bold signals
+based on time-constrained multiset canonical correlation analysis for brain
+functional network estimation and classification. Brain Res. 2022;1775:147745.
+135. Wang N, Yao D, Ma L, Liu M. Multi-site clustering and nested feature extraction
+for identifying autism spectrum disorder with restingstate fMRI. Med Image
+Anal. 2022;75:102279.
+136. Wong E, Anderson JS, Zielinski BA, Fletcher PT. Riemannian regression and
+classification models of brain networks applied to autism. In Connectomics in
+NeuroImaging: Second International Workshop. 2018:78– 87.
+137. Xiao Z, Wu J, Wang C, Jia N, Yang X. Computer-aided diagnosis of school-aged
+children with asd using full frequency bands and enhanced sae: a multiinstitution study. Exp Ther Med. 2019;17:4055–63.
+138. Xing X, Ji J, Yao Y. Convolutional neural network with element-wise filters to
+extract hierarchical topological features for brain networks. In 2018 IEEE
+International Conference on Bioinformatics and Biomedicine (BIBM). 2018:
+780–3.
+139. Xu G, Liang Y, Tu S, ur Rehman S. A spatial-temporal integration analysis to
+classify dynamic functional connectivity for brain disease diagnosis. In Artificial
+Intelligence and Security: 8th International Conference. 2022:549–58.
+140. Yamin MA, Tessadori J, Akbar MU, Dayan M, Murino V, Sona D. Geodesic clustering of positive definite matrices for classification of mental disorder using
+brain functional connectivity. In 2020 International Joint Conference on Neural
+Networks (IJCNN). 2020:1–5.
+141. Yang X, Schrader PT, Zhang N. A deep neural network study of the abide
+repository on autism spectrum classification. Int J Adv Comput Sci Appl.
+2020;11.
+142. Yang C, Wang P, Tan J, Liu Q, Li X. Autism spectrum disorder diagnosis using
+graph attention network based on spatial-constrained sparse functional brain
+networks. Comput Biol Med. 2021;139:104963.
+143. Yang R, Ke F, Liu H, Zhou M, Cao H-M. Exploring smri biomarkers for diagnosis of
+autism spectrum disorders based on multi class activation mapping models.
+IEEE Access. 2021;9:124122–31.
+144. Yang M, Cao M, Chen Y, Chen Y, Fan G, Li C, et al. Large-scale brain functional
+network integration for discrimination of autism using a 3-d deep learning
+model. Front Human Neuroscience. 2021;15:687288.
+145. Yi T, Wei W, Ma D, Wu Y, Cai Q, Jin K, et al. Individual brain morphological
+connectome indicator based on jensen–shannon divergence similarity estimation for autism spectrum disorder identification. Frontiers in Neuroscience.
+2022;16:952067.
+146. Yin W, Li L, Wu F-X. A semi-supervised autoencoder for autism disease diagnosis.
+Neurocomputing. 2022;483:140–7.
+147. Yuan D, Zhu L, Huang H. Prediction of autism spectrum disorder based on
+imbalanced resting-state fmri data using clustering oversampling. Tenth International Conference on Signal Processing Systems. 2019;11071:182–6.
+148. Zhang F, Savadjiev P, Cai W, Song Y, Rathi Y, Tunç B, et al. Whole brain white
+matter connectivity analysis using machine learning: an application to autism.
+Neuroimage. 2018;172:826–37.
+149. Zhang M, Zhao X, Zhang W, Chaddad A, Evans A, Poline JB. Deep discriminative
+learning for autism spectrum disorder classification. In Database and Expert
+Systems Applications: 31st International Conference. 2020: 435–43.
+150. Zhang L, Wang X-H, Li L. Diagnosing autism spectrum disorder using brain
+entropy: A fast entropy method. Comput Methods Programs Biomed.
+2020;190:105240.
+151. Zhang Z, Zheng W. The discriminative power of white matter microstructures
+for autism diagnosis. IFAC-PapersOnLine. 2020;53:446–51.
+152. Zhang L, Wang J-R, Ma Y. Graph convolutional networks via low-rank subspace
+for multi-site rs-fmri asd diagnosis. In 2021 14th International Congress on
+Image and Signal Processing. 2021:1–6.
+153. Zhang Y, Peng B, Xue Z, Bao J, Li BK, Liu Y, et al. Self-paced learning and
+privileged information based cascaded multi-column classification algorithm for
+asd diagnosis. In 2021 43rd Annual International Conference of the IEEE Engineering in Medicine & Biology Society (EMBC). 2021:3281–4.
+154. Zhang J, Feng F, Han T, Gong X, Duan F. Detection of autism spectrum disorder
+using fmri functional connectivity with feature selection and deep learning.
+Cognitive Comput. 2022;15:1–12.
+155. Zhang F, Wei Y, Liu J, Wang Y, Xi W, Pan Y. Identification of autism spectrum
+disorder based on a novel feature selection method and variational auto
+encoder. Comput Biol Med. 2022;148:105854.
+156. Zhao F, Zhang H, Rekik I, An Z, Shen D. Diagnosis of autism spectrum disorders
+using multi-level high-order functional networks derived from resting-state
+functional MRI. Front Human Neurosci. 2018;12:184.
+157. Zhao F, Chen Z, Rekik I, Lee S-W, Shen D. Diagnosis of autism spectrum disorder
+using central-moment features from lowand high-order dynamic resting-state
+functional connectivity networks. Front Neurosci. 2020;14:258.
+Translational Psychiatry (2024) 14:318
+10
+S.J.C. Schielen et al.
+111. Rakhimberdina Z, Liu X, Murata T. Population graph-based multi-model
+ensemble method for diagnosing autism spectrum disorder. Sensors.
+2020;20:6001.
+112. Rakić M, Cabezas M, Kushibar K, Oliver A, Lladó X. Improving the detection of
+autism spectrum disorder by combining structural and functional mri information. Neuroimage Clin. 2020;25:102181.
+113. Ronicko JFA, Thomas J, Thangavel P, Koneru V, Langs G, Dauwels J. Diagnostic
+classification of autism using resting-state fMRI data improves with full correlation functional brain connectivity compared to partial correlation. J Neurosci
+Methods. 2020;345:108884.
+114. Saad M, Islam SMR. Brain connectivity network analysis and classifications from
+diffusion tensor imaging. In 2019 International Conference on Robotics. 2019:
+422–7.
+115. Saponaro S, Giuliano A, Bellotti R, Lombardi A, Tangaro S, Oliva P, et al. Multi-site
+harmonization of mri data uncovers machine-learning discrimination capability
+in barely separable populations: an example from the abide dataset. Neuroimage Clin. 2022;35:103082.
+116. Sen B, Borle NC, Greiner R, Brown MR. A general prediction model for the
+detection of adhd and autism using structural and functional mri. PLoS ONE.
+2018;13:e0194856.
+117. Shen MD, Nordahl CW, Li DD, Lee A, Angkustsiri K, Emerson RW, et al. Extra-axial
+cerebrospinal fluid in high-risk and normal-risk children with autism aged 2–4
+years: a case-control study. Lancet Psychiatry. 2018;5:895–904.
+118. Sherkatghanad Z, Akhondzadeh M, Salari S, Zomorodi- Moghadam M, Abdar M,
+Acharya UR, et al. Automated detection of autism spectrum disorder using a
+convolutional neural network. Front Neurosci. 2020;13:1325.
+119. Shi C, Xin X, Zhang J. Domain adaptation using a three-way decision improves
+the identification of autism patients from multisite fmri data. Brain Sci.
+2021;11:603.
+120. Shi C, Xin X, Zhang J. A novel multigranularity featureselection method based
+on neighborhood mutual information and its application in autistic patient
+identification. Biomed Signal Process Control. 2022;78:103887.
+121. Sidhu G. Locally linear embedding and fmri feature selection in psychiatric
+classification. IEEE J Trans Eng Health Med. 2019;7:1–11.
+122. Song Y, Epalle TM, Lu H. Characterizing and predicting autism spectrum disorder by performing resting-state functional network community pattern analysis. Front Human Neurosci. 2019;13:203.
+123. Spera G, Retico A, Bosco P, Ferrari E, Palumbo L, Oliva P, et al. Evaluation of
+altered functional connections in male children with autism spectrum disorders
+on multiple-site data optimized with machine learning. Front Psychiatry.
+2019;10:620.
+124. Squarcina L, Nosari G, Marin R, Castellani U, Bellani M, Bonivento C, et al.
+Automatic classification of autism spectrum disorder in children using cortical
+thickness and support vector machine. Brain Behav. 2021;11:e2238.
+125. Subah FZ, Deb K, Dhar PK, Koshiba T. A deep learning approach to predict
+autism spectrum disorder using multisite restingstate fmri. Appl Sci. 2021;11:
+3636.
+126. Sun J-W, Fan R, Wang Q, Wang Q-Q, Jia X-Z, Ma H-B. Identify abnormal
+functional connectivity of resting state networks in autism spectrum disorder and apply to machine learning-based classification. Brain Res.
+2021;1757:
+147299.
+127. Supekar K, Ryali S, Yuan R, Kumar D, de Los Angeles C, Menon V. Robust,
+generalizable, and interpretable artificial intelligence–derived brain fingerprints
+of autism and social communication symptom severity. Biol Psychiatry.
+2022;92:643–53.
+128. Tang M, Kumar P, Chen H, Shrivastava A. Deep multimodal learning for the
+diagnosis of autism spectrum disorder. J Imaging. 2020;6:47.
+129. Wang J, Wang Q, Zhang H, Chen J, Wang S, Shen D. Sparse multiview taskcentralized ensemble learning for asd diagnosis based on age-and sex-related
+functional connectivity patterns. IEEE Trans Cybernet. 2018;49:3141–54.
+130. Wang C, Xiao Z, Wu J. Functional connectivity-based classification of autism and
+control using SVM-RFECV on rs-fMRI data. Phys Med. 2019;65:99–105.
+131. Wang J, Zhang Y, Zhou T, Deng Z, Huang H, Wang S, et al. Interpretable
+feature learning using multi-output takagisugeno- kang fuzzy system for
+multi-center asd diagnosis. In Medical Image Computing and Computer
+Assisted Intervention–MICCAI 2019: 22nd International Conference. 2019:
+790–8.
+132. Wang Y, Wang J, Wu F-X, Hayrat R, Liu J. Aimafe: autism spectrum disorder
+identification with multi-atlas deep feature representation and ensemble
+learning. J Neurosci Methods. 2020;343:108840.
+133. Wang C. Indentification of autism spectrum disorder based on an improved
+convolutional neural networks. In 2021 3rd International Conference on
+Machine Learning. 2021:235–9.
+11
+158. Zhao M, Yan W, Luo N, Zhi D, Fu Z, Du Y, et al. An attention-based hybrid deep
+learning framework integrating brain connectivity and activity of resting-state
+functional mri data. Med Image Anal. 2022;78:102413.
+159. Zhao F, Han Z, Cheng D, Mao N, Chen X, Li Y, et al. Hierarchical synchronization
+estimation of low-and high-order functional connectivity based on sub-network
+division for the diagnosis of autism spectrum disorder. Front Neurosci. 2022;15:1898.
+160. Zu C, Gao Y, Munsell B, Kim M, Peng Z, Cohen JR, et al. Identifying diseaserelated subnetwork connectome biomarkers by sparse hypergraph learning.
+Brain Imaging Behav. 2019;13:879–92.
+161. Mellema CJ, Treacher A, Nguyen KP, Montillo A. Architectural configurations,
+atlas granularity and functional connectivity with diagnostic value in autism
+spectrum disorder. In 2020 IEEE 17th International Symposium on Biomedical
+Imaging (ISBI). 2020: 1022–5.
+162. Huang F, Yang P, Huang S, Ou-Yang L, Wang T, Lei B. Multi-template based autoweighted adaptive structural learning for asd diagnosis. In Machine Learning in
+Medical Imaging: 10th International Workshop. 2019: 516–24.
+163. Di Martino A, Yan C-G, Li Q, Denio E, Castellanos FX, Alaerts K, et al. The autism
+brain imaging data exchange: towards a largescale evaluation of the intrinsic
+brain architecture in autism. Mol Psychiatry. 2014;19:659–67.
+164. Hall D, Huerta MF, McAuliffe MJ, Farber GK. Sharing heterogeneous data: the
+national database for autism research. Neuroinformatics. 2012;10:331–9.
+165. Du Y, Chen L, Yan M-C, Wang Y-L, Zhong X-L, Xv C-X, et al. Neurometabolite
+levels in the brains of patients with autism spectrum disorders: a meta-analysis
+of proton magnetic resonance spectroscopy studies (n= 1501). Mol Psychiatry.
+2023;28:3092–103.
+166. Higgins JP, Li T. In: Systematic reviews in health research (eds Egger M, Higgins
+JP, Smith GD) Ch. 10 (John Wiley & Sons, Ltd, 2022).
+167. Eche T, Schwartz LH, Mokrane F-Z, Dercle L. Toward generalizability in the
+deployment of artificial intelligence in radiology: role of computation stress
+testing to overcome underspecification. Radiol Artif Intell. 2021;3:e210097.
+168. Bahl M. Artificial intelligence in clinical practice: Implementation considerations
+and barriers. J Breast Imaging. 2022;4:632–9.
+169. Mottron L, Bzdok D. Autism spectrum heterogeneity: fact or artifact? Mol Psychiatry. 2020;25:3178–85.
+170. Masi A, DeMayo MM, Glozier N, Guastella AJ. An overview of autism spectrum
+disorder, heterogeneity and treatment options. Neurosci. Bull. 2017;33:183–93.
+171. Ferri SL, Abel T, Brodkin ES. Sex differences in autism spectrum disorder: a
+review. Curr Psychiatry Rep. 2018;20:1–17.
+172. Lai M-C, Baron-Cohen S, Buxbaum JD. Understanding autism in the light of sex/
+gender. Mol Autism. 2015;6:1–5.
+173. van Enst WA, Ochodo E, Scholten RJ, Hooft L, Leeflang MM. Investigation of
+publication bias in meta-analyses of diagnostic test accuracy: a metaepidemiological study. BMC Med Res Methodol. 2014;14:1–11.
+174. Sterne JA, Gavaghan D, Egger M. Publication and related bias in meta-analysis:
+power of statistical tests and prevalence in the literature. J Clin Epidemiol.
+2000;53:1119–29.
+175. Cohen SE, Zantvoord JB, Wezenberg BN, Bockting CL, van Wingen GA. Magnetic
+resonance imaging for individual prediction of treatment response in major
+depressive disorder: a systematic review and meta-analysis. Transl Psychiatry.
+2021;11:168.
+176. Yu M, Linn KA, Cook PA, Phillips ML, McInnis M, Fava M, et al. Statistical harmonization corrects site effects in functional connectivity measurements from
+multi-site fmri data. Human Brain Mapp. 2018;39:4213–27.
+177. Bashyam VM, Doshi J, Erus G, Srinivasan D, Abdulkadir A, Singh A, et al. Deep
+generative medical image harmonization for improving cross-site generalization
+in deep learning predictors. J Magnet Reson Imaging. 2022;55:908–16.
+178. Botteron K, Carter C, Castellanos FX, Dickstein DP, Drevets W, Kim KL, et al.
+Consensus report of the apa work group on neuroimaging markers of psychiatric disorders. Am Psychiatr Assoc. 2012.
+179. Falkmer T, Anderson K, Falkmer M, Horlin C. Diagnostic procedures in autism
+spectrum disorders: a systematic literature review. Eur Child Adolesc Psychiatry.
+2013;22:329–40.
+Translational Psychiatry (2024) 14:318
+S.J.C. Schielen et al.
+180. Lord C, Risi S, Lambrecht L, Cook EH, Leventhal BL, Di Lavore PC, et al. The
+autism diagnostic observation schedule—generic: a standard measure of social
+and communication deficits associated with the spectrum of autism. J Autism
+Dev Disord. 2000;30:205–23.
+181. Lord C, Rutter M, Le Couteur A. Autism diagnostic interview revised: a
+revised version of a diagnostic interview for caregivers of individuals with
+possible pervasive developmental disorders. J Autism Dev Disord. 1994;24:
+659–85.
+182. Clark LA, Cuthbert B, Lewis-Fernández R, Narrow WE, Reed GM. Three approaches to understanding and classifying mental disorder: Icd-11, dsm-5, and the
+national institute of mental health’s research domain criteria (rdoc). Psychol Sci.
+Public Interest. 2017;18:72–145.
+ACKNOWLEDGEMENTS
+This research is solely funded by Eindhoven University of Technology, Department of
+Electrical Engineering.
+AUTHOR CONTRIBUTIONS
+SJCS, SZ, and APA conceptualized the study. SJCS and JP independently reviewed
+the literature. SJCS performed statistical analyses. JP, SZ, and APA provided
+feedback on the methods and the manuscript. SZ and APA provided supervision
+to SJCS and JP.
+COMPETING INTERESTS
+The authors declare no competing interests.
+ADDITIONAL INFORMATION
+Supplementary information The online version contains supplementary material
+(https://doi.org/10.1038/s41398-024-03024-5)
+Correspondence and requests for materials should be addressed to Sjir J. C. Schielen.
+[Reprints and permission information is available at http://www.nature.com/](http://www.nature.com/reprints)
+(http://www.nature.com/reprints)
+Publisher’s note Springer Nature remains neutral with regard to jurisdictional claims
+in published maps and institutional affiliations.
+Open Access This article is licensed under a Creative Commons
+Attribution 4.0 International License, which permits use, sharing,
+adaptation, distribution and reproduction in any medium or format, as long as you give
+appropriate credit to the original author(s) and the source, provide a link to the Creative
+Commons licence, and indicate if changes were made. The images or other third party
+material in this article are included in the article’s Creative Commons licence, unless
+indicated otherwise in a credit line to the material. If material is not included in the
+article’s Creative Commons licence and your intended use is not permitted by statutory
+regulation or exceeds the permitted use, you will need to obtain permission directly
+from the copyright holder. To view a copy of this licence, visit (http://creativecommons.org/licenses/by/4.0/)
+(http://creativecommons.org/licenses/by/4.0/)
+© The Author(s) 2024
+=== END: s41398-024-03024-5.pdf (10 equations) ===

@@ -1,0 +1,115 @@
+=== PDF: bams-1520-0477_1998_079_0061_apgtwa_2_0_co_2.pdf ===
+
+Eurographics Workshop on Visual Computing for Biology and Medicine (2025) Poster
+T. Gerrits and C. Gillmann (Poster Chairs)
+**Optimization of a Parametrized, Time-Dependent Hidden Markov** **Model by Example of an Electrophysiological Cancer Cell**
+P. Waldert 1 †, S. Langthaler 2, T. Rienmüller 3 B. Kantz 1 and T. Schreck 1
+1 Institute of Visual Computing, Graz University of Technology
+2 Diagnostics and Research Institute for Pathology, Medical University of Graz
+3 Institute of Biomechanics, Graz University of Technology
+Lung cancer is one of the most widespread pathologies worldwide and its mechanisms, specifically at the level of individual
+cells, are not well understood. We improve on the A549 electrophysiological cancer cell model introduced in [LRS*21; LZR*24],
+combining numerical methods with an efficient implementation to reduce simulation time to a level where it is feasible for live
+interaction. More specifically, we were able to accelerate the simulation with adaptive timestepping and a highly efficient
+implementation in the Rust programming language, while we also managed to approach the corresponding inverse problem
+using a quadratic program, solving it within milliseconds. We introduce a visualisation approach of the entire model in the form
+[of a live simulation dashboard available at https://in-silico.hce.tugraz.at/, running directly in the browser.](https://in-silico.hce.tugraz.at/)
+**CCS Concepts**
+• **Computing Methodologies** → **Modeling and Simulation;** • **Human-Centered Computing** → Visual Analytics;
+**1. Introduction**
+The mechanisms behind lung adenocarcinoma, specifically those
+of individual A549 cells (cf. Figure 2), are not well understood.
+† Corresponding Author. Email: peter.waldert@tugraz.at.
+© 2025 The Author(s).
+Proceedings published by Eurographics - The European Association for Computer Graphics.
+This is an open access article under the terms of the Creative Commons Attribution License, which
+permits use, distribution and reproduction in any medium, provided the original work is properly
+cited.
+Computational techniques can help to gain more insight on the behaviour of these cancer cells. A single cell’s membrane consists
+of multiple ion channels, categorized into M ∈ N different types.
+In electrophysiology, ion channels are usually represented by a
+Hodgkin-Huxley model [SGG*23; ACD*19]. In our model however, each ion channel is represented in one of N s,k ∈ N states,
+2 of 2 P. Waldert et al. / In-Silico Cancer Cell Simulation
+channels are implemented in Rust, whereas the interface components are written in TypeScript. The entire source code is freely
+available on GitHub and reusable through three different channels:
+the simulation interface (powered by compilation to WebAssembly), the Rust linkable library and a Python package (simply
+run: pip install in-silico-cancer-cell). Our aim
+behind a distribution in this way is to make the topic and simulation
+as accessible as possible.
+**3. Conclusion**
+Figure 2: Schematic depiction of the cancer cell and its channels,
+source: [LZR*24].
+which, in physical terms, is related to a positional configuration
+of a protein within the ion channel. Only some states can be observed directly, and its development only depends on the one previous state. Hence, we are working with a Hidden Markov Model
+(HMM). For many ion channel categories, their corresponding transition probabilities are voltage or ion-concentration dependent, significantly impacting the simulation performance (runtime).
+The whole cell current I : T → R over time t ∈ T ⊂ R + is then
+obtained as the sum of all individual channel contributions I k , k ∈
+$\{ 1 ,..., M\} over M \in N channel types$
+M M
+$I ( t ) := \sum N k I k ( t ) = \sum N k g k p o,k ( V ( t ) - E k ), (1)$
+k =1 k =1
+where N k is the number of channels of type k ∈{ 1 ,..., M}, g k is the
+respective ion channel’s conductivity, p o,k ∈ 0 , 1 is the probability
+of observing the channel in a state where an ion current can flow
+(“open states”), V : T → R is the voltage across the membrane and
+E k ∈ R the reversal potential.
+When regarding the cell model as a whole, the number of ion
+channels N k per type k may be put into a configuration vector
+**N** ∈ N M 0 I [ sampled at (dynami-]
+cally adjusted) measurement points can be expressed as a product
+**I** = ∑ M k =1 N k **I** **k** =  R **N** [ where]  R ∈ R N t ×M [ is the matrix of all cur-]
+rent measurements per channel type. Given the individual ion channel type models’ parameters, which we know from literature [e.g.
+HZL*14], the question that remains is how many channels there are
+of each type to fit the measurements. We solve this problem using a
+number of optimization approaches, comparing them quantitatively
+to propose a best fit for our conditions. The best performance for
+our use case is obtained using the Clarabel solver GC24 upon
+formulation of the inverse problem as a quadratic program.
+**2. Methods**
+We simulate the coupled, time-dependent Hidden Markov Model
+(HMM) using a straightforward numerical Forward Euler scheme
+and visualise the results in a dashboard (cf. Figure 1) to make the
+process more understandable. In this case, the full model encapsulates M = 11 sub-model routines for each channel type, where
+each channel’s time- and voltage-dependent transition matrix is collected from the literature [LRS*21]. The coupled model and all
+Efforts to further enhance and complete the first electrophysiological cancer cell model simulation were fruitful, resulting in a
+new library implementation, an improved inverse problem solution technique and a live in-browser simulation dashboard. Numerically, the stability of the simulation varies greatly with the time
+step state change tolerance ∆ tol, this could be improved using a
+higher-order integration scheme. There are also many ideas for further customizations that would improve the live simulation dashboard, opening up future usage perspectives.
+**Acknowledgements**
+This work was supported by the HEREDITARY Project, as part
+of the European Union’s Horizon Europe research and innovation
+programme under grant agreement No GA 101137074. Part of this
+work was also funded through a BioTechMed-Graz Lab Rotation
+Research Fellowship. A part of this work has already been outlined
+in a technical report, Deliverable 5.1 [SLW*24].
+**References**
+[ACD*19] A NDREOZZI, E MILIO, C ARANNANTE, I LARIA, D’A DDIO,
+G IOVANNI, et al. “Phenomenological models of NaV1.5. A side by side,
+procedural, hands-on comparison between Hodgkin-Huxley and kinetic
+formalisms”. Sci. Rep. 9.17493 (Nov. 2019), 1–24. ISSN : 2045-2322.
+DOI [: 10.1038/s41598-019-53662-9.](https://doi.org/10.1038/s41598-019-53662-9)
+GC24 G OULART, P AUL J. and C HEN, Y UWEN . Clarabel: An interior-
+point solver for conic programs with quadratic objectives . 2024. arXiv:
+[2405.12762 .](https://arxiv.org/abs/2405.12762)
+[HZL*14] H OU, P ANPAN, Z HANG, R ONG, L IU, Y ONGFENG, et al. “Physiological Role of Kv1.3 Channel in T Lymphocyte Cell Investigated
+Quantitatively by Kinetic Modeling”. PLoS One 9.3 (Mar. 2014),
+e89975. ISSN : 1932-6203. DOI [: 10 . 1371 / journal . pone .](https://doi.org/10.1371/journal.pone.0089975)
+[0089975.](https://doi.org/10.1371/journal.pone.0089975)
+[LRS*21] L ANGTHALER, S ONJA, R IENMÜLLER, T HERESA,
+S CHERUEBEL, S USANNE, et al. “A549 in-silico 1.0: A first computational model to simulate cell cycle dependent ion current modulation
+in the human lung adenocarcinoma”. PLoS Comput. Biol. 17.6 (June
+2021), e1009091. DOI [: 10.1371/journal.pcbi.1009091.](https://doi.org/10.1371/journal.pcbi.1009091)
+[LZR*24] L ANGTHALER, S ONJA, Z UMPF, C HRISTIAN, R IENMÜLLER,
+T HERESA, et al. “The bioelectric mechanisms of local calcium dynamics in cancer cell proliferation: an extension of the A549 in silico cell
+model”. Front. Mol. Biosci. 11 (May 2024), 1394398. DOI [: 10.3389/](https://doi.org/10.3389/fmolb.2024.1394398)
+(https://doi.org/10.3389/fmolb.2024.1394398)
+[SGG*23] S TERRATT, D AVID, G RAHAM, B RUCE, G ILLIES, A NDREW, et
+al. Principles of Computational Modelling in Neuroscience . Cambridge,
+England, UK: Cambridge University Press, Oct. 2023. ISBN : 978-110867295-5. DOI [: 10.1017/9781108672955.](https://doi.org/10.1017/9781108672955)
+[SLW*24] S CHRECK, T OBIAS, L ENGAUER, S TEFAN, W ALDERT, P ETER,
+et al. Deliverable 5.1: Visualization components for sequences, networks,
+text, and high- dimensional data . Dec. 2024. DOI [: 10.5281/zenodo.](https://doi.org/10.5281/zenodo.14628086)
+[14628086.](https://doi.org/10.5281/zenodo.14628086)
+© 2025 The Author(s).
+Proceedings published by Eurographics - The European Association for Computer Graphics.
+=== END: bams-1520-0477_1998_079_0061_apgtwa_2_0_co_2.pdf (2 equations) ===

@@ -1,0 +1,42 @@
+1. implement changes
+2. email to all authors: introduce me, attach the final version to the email. Write in a polite way what is the idea (submit to VCBM) and indicate the data by which they can send remarks and changes by this date.2 weeks is good enough.
+3. finish by next week.
+
+
+* authors: daniel sjir danny bert zinger
+* no need for acknowledgements for ABIDE (remove it)
+* Our approach where is the innovation
+* make it clearer what the innovation is: wavelet as connectivity novel but not totally new, first visualization, but we need to underline the novelty, section 3 has to include novelty or what I am visualizing: visualizations of brain dynamics
+* emphasize the dynamics over time not static
+* title of section 3: visualizations of dynamic brain activity.
+* title of section 2: autism data and brain connectivity, or neuroimaging and brain connectivity
+* maybe change the figure: image of the RSNs and a flow chart, list of the RSNS (some) + process like which correlations and then the graph
+*   add a small title of figure 1, should also be a description of the figure in the text as well and describe what it shows.
+
+
+
+changes:
+* conclusion -> conclusions
+* whose dynamic connectivity* (change sentence in abstract)
+* (abstract change) visualize as a video containing edge weights of a graph
+* add in abstract can potentially be used for diagnosis and interpretation tool for neuroimaging
+* remark: very first sentence: it is at a very high level -> introduce a sentence at the start to introduce the reader into the world, point at a problem in the field
+* change CCS to: Information systemsInformation systems applicationsDecision support systemsData analytics - remove life sciences
+* rs-fMRI for research of autism (change)
+* a web application automated graph view of *various types*
+* in the intro and conclusions: we have to have a sentence that clearly indicates what is new (the contribution of our research is that we introduce a novel approach for observing brain dynamics in terms of RSN activities. We explore several connectivity methods and provide the tool online for visualizations.
+ial t
+* for section2. data, flip the explanation of T to be before T. - remove T just say its a series of 14x14 correlation matrices. sliding window -> series of matrices
+* explain what a correlation tensor is - keep calling it connectivity matrix dont introduce tensor, make it easier to follow.
+* conclusions -> come back at a higher abstraction level (what was the main thing we wanted to solve or pushed us to writing this paper)
+* exploration of neural image data for autism is done as a goal of objective diagnosis.
+* better to emphasize the interpertability concept. Aiding a clinician. maybe also objectivity of diagnosis. explainable features. make clear that this is the added value (Explainable features to assist clinicians)
+* in conclusions: general context and the need for the research, Then Our system not The system. Before planned work, add our system is available online and has potential to serve for interpretation and visual observation of neuroimaging data analysis, for diagnosis and interpretation in machine learning applications. explainable AI
+* ask from sjir a paper from antoine: about cognitive aging and also with autism
+* also pilmijer for depression prognosis (brain dynamics is explored with success in research of diagnosis and prognosis of neuro psychiatric diseases like depression autism, cognitive aging, machine learning solutions are found but the way to present the features was missing + cite. The solution presented here is helping...
+* figure 2 -> make the lines thicker in graph and the words bigger and the side configuration pane is not visible enough.
+
+
+
+
+

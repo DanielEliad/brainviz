@@ -1,0 +1,1586 @@
+=== PDF: 1-s2.0-S1053811916307881-main.pdf ===
+
+[NeuroImage 160 (2017) 41–54](http://dx.doi.org/10.1016/j.neuroimage.2016.12.061)
+[Contents lists available at ScienceDirect](http://www.sciencedirect.com/science/journal/10538119)
+NeuroImage
+(http://www.elsevier.com/locate/neuroimage)
+The dynamic functional connectome: State-of-the-art and perspectives
+Maria Giulia Preti a,b,⁎,1, Thomas AW Bolton a,b,1, Dimitri Van De Ville a,b
+a Institute of Bioengineering, Center for Neuroprosthetics, Ecole Polytechnique Fédérale de Lausanne (EPFL), Lausanne, Switzerland
+b Department of Radiology and Medical Informatics, University of Geneva (UNIGE), Geneva, Switzerland
+A R T I C L E I N F O
+Keywords:
+Dynamic functional connectivity
+Sliding window analysis
+Time/frequency analysis
+State characterization
+Dynamic graph analysis
+Frame-wise description
+Temporal modeling
+1. Introduction
+A B S T R A C T
+Resting-state functional magnetic resonance imaging (fMRI) has highlighted the rich structure of brain activity
+in absence of a task or stimulus. A great effort has been dedicated in the last two decades to investigate
+functional connectivity (FC), i.e. the functional interplay between different regions of the brain, which was for a
+long time assumed to have stationary nature. Only recently was the dynamic behaviour of FC revealed, showing
+that on top of correlational patterns of spontaneous fMRI signal fluctuations, connectivity between different
+brain regions exhibits meaningful variations within a typical resting-state fMRI experiment. As a consequence, a
+considerable amount of work has been directed to assessing and characterising dynamic FC (dFC), and several
+different approaches were explored to identify relevant FC fluctuations. At the same time, several questions were
+raised about the nature of dFC, which would be of interest only if brought back to a neural origin. In support of
+this, correlations with electroencephalography (EEG) recordings, demographic and behavioural data were
+established, and various clinical applications were explored, where the potential of dFC could be preliminarily
+demonstrated. In this review, we aim to provide a comprehensive description of the dFC approaches proposed
+so far, and point at the directions that we see as most promising for the future developments of the field.
+Advantages and pitfalls of dFC analyses are addressed, helping the readers to orient themselves through the
+complex web of available methodologies and tools.
+In the last two decades, resting-state (RS) functional magnetic
+resonance imaging (fMRI) has shed new lights on the spatiotemporal
+organisation of spontaneous brain activity. Since the seminal discovery
+that brain regions can be synchronised in activity despite the absence of
+any task or stimulus (Biswal et al., 1995), a picture in which the rich
+and complex structure of RS fluctuations is described in terms of
+distinct RS networks (RSNs), arising from coherent fluctuations in sets
+of distributed brain regions, has emerged (Beckmann et al., 2005; Fox
+et al., 2005; Damoiseaux et al., 2006). Classically, statistical interdependencies between spatial locations are computed over a whole RS
+scan of 6 min or more; in this setting, the Pearson correlation
+coefficient is the most commonly applied measure of functional
+connectivity (FC).
+Recently, FC has been shown to fluctuate over time (Chang and
+Glover, 2010), implying that measures assuming stationarity over a full
+RS scan may be too simplistic to capture the full extent of RS activity.
+Since these initial findings, a consequent body of research has rapidly
+blossomed to investigate the so-called dynamic functional connectivity
+(dFC), and attempts to resolve RS dFC in a meaningful way have been
+spreading over a spectrum of methodological variants.
+For the practitioner interested in applying dFC approaches as well
+as for the more advanced methods researcher, navigating through the
+dense web of existing work is a daunting task. Due to the inherent
+sophistication of methods designed to track temporal fluctuations, it is
+sometimes difficult to clearly evaluate the underlying hypotheses and
+validity of a dFC technique in a given setting. Further, it is even harder
+to draw relationships between different existing tools.
+There have been several reviews on dFC to date; however, most of
+them have been oriented towards the description of specific families of
+methods (Calhoun et al., 2014; Calhoun and Adali, 2016), or have only
+superficially introduced dFC as part of a more general problematic
+(Tagliazucchi and Laufs, 2015). In fact, the last exhaustive coverage of
+the RS dFC literature now dates back to three years ago (Hutchison
+et al., 2013a); due to the rapid expansion of the dFC field, new
+analytical developments have since then been numerous. To both
+address this point and go beyond the descriptive framework adopted
+in previous reviews, our work revolves around three central goals: first,
+to provide an updated, exhaustive cartography of the dFC methodolo
+⁎ Corresponding author at: Institute of Bioengineering, Center for Neuroprosthetics, Ecole Polytechnique Fédérale de Lausanne (EPFL), Lausanne, Switzerland.
+E-mail address: maria.preti@epfl.ch (M.G. Preti).
+1 Equally contributing authors.
+(http://dx.doi.org/10.1016/j.neuroimage.2016.12.061)
+Accepted 20 December 2016
+Available online 26 December 2016
+1053-8119/ © 2016 The Author(s). Published by Elsevier Inc. This is an open access article under the CC BY-NC-ND license (http://creativecommons.org/licenses/BY-NC-ND/4.0/).
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+gical advances achieved to date. Second, to propose a set of key steps
+involved in dFC analytical pipelines, and anchor the existing methodologies within this framework, so that the wide landscape of dFC
+tools becomes more clearly delineated. Third, to build on this view in
+order to isolate innovative directions for the field to move forward,
+based on our appreciation of the dFC state-of-the-art.
+At this stage, it is important to further specify what we refer to as
+dFC here, as this particular terminology may be interpreted in various
+ways. For instance, dynamic fluctuations in brain connectivity are not
+an exclusive RS hallmark: attempts to characterise these changes
+during the execution of specific cognitive tasks are also emerging
+(Simony et al., 2016; Braun et al., 2015; Gonzalez-Castillo et al., 2012;
+Kucyi et al., 2013, 2016). Also, one may argue that RS dFC itself exists
+at different time scales: although most reports are concerned with the
+changes that happen over the course of seconds, there is also a
+temporal evolution of brain connectivity at slower time scales of hours
+(Grigg and Grady, 2010; Bassett et al., 2011, 2015; Sami et al., 2014) to
+months (Poldrack et al., 2015; Choe et al., 2015; Laumann et al., 2015),
+driven by various factors ranging from learning to gene expression. In
+what follows, we will be focusing on reviewing the dynamic aspects of
+spontaneous brain activity at the time scale of seconds.
+To do so, we first show how many suggested methodological
+improvements and analytical pipelines can be understood as extensions
+of a basic sliding window pairwise correlation framework. We then
+distinguish two conceptually innovative directions that, we believe,
+offer promising potential for future dFC studies: focusing on a subset of
+temporally sparse activation events in place of windowed connectivity
+estimates, and understanding how time should be modeled in the
+description of connectivity changes. We finally go over the current
+evidence that positions dFC as a meaningful measure of brain activity,
+and briefly review the clinical knowledge that it yielded to date.
+2. Dynamic functional connectivity: methodological
+framework
+Although it is not the focus of this review, it is first worth noting
+that the input data to dFC analyses is not raw: it has generally
+undergone several preprocessing steps (see Van Dijk et al., 2010 for
+a review), for which a wealth of pipeline variants are available.
+Resorting to those steps is crucial for the relevance of subsequent
+analyses; for instance, subject motion can bias analytical results if not
+properly accounted for (see Power et al., 2015 for a recent review), an
+unresolved and vivid issue in the RS FC field (Siegel et al., 2016;
+Laumann et al., 2016). However, the reader wishing to deploy dFC
+analyses should be aware that some of the choices made at this stage
+can, in themselves, already strongly influence FC estimates (Murphy
+et al., 2009; Zalesky et al., 2010; Shirer et al., 2015).
+The simplest analytical strategy to investigate dFC consists in
+segmenting the timecourses from spatial locations (brain voxels or
+regions) into a set of temporal windows, inside which their pairwise
+connectivity is probed (Section 2.1). By gathering FC descriptive
+measures over subsequent windows, fluctuations in connectivity can
+be captured, which is why the term dynamic FC was coined. Many
+methodological choices and extensions to this straightforward framework have been suggested and will be described in the following
+paragraphs, including in particular: (1) the choice of the most suitable
+window characteristics (length and shape) and alternative approaches
+to overcome window limitations (Sections 2.2, 2.3); (2) different
+measures to assess FC inside the window (Section 2.4); (3) how to
+extract interpretable information from the dFC patterns, either by
+assessing graph measures (Section 2.5) or by determining dFC states
+(Section 2.6). These points are what we see as methodological
+improvements within the framework of sliding window analysis
+(Fig. 1A/C 2 ).
+Attempts to more fundamentally extend this framework also
+emerged in the past years. To this regard, we identified in recent
+literature two directions that, we believe, bear great potential for the
+understanding of dFC: (1) moving from a sliding window analysis
+towards the observation of events (Section 3.1, Fig. 1B/C 1 /D 1 ); (2)
+moving towards a proper modeling of time; that is, investigating how
+this factor can be best included in dFC analytical attempts (Section 3.2,
+Fig. 1D 1 /D 2 ).
+A detailed overview of all literature papers addressing dFC, including the specific approach adopted, is reported in Table S1.
+2.1. Sliding window analysis
+The basic sliding window framework has been enthusiastically
+welcomed and repeatedly applied by the neuroimaging community to
+understand how functional brain dynamics relates to our cognitive
+abilities (Kucyi and Davis, 2014; Elton and Gao, 2015; Madhyastha and
+Grabowski, 2014), is affected by brain disorders (Sakoglu et al., 2010;
+Jones et al., 2012; Leonardi et al., 2013), or compares to other
+functional (Tagliazucchi et al., 2012b; Chang et al., 2013a) or structural
+(Liégeois et al., 2016) brain measures. It was also applied to study
+dynamic brain properties in the rodent (Keilholz et al., 2013) and the
+macaque (Hutchison et al., 2013b).
+The input data to sliding window analysis is a set of timecourses
+representing brain regional activity. In the simplest case, a temporal
+window, parameterized by its length W, is chosen, and within the
+temporal interval that it spans (from time t=1 to time t=W), connectivity is computed between each pair of timecourses as Pearson
+correlation coefficient, a second-order statistical measure (Fig. 1A, top
+panel). Then, the window is shifted by a step T, and the same
+calculations are repeated over the time interval [1 + T W, + T ] . This
+process is iterated until the window spans the end part of the
+timecourses, to eventually obtain a connectivity timecourse (Fig. 1A,
+middle panel). Considering N different regions, this procedure yields
+N × ( N −1)/2 values per window, which are generally summarized into
+a matrix describing the connectivity pattern of the brain during the
+examined temporal interval. When all windows are considered, a set of
+connectivity matrices—a dynamic functional connectome—recapitulating the temporal evolution of whole-brain functional connectivity is
+obtained (Fig. 1A, lower left panel).
+Starting from this basic approach, a great effort has been devoted in
+different directions, discussed in the following, to obtain more refined
+and informative dFC assessments.
+2.2. Overcoming window limitations
+Besides its simplicity, the sliding window technique carries some
+obvious limitations. First of all, the choice of the window length W has
+long been matter of debate. On the one hand, too short window lengths
+increase the risks of introducing spurious fluctuations in the observed
+dFC (Leonardi and Van De Ville, 2015; Hutchison et al., 2013a; Zalesky
+and Breakspear, 2015) and of having too few samples for a reliable
+computation of correlation, while, on the other hand, too long windows
+would impede the detection of the temporal variations of interest. A
+trade-off must be reached to keep satisfactory ranges of both specificity
+(W long enough to detect reliable dFC fluctuations) and sensitivity (W
+short enough not to miss genuine dFC variations). While a lower limit
+to safely avoid artifacts is set to the largest wavelength present in the
+preprocessed fMRI timecourses (Leonardi and Van De Ville, 2015),
+there is no clear indication on the window size which would best suit
+each analysis and the choice remains arbitrary. Even when following
+this rule of thumb, in fact, the fundamental nature of the technique,
+implying the choice of a fixed window length, limits the analysis to the
+fluctuations in the frequency range below the window period, independently of the true frequency content of the data.
+A different family of approaches detaching from the sliding
+window framework, which effectively escapes this constraint, is
+time-frequency analysis (Chang and Glover, 2010; Yaesoubi et al.,
+42
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+Fig. 1. Summary figure of existing dFC analytical strategies. (A) The most commonly used approach is the traditional sliding window methodology, where the connectivity between
+brain regions is computed as Pearson correlation between pairs of blood-oxygen-level dependent (BOLD) timecourses, over a temporal interval spanned by a rectangular window (upper
+panel). This computation is repeated iteratively, shifting the window by a specific step every time, to generate a connectivity timecourse (middle panel). Performing this procedure for all
+connections yields one connectivity matrix per window, i.e. a dynamic characterization of whole-brain connectivity (lower left panel). Building on this core framework, improvements
+towards several directions have been developed, including using other window types (Section 2.2), refining the connectivity criterion (Section 2.4), or performing a whole-brain level
+graph analysis (Section 2.5). (B) A recent conceptual alternative to the sliding window framework is a frame-wise description of timecourses, where only moments when the BOLD signal
+exceeds a threshold are retained for the analysis (Section 3.1). These frames can be used for the generation of voxelwise brain states (C 1 ), the co-activation patterns (CAPs).
+Alternatively, the connectivity matrices obtained from (A) can be used to retrieve dFC states (C 2 ; Section 2.6). Through temporal modeling (Section 3.2), parameters describing CAPs
+(D 1 ) or connectivity states (D 2 ) and their relationship can be inferred, so that amongst all possible state trajectory options (denoted by the set of white dots linked by light grey arrows),
+the observed path (black dots and arrows) is the most likely. Compared to sliding window analysis, frame-wise analysis and temporal modeling are two suggested, conceptually
+innovative directions for future dynamic functional connectivity work.
+2015a) and will be discussed in more details below (see Section
+2.3). By allowing the temporal exploration of connectivity at
+multiple frequencies, it can be conceptually seen as adapting the
+observation window to the frequency content of the original timecourses (Hutchison et al., 2013a), but at the expense of adding an
+additional dimension to the parameter space.
+Nonetheless, presumably thanks to its combined simplicity and
+ability to retrieve salient features of dFC, the sliding window approach
+has so far prevailed for dFC analysis. As for parameter selection,
+previous studies suggested that windows of 30–60 s are able to
+successfully capture RS dFC fluctuations, and showed that in most
+cases, different window lengths, when chosen above the safety limit, do
+not yield substantially different results (Liégeois et al., 2016; Li et al.,
+2014a; Keilholz et al., 2013; Lee et al., 2013; Deng et al., 2016; see Fig.
+S1 for detailed statistics about the window lengths experimented in
+literature).
+Assuming the most suitable window length is chosen, other
+limitations originate from the use of the common rectangular window.
+In fact, with such an elementary window, all the included observations
+(time points inside the window) are given equal weight. This increases
+the sensitivity to outliers in the detection of dFC, as the inclusion/
+exclusion of instantaneous noisy observations would appear as a
+sudden change in the dFC timecourse (Lindquist et al., 2014). To limit
+this risk, tapered windows discounting more distant or boundary
+observations are preferable and were adopted in many studies (Allen
+et al., 2014; Barttfeld et al., 2015; Chen et al., 2016a; Handwerker
+et al., 2012; Yang et al., 2014; Marusak et al., 2016; Miller et al., 2014;
+Damaraju et al., 2014; Zalesky et al., 2014; Rashid et al., 2014; Shakil
+et al., 2016; Sourty et al., 2016a, 2016b; Yaesoubi et al., 2015b; Betzel
+et al., 2016; see Table S1 for a complete overview).
+An interesting method to replace the arbitrary parameter choice
+with a data-driven window selection is offered by dynamic connectivity regression (DCR; Cribben et al., 2012, 2013) or, in its
+revisited version, dynamic connectivity detection (DCD; Xu and
+Lindquist, 2015). Both methods enable the detection of instants
+when changes in connectivity occur, and define temporal windows
+for dFC analysis within these change points. Another approach was
+recently suggested by Jia et al. (2014), in which an initially short
+window length is chosen, and gradually increased until an assumption of local stationarity in the data becomes violated. In this way,
+windows of tailored, varying sizes can span the whole timecourse of
+brain activity.
+In this direction, we can also place the recent proposition of
+multivariate volatility models for the study of dFC (Lindquist et al.,
+2014), which refine the concept of sliding window (exponentially
+weighted moving average, EWMA) or more substantially overcome
+it (dynamic conditional correlation, DCC). These are parametric
+models of the conditional covariance/correlation between timecourses. In particular, DCC connectivity estimates were shown to fit
+the true values on artificially generated data at least as well as the
+traditional sliding window technique, across several subtypes of
+connectivity patterns (independent traces, oscillatory or transient
+connectivity); importantly, this was the case when DCC (for which
+no a priori parameter selection is required) was compared to an
+oracle sliding window case with optimal window length minimising
+the fitting error.
+43
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+2.3. Towards joint time-frequency analysis
+It is a well-acknowledged fact that oscillatory brain rhythms of
+electrophysiological origin underly large-scale constituting networks at
+various frequency bands (Buzsaki and Draguhn, 2004; Laufs et al.,
+2003; Mantini et al., 2007). In the fMRI case, however, the activityrelated blood-oxygen-level dependent (BOLD) signal limits the analysis
+to a low temporal resolution due to the hemodynamic response
+function (HRF). As far as RS is concerned, FC was shown to be driven
+–
+by fluctuations in a low frequency range of [0.01 0.1] Hz, while higher
+frequencies captured physiological noise like respiratory and cardiac
+pulsations (Cordes et al., 2001). More recent work also put forward a
+spatially inhomogeneous frequency distribution within this narrow
+interval (Zuo et al., 2010), a feature that revealed to be clinically useful
+(Wee et al., 2012; Han et al., 2011).
+Recently, Thompson and Fransson (2015a) subdivided regional
+timecourses into a set of 78 frequency bins spanning the resting-state
+range, and derived a connectivity matrix for each. Subsequent graph
+analysis revealed that within- and across-network connectivity were
+very different across frequencies, putting forward the presence of
+distinct, overlapping interactions that are possibly averaged in classical
+correlation.
+This problem extends to the dFC case, where a standard sliding
+window methodology does not offer the power to resolve those complex
+interplays. The first report of a time/frequency decomposition strategy
+in the dFC field history to address this limitation was precocious
+(Chang and Glover, 2010): wavelet transform coherence (WTC) was
+used to track the amplitude and the phase of the default mode network
+(DMN) and the task-positive network (TPN) along time across the
+resting-state frequency range, unraveling previously unreported episodes of within-network anti-correlation and across-network correla
+tion.
+Since this seminal report, only few time/frequency studies were
+conducted. For instance, following caffeine intake, the phase difference
+between right and left motor cortices became more fluctuant, and
+explained a larger fraction of connectivity variability (Rack-Gomer and
+Liu, 2012). Interestingly, in the same study, the cross-magnitude
+component conversely lost explanatory power after caffeine intake,
+demonstrating that magnitude and phase are two distinct facets of
+time/frequency analyses that may offer complementary insight into
+brain dynamics.
+More recently, those region-specific studies were up-scaled to a
+whole-brain setting: considering phase synchronization within the
+RS frequency range, major depressive disorder (MDD) patients
+were found to exhibit more globally synchronized, temporally
+stable connectivity patterns (Demirtas et al., 2016). Phase-dependent eigenconnectivities, i.e. complex-valued dFC states (see
+Section 2.6) yielded from the principal component analysis (PCA)
+of Hilbert-transformed dFC timecourses, were obtained in Preti
+et al. (2015), including the additional information of the phase of
+dFC states. Through hard clustering of concatenated whole-brain
+WTC timecourses, Yaesoubi et al. (2015a) were also able to define a
+set of connectivity states that not only contained a connectivity
+profile as in Allen et al. (2014), but also cross-region phase and
+frequency representations.
+In addition to those uses of time/frequency approaches in
+directly quantifying dFC, an interesting alternative application
+was recently proposed by Patel and Bullmore (2016): in their work,
+wavelet despiking is applied to the BOLD timecourses to jointly
+remove spurious signal fluctuations resulting from non-neuronal
+confounds, and estimate a local degree of freedom, which will be
+lower for the more aggressively corrected portions of the signal.
+Sliding window analysis is then applicable with an adjustable
+window length, so that connectivity is computed from data chunks
+with similar windowed degree of freedom, resulting in less biased
+estimates.
+2.4. Assessing connectivity inside the window
+As mentioned above, bivariate correlation (e.g., Pearson correlation
+coefficient) represents the most direct measure to assess FC within the
+sliding window approach (see Table S1 for details). As the computation
+of the covariance matrix might be difficult due to the limited window
+size 2, sparsity is sometimes imposed (Xu and Lindquist, 2015; Wee
+et al., 2016b). A more common approach which improves the conditioning of the problem, however, lies in applying the regularization
+strategy to the precision matrix, the inverse of the covariance matrix
+(Allen et al., 2014; Barttfeld et al., 2015; Cribben et al., 2012; Marusak
+et al., 2016; Rashid et al., 2014; Wee et al., 2016a; Cribben et al., 2013;
+Damaraju et al., 2014). Conditional, rather than marginal independence, is then enforced (Xu and Lindquist, 2015), by limiting the
+amount of non-zero coefficients of the precision matrix, which is
+expected to be particularly useful when the number of observations
+(time points) at each node are limited.
+Beyond the measures of bivariate correlation/covariance, higher
+order multivariate analyses have been experimented as well. One
+example is represented by sliding time-window independent component analysis (ICA), where the windowed BOLD fMRI timecourses are
+decomposed through ICA and the evolution of the obtained spatial
+components in time is observed (a set of independent components
+(ICs) would be produced for each window). With this technique,
+Kiviniemi et al. (2011) analyzed the stability of the DMN, finding that,
+in every subject, no single DMN voxel was recruited stably throughout
+all time points. This suggests that the full acquisition time is characterized by momentary interactions of subgroups of DMN nodes,
+while the full network as depicted from the classical stationary ICA
+never occurs. Further, dynamic interactions were depicted even with
+additional nodes external to the DMN, which are not usually captured
+in the stationary view, probably due to their short occurrence. A
+shortcoming of the technique is represented by the need of matching
+the components of different decompositions, which can be automatically performed with different methods (e.g., through the Hungarian
+algorithm; Kuhn, 1955), but remains subject to imprecise results. A
+conceptually similar alternative to identify the components of the
+windowed fMRI data is independent vector analysis (IVA), an extension of ICA that, in the windowed components computation, maximizes
+spatial independence between distinct sources, while at the same time
+minimizing independence within the same ones (Calhoun et al., 2014).
+This technique showed to be useful in the investigation of dFC changes
+related to schizophrenia (Ma et al., 2014), as further detailed in Section
+5.
+Further, regional homogeneity (ReHo) has also been recently
+explored to quantify local FC (within few mm in space) in the human
+brain (Hudetz et al., 2015; Deng et al., 2016), and showed clear
+dynamic features. An interesting link could be established between
+local FC dynamics, assessed with sliding window ReHo, and global
+brain organization. Deng et al. (2016) explored, in fact, the dependency
+of ReHo variability across different brain regions. First, Pearson
+correlation was computed between ReHo fluctuations of each pair of
+areas, yielding a global connectivity pattern (based on local FC
+dynamics) with a clear structure, absent in surrogate data. Second,
+the importance of a region in the global system (measured by nodal
+strength) was found to be correlated to its local FC dynamics, showing
+that network hubs (e.g., posterior cingulate cortex (PCC) and precuneus in the DMN) tend to have higher ReHo variability. Third, higher
+ReHo co-variation existed between ROIs within the same ICA-derived
+networks, compared to ROIs from different ones. All these findings
+point at the existence of an association between local FC dynamics and
+global brain function.
+2 This is because the rank of the covariance matrix can, at most, be equal to the
+window length W.
+44
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+Finally, a novel metric of within-window connectivity that was
+recently introduced is the multiplication of temporal derivatives
+(MTD; Shine et al., 2015b, 2015a, 2016); i.e., the sum of the products
+of the two first-order derivatives of the BOLD timecourses, which was
+shown to be more sensitive than sliding window correlation in
+estimating dFC and more robust than the conventional method for
+the assessment of stationary FC. Acting as a high-pass filter, the first
+temporal derivative operator applied to the fMRI timecourses benefits
+from increased sensitivity to small changes over time, allowing for the
+detection of even subtle alterations of the connectivity structure.
+Further, despite the theoretically higher risk of temporal derivatives
+to amplify noise in the data, simulations were used to prove the
+robustness of MTD against high and low frequency noise and head
+motion-related artifacts, when a proper window size is used (Shine
+et al., 2015b).
+2.5. Dynamic graph analysis
+A popular avenue to extract information from dFC is the use of
+graph theory, where large-scale measures characterizing the architecture and the information flow of the brain functional network are
+derived (see Bullmore and Sporns, 2009 for a review). Many different
+quantities can be extracted, each informing on a particular aspect of the
+network (see Rubinov and Sporns, 2010).
+To make use of these metrics dynamically, network analysis is
+applied separately to each generated connectivity matrix, yielding
+timecourses of graph measures. Note that a dependence between graph
+metrics of subsequent windows can also be modeled, for example
+imposing a specific smoothness over time (Mucha et al., 2010; see
+Section 3.2). It turns out that strong fluctuations over time occur across
+diverse graph metrics (Tagliazucchi et al., 2012b), highlighting a
+continuous functional reorganization of the brain regarding different
+network features.
+The most recent efforts to understand this phenomenon have been
+relying on two metrics in particular: efficiency, which describes the ease
+with which a signal can travel from one brain region to another, and
+modularity, which quantifies the extent to which the network is
+organized into a set of compact communities with few inter-classes
+connections (Clauset et al., 2004). Zalesky et al. (2014) reported
+moments of high efficiency that predominantly concerned remote brain
+regions; at the same time, the most dynamic connections over time
+were the ones linking different brain networks. Betzel et al. (2016)
+observed large variations of modularity, which was strong in periods
+when a large number of strong connections could be detected. Thus,
+the view in light of this evidence is the one of a brain with interspersed
+moments of high modularity/low efficiency, when different networks
+are functionally disconnected, and periods of low modularity/high
+efficiency, when those distinct networks interact. Further, the former
+type of state also appears to more strongly mimic the brain structural
+architecture (Liégeois et al., 2016): although network-to-network
+interactions are primordial, they are also energetically costly and thus,
+only sporadically occurring and not the norm.
+Interestingly, the degree of network allegiance flexibility captured
+by graph dynamic analysis also appears to vary across individuals in a
+behaviourally relevant manner: indeed, the extent to which a set of
+brain regions from the salience network can communicate with other
+external nodes correlates with cognitive flexibility (Chen et al., 2016a).
+In short, graph-based dynamic metrics thus offer a promising window
+on network integration and segregation.
+2.6. Extracting dFC states
+After the estimation of whole-brain dFC (e.g., by sliding window
+correlation or time-frequency analysis), summary measures quantifying fluctuations in the connectivity timecourses can be easily assessed,
+such as their standard deviation (Kucyi et al., 2013; Kucyi and Davis,
+2014; Falahpour et al., 2016; Laufs et al., 2014; Morgan et al., 2014;
+Lee et al., 2013; Price et al., 2014), coefficient of variation (GonzalezCastillo et al., 2014) or amplitude of low frequency fluctuations
+(ALFF; Shen et al., 2014; Qin et al., 2015).
+In addition, the decomposition of dFC timecourses through matrix
+factorization techniques, for example via k-means clustering or PCA,
+allows to summarize the obtained dFC patterns (one at each time
+point) into a smaller set of connectivity states (Fig. 1C 2 ). Different
+criteria can be applied to obtain dFC states, whose interpretation and
+characteristics will change considerably depending on the approach
+chosen; for instance, they can represent patterns of connectivity that
+repetitively occur during the resting-state acquisition, or building
+blocks which differently contribute to the FC network at every time
+point.
+The inputs typically consist in the concatenation of vectorized
+connectivity patterns across time points and subjects (after possible
+subject normalization), yielding a dFC data matrix. States will, therefore, characterize not only the individual resting-state acquisition, but
+the group of subjects under examination.
+K-means clustering, introduced by Allen et al. (2014) and subsequently adopted by others (Damaraju et al., 2014; Barttfeld et al., 2015;
+Gonzalez-Castillo et al., 2015; Hudetz et al., 2015; Hutchison et al.,
+2014; Ma et al., 2014; Marusak et al., 2016; Shakil et al., 2014, 2016;
+Shen et al., 2016; Su et al., 2016; Hutchison and Morton, 2015; Rashid
+et al., 2014), allows to identify recurring connectivity patterns (cluster
+centroids), which are mutually exclusive in time and present positive
+and negative values indicating highly correlated and anti-correlated
+regions, respectively (Fig. 2A). The application of this approach to
+schizophrenia (Damaraju et al., 2014) proved the clinical usefulness of
+the clustering-derived dFC states (see also Section 5), showing that
+pathological alterations only affect some dynamic states; i.e., they were
+only present at specific moments and/or in specific subjects.
+Alternatively, conceptually similar ways to generate dFC states that
+do not overlap in time were also proposed, for example through
+hierarchical clustering (Ou et al., 2013, 2015; Yang et al., 2014), or
+modularity approaches to look for communities, that is, patterns of
+dFC (Yu et al., 2015). Some uses of hidden Markov models (HMMs) to
+describe RS data (which is further discussed in Section 3.2) can also
+enter this category, if the inferred hidden states follow each other in a
+temporal sequence and are each parameterized by a covariance matrix
+(Eavani et al., 2013).
+In a framework similar to Allen et al. (2014), Yaesoubi and
+colleagues (Yaesoubi et al., 2015b) proposed to replace clustering by
+temporal ICA (TICA), to obtain states which are maximally mutually
+temporally independent. Unlike clustering, this method allows a
+temporal overlap between connectivity building blocks, which also
+have clear temporal dynamic interpretability. At every time point,
+therefore, the connectivity pattern is now given by a combination of
+states, each one with a different contribution.
+The same happens when adopting a PCA/singular value decomposition (SVD) approach (Leonardi et al., 2013), where the temporally
+overlapping states are by construction orthogonal and maximize the
+variance in the dFC data matrix (Fig. 2B), or dictionary learning
+(DL; Leonardi et al., 2014; Li et al., 2014a), where states can be seen as
+building blocks of the connectivity patterns with different temporal
+contributions, and a specific temporal sparsity can be imposed. In the
+interpretation of these patterns (obtained through TICA, PCA or DL),
+the sign is arbitrary and needs to be combined with the weight of
+temporal contributions, which might also be positive or negative and
+will define the sign of the final building blocks of connectivity. Careful
+interpretation of the patterns is therefore required, as high positive/
+negative values in the states do not necessarily translate into strong
+connectivity in the final observation.
+Further, even small modifications of the pipeline can make a great
+difference in the interpretation. In the work by Leonardi et al. (2013),
+for instance, the connectivity timecourses are temporally demeaned
+45
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+Fig. 2. Examples of dFC states. (A) The k-means clustering procedure to obtain dFC states (Allen et al., 2014) is graphically depicted (upper panel). The resulting cluster centroids (the
+first 6 are displayed) are networks showing groups of regions highly correlated (red)/anti-correlated (blue) at specific time points (lower panel). For each cluster, the total temporal
+occurrence is specified on top of the matrices. Adapted with permission from Allen et al. (2014). (B) The first five dFC states found with PCA in Leonardi et al. (2013), i.e.
+eigenconnectivities, are reported, in form of matrices and corresponding brain graphs. The patterns highlight here increased (red)/decreased (blue) connectivity with respect to
+stationary FC. Reprinted with permission from Leonardi et al. (2013).
+before applying PCA, differing from previous studies. Consequently,
+the obtained eigenconnectivities (Fig. 2B) exclusively highlight changes
+(instead of strong values) of connectivity; i.e., regions showing a
+connectivity increase/decrease with respect to the mean value (stationary FC), independently from the actual connectivity value.
+In addition, states can also be obtained through the clustering of
+another kind of information than directly the dFC matrix, for example
+dynamically derived graph metrics, which are discussed further in
+Section 2.5 (Li et al., 2014a; Chiang et al., 2016), or higher-level
+information, such as similarity vectors between different IVA components (Ma et al., 2014).
+Once dFC states are obtained, individual measures expressing their
+occurrence (Leonardi et al., 2013) or persistence (Damaraju et al.,
+2014) can be assessed. In the methodological cases where different
+state building blocks are allowed to combine at a given time point, one
+can also consider the global state of activity of the system: then, the
+whole pattern of activity levels across building blocks is referred to as a
+meta-state (Yaesoubi et al., 2015b; Miller et al., 2016). Of note, in the
+cases where the problem at hand involves only a limited subset of brain
+regions, this meta-state characterization can also be readily applied to
+the connectivity estimates themselves, without the need of clustering
+strategies (Tagliazucchi et al., 2014).
+3. Beyond the dFC state-of-the-art: future and alternative
+perspectives
+All the dFC methods described in the previous section can be
+considered part of the same framework, which is built around the basic
+sliding window correlation approach. Here, we identify two promising
+directions that have only more recently been explored and that, we
+believe, constitute fruitful perspectives for future research.
+3.1. From windowed measures to single frames
+The sliding window based methods described so far extract
+measures out of the BOLD fMRI signals, under the implicit assumption
+that spontaneous brain activity is characterized by a slow, but ever
+changing temporal dynamics. However, an alternative view was
+proposed by Tagliazucchi and colleagues (Tagliazucchi et al., 2010,
+2011, 2012a), suggesting that the relevant information about RS FC
+could actually be condensed into events or short periods of time, and
+that, therefore, a point process analysis (PPA) only including the
+relevant time points (e.g., where fMRI timecourses exceed a chosen
+threshold) would contain the same information as a regular full
+timecourse analysis (Fig. 1B). This was shown in a seed-based analysis
+(Tagliazucchi et al., 2012a), which yielded the main well-known RSNs,
+and was extended in a whole-brain approach recently proposed by the
+same authors (Tagliazucchi et al., 2016).
+This idea that meaningful information can actually be retrieved
+from the observation of individual frames led to a powerful alternative
+in the connectivity analysis trend: from a temporal window perspective—yielding a connectivity map of second-order statistics—to the
+analysis of single frames, such as in PPA, yielding temporally subsequent co-activation maps (first-order statistics). A potential explanation for the spontaneous activity to be condensed in short periods could
+originate from the presence of neuronal avalanching activity causing
+46
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+Fig. 3. Innovative directions for future dFC work: frame-wise analysis and temporal modeling. (A) The 13 clusters obtained with the iCAP approach (Karahanoğlu and Van De Ville,
+2015) are numbered in order of temporal occurrence and grouped by hierarchical clustering based on their temporal overlap into meaningful components related to sensory, default
+mode and attention functions. MOT: Motor. AUD: Auditory. SUB: Subcortical. pVIS: Primary visual. sVIS: Secondary visual. VISP: Visuospatial. PRE: Precuneus. pDMN: Posterior
+default mode. DMN: Default mode. ACC: Anterior cingulate. EXEC: Executive control. ATT: Attention. ASAL: Anterior saliency. Reprinted with permission from Van De Ville and
+Karahanoğlu (2016). (B) The iterative process to identify a recurring spatiotemporal activity pattern (template) with the approach suggested by Majeed et al. (2011) is graphically
+displayed. The found template shows an alternation between the DMN and attention network, and repeatedly occurs over the RS scan, as depicted by the correlation timecourse. Adapted
+with permission from Majeed et al. (2011).
+only brief neuronal events (Tagliazucchi et al., 2012a). An example of
+the cognitive relevance of such frame-level activity lies in the study of
+RS periods following the learning of a task, where extracted task-driven
+activity patterns are searched for by a matching process as a proof of
+memory consolidation effects (Staresina et al., 2013; Guidotti et al.,
+2015). Another one is the robust detection of arousal level fluctuations,
+as confirmed by electrophysiological recordings, through matching
+with a single frame activity template (Chang et al., 2016).
+The advantages of PPA are multiple. First, it considerably reduces
+the data load, which appears more and more essential given several
+large-scale acquisition efforts that are undergoing (Smith et al., 2013;
+Nooner et al., 2012; Holmes et al., 2015). It also easily allows for a
+voxelwise, atlas-free analysis, which remains difficult in FC/dFC
+investigations. Then, the associated exclusion of time points with
+smaller amplitude, which are more likely to be corrupted by noise,
+improves outcomes compared to more classical analytical strategies (Li
+et al., 2014b). However, the arbitrary choice of a threshold and the
+neglect of deactivation events (negative peaks) remain important
+shortcomings of this approach. We note that a possible way to include
+those negative peaks in stationary analyses could be the use of recently
+proposed alternative measures to Pearson correlation, namely accordance and discordance (Meskaldji et al., 2015), which unravel otherwise hidden connectivity information of clinical relevance (Meskaldji
+et al., 2016).
+A different method to detect short spontaneous events in BOLD
+voxelwise time series, known as paradigm free mapping (PFM), was
+introduced by Caballero Gaudes et al. (2013) and was shown to be less
+subject to artifactual detections as the signal was fitted with the HRF.
+In an application of this technique, seed-based connectivity measured
+in the presence of spontaneous events was more marked than in their
+absence, showing that transient instances are actually shaping the
+known large-scale RSN connectivity patterns (Allan et al., 2015).
+Inspired by PPA and hypothesizing that these brief neuronal events
+would yield only short periods of co-activation and co-deactivation that
+are missed in stationary FC analysis, Liu and Duyn (2013) refined the
+technique by applying the point selection only to a specific seed
+timecourse, and then retaining the original (not thresholded) fMRI
+volumes at the selected time points for temporal clustering. This
+generates co-activation patterns (CAPs); i.e., patterns of regions which
+recurrently co-activate or co-deactivate with the seed for limited time
+intervals (Fig. 1C 1 ). In this way, the known RSNs are decomposed into
+multiple patterns, which express the dynamic behaviour of connectiv
+ity. For example, using a seed in the PCC, a known core region of the
+DMN, it was possible to obtain DMN-related CAPs including only parts
+of this network, suggesting that different network sub-portions are
+recruited at specific moments (Liu and Duyn, 2013). Further, some
+CAPs showed a spatial pattern deviating from conventional RSNs, with
+additional information captured thanks to the dynamic analysis.
+CAPs extend the original PPA in two ways. First, applying PPA only
+to the seed timecourse rather than to all voxel timecourses also allows
+to detect co-deactivations with respect to the seed, adding otherwise
+missed, potentially useful information. For instance, in some of the
+PCC CAPs, extensive co-deactivations (negative areas) were found in
+regions of the TPN. Applying a similar seed-based selection of time
+points, Di and Biswal (2015) also found, upon separate computation of
+connectivity to the seed when it is active and deactive, that obtained
+patterns would significantly differ in some cases, highlighting the
+distinct information lying in activation and deactivation events.
+Second, the additional temporal clustering step yields spatial states
+(i.e., CAPs), whose temporal properties (e.g., occurrences) can be
+summarized (Chen et al., 2015), as for dFC states in sliding window
+approaches (see Section 2.6). RSNs from conventional stationary FC
+can therefore be seen as the temporal average of CAPs, and are limited
+by the capability of highlighting only areas with stable connectivity
+throughout the acquisition time.
+Additional refinements of the CAP technique included the extension
+of the approach to the whole brain (Liu et al., 2013). In this case, a seed
+is not specified and all fMRI volumes (not only a portion of them) enter
+the clustering, avoiding therefore the need of arbitrarily choosing a
+threshold. Regarding their cognitive relevance, CAP spatial patterns
+were shown to differ across consciousness states (Amico et al., 2014),
+and CAP-based brain dynamics metrics, such as occurrence percentage
+and state switching frequency, enabled the detection of differences in
+network dynamics between RS and a working memory task (Chen et al.,
+2015).
+Further, another contribution to the CAP technique was provided by Karahanoğlu and Van De Ville (2015), where data-driven
+whole-brain patterns of co-activation are also obtained, but based
+on transients in the fMRI signal, rather than peaks. In fact, frames
+of the so-called innovation signals enter the clustering step. These
+are obtained as the first-order derivative of regularized HRFdeconvolved fMRI timecourses, and therefore encode information
+about changes in the original BOLD timecourses (Karahanoğlu
+et al., 2013). Even if the resulting patterns, called here innovation
+47
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+driven CAPs (iCAPs; Fig. 3A), might look similar to the original
+CAPs, they identify by construction regions whose BOLD signal
+increases/decreases simultaneously, corresponding to high positive/negative values, respectively. Hence, when inspecting iCAPs,
+we do not detect regions which are activated (or deactivated)
+together, as for conventional CAPs, but regions whose activity level
+simultaneously increases (or decreases); i.e., regions characterized
+by a similar temporal dynamics.
+Under such an analysis, the well-known RSNs also break up into
+multiple subsystems with their own temporal dynamics. In addition,
+despite the commonly reported anti-correlation between the DMN and
+fronto-parietal network, they appear here with the same sign in most of
+the time frames, while subsystems such as the posterior DMN subnetwork drive the apparent anti-correlation. Also, a back-projection of
+iCAPs to deconvolved fMRI volumes allows to reconstruct iCAP timecourses, and, therefore, assess the temporal overlap of the different
+patterns, overcoming this limitation of the initial hard clustering
+assignment.
+Interestingly, the observed temporal overlap of iCAPs is consistent
+with their behavioural profiles. Further, the analysis of CAP/iCAP
+–
+temporal occurrences showed persistence of patterns for about 5 10 s,
+which, on the one hand, might explain why the sliding window
+approach requires a window length of at least about 20 s (to observe
+a few on/off changes of these patterns), but, on the other hand, also
+shows the limitations of the window approach in terms of a resolvable
+temporal resolution below these iCAP durations.
+Finally, it is interesting to note that direct clustering of fMRI
+timecourses was applied to detect similarities in activation between
+voxels in much earlier work (Baumgartner et al., 1997, 1998; Moser
+et al., 1997; Golay et al., 1998; Moser et al., 1999; Goutte et al., 1999),
+aiming to analyze variability in task-based fMRI experiments. In that
+context, however, cluster centroids corresponded to representative
+timecourses (instead of fMRI frames) and patterns of similar activation
+were given by the membership maps of the found representative
+timecourses.
+3.2. Towards optimal modeling of time
+Recent studies (Majeed et al., 2011; Guidotti et al., 2015) highlighted how the analysis of spatiotemporal patterns (i.e., temporal
+sequences of frames), which repeatedly occur over time, can capture
+the evolution of RSNs better than conventional analysis of single
+spatial patterns. In details, Majeed et al. (2011) developed an innovative approach in which the recorded fMRI data is probed to extract a
+temporal sequence of volumes, referred to as the template, which
+recurs over the RS acquisition. In the found template, the DMN and
+attention network were opposed in activity levels, and gradually
+reverted sign over around twenty seconds (Fig. 3B). More recently,
+Guidotti et al. (2015) were interested in discriminating the activation
+patterns of two different tasks, retrieved throughout the course of a RS
+recording by template matching (as briefly introduced in Section 3.1).
+In their case, standard spatial analysis at the level of single frames was
+unsuccessful, while considering sequences of frames greatly improved
+performance.
+In our view, those two separate reports call for the same organising
+principle in RS data: when the system lies in a specific state, it will not
+evolve randomly, but rather in a very constrained manner, towards a
+particular subsequent configuration. Including explicit temporal modeling in the analysis means therefore taking into account this principle
+and looking for specific sequences of RS patterns. This allows for a
+more realistic and precise modeling of FC dynamics, which includes
+additional information regarding the past network configurations
+constraining the present ones. However, understanding and properly
+capturing this phenomenon is anything but easy: how can we best
+encompass the influence that time has on brain activity and connectivity levels in newly developed dFC techniques? Although the importance
+of temporal modeling may sound like an unsurprising and logical
+claim, there have only been sparse attempts to explicitly do so in the
+present literature.
+In the conventional sliding window analysis, the transition from
+one state to the following is smoothed by construction, due to the
+temporal overlap between successive windows. Further, an approach
+undertaken by some, that we could see as a first attempt at temporal
+modeling, is to explicitly model the smoothness between subsequent
+time points and to constrain the solution space accordingly. For
+example, in recent studies (Wee et al., 2016a; Monti et al., 2014), the
+FC at each window is constrained by the data of neighbouring windows:
+a regularized precision matrix is used as FC metric inside the window,
+with an additional constraint of temporal smoothness which encourages the coefficients at time t to have similar values to the ones
+at time t−1. This approach showed successful results in both connectivity estimation (Monti et al., 2014) and classification between
+healthy and mild cognitive impairment (MCI) individuals (Wee et al.,
+2016a). Along the same line, it is possible to impose smoothness in the
+evolution of the network-level graph metrics computed over the
+windows. Although this direction has not been followed yet in the
+purely RS fMRI literature, the framework for this purpose is available
+(Mucha et al., 2010), and has started to be applied for the computation
+of modularity in temporally linked networks to investigate dFC during
+task performance (Bassett et al., 2011, 2015). The frame-wise view
+(Section 3.1) is also well adapted to this type of approaches. For
+instance, a way to directly model the BOLD signal changes over
+subsequent time points is the use of a Kalman filtering scheme (Kang
+et al., 2011; Liao et al., 2014a), in which the dependence of two
+timecourses is governed by a weighting coefficient being positive/
+negative if the activity values are concordant/discordant and larger if
+their absolute values are close. This framework can therefore be seen as
+a frame-wise equivalent of the sliding window approach, the coefficient
+being the equivalent of a connectivity value. The coefficient at a specific
+time point is chosen to be dependent on the one before, always aiming
+at a trade-off between data fitting and smoothness with respect to the
+previous time point estimate.
+Despite the encouraging results that the above techniques could
+yield, we believe that other hypotheses to model temporality have
+greater potential; indeed, smoothening up activity/connectivity estimates remains an add-on to already existing methodologies. Moreover,
+smoothness in FC changes may be indeed what to expect most often,
+but in some cases this could also not represent a truthful description of
+FC evolution, for example when an alternation between two different
+networks takes place. Large and rapid reorganisations of the brain
+functional architecture, in fact, are salient events that we would also
+wish to resolve.
+A second strategy of temporal modeling that we can point at was
+suggested by Smith et al. (2012): here, activity at each time point is
+viewed as a linear combination of RSNs, and mutually independent
+RSN activity time courses are extracted through the cascading of a
+spatial ICA (SICA) and subsequent TICA step. Time is thus incorporated in the approach by hypothesising that brain networks evolve in
+activity without interacting together, a choice leading to spatially
+overlapping, functionally distinct networks termed temporal functional
+modes (TFMs). Although the retrieved TFMs appeared functionally
+relevant, explicitly preventing any cross-talk between brain systems
+seems in conflict with our current understanding of RS brain functions,
+of which cooperation across RSNs is a hallmark feature (Christoff et al.,
+2016).
+To overcome the need to set such limiting constraints, and thus
+keep a more general framework capable of incorporating various types
+of dynamics, we would particularly favour a third, emerging option of
+temporal modeling for future developments: here, changes in activity/
+connectivity are parameterised in models that explicitly describe the
+brain as evolving through a temporal sequence of states (see Fig. 1D 1 /
+D 2 ). There is no need to formulate a limiting a priori hypothesis about
+48
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+the temporal evolution of the system: the presence of a given temporal
+regime or of another (for example, faster or slower dynamics) will be
+translated into different parameter values, and networks with distinct
+dynamics can coexist.
+The main limitations of this family of approaches are the need of
+large volumes of data for proper model inference (which, again,
+resonates with the undergoing large-scale acquisition initiatives;
+Smith et al., 2013; Nooner et al., 2012; Holmes et al., 2015), and the
+type of model used, as a feature that is not incorporated into the
+modeling framework will not be captured. This strategy can be
+deployed at various levels of a dFC pipeline: for example, Ou et al.
+(2015) applied an HMM to the output data of a sliding window
+analytical scheme in which dFC states had been extracted, to model
+state dynamics in two populations of control and post-traumatic stress
+disorder (PTSD) subjects. PTSD patients were found to often stay
+trapped in one state in particular, whereas control subjects would
+display more numerous transitions. In another more recent work,
+parameterisation was performed at the level of various dynamic graph
+metrics (for example, the brain was assumed to transit across different
+states of small-worldness), which enabled accurate discrimination
+between control and temporal lobe epilepsy (TLE) subjects (Chiang
+et al., 2016).
+HMMs can also be used as a dFC method per se: in one such
+attempt, the brain was hypothesised to be in one specific, global brain
+state at each time point, as parameterised by a covariance matrix with
+added sparsity constraints (Eavani et al., 2013). In another piece of
+work, the relationship between different RSNs (as retrieved by SICA)
+was modeled, so that connectivity between two given RSNs could
+influence the probability of other pairs to transit from a synchrony state
+to another (Sourty et al., 2016b). This report is a good example of the
+promising potential of temporal modeling, as it enables the incorporation of previously uncharacterised complex features that are nonetheless of utmost importance for the understanding of RS brain
+functions (in this specific example, causal influences between RSNs).
+Finally, a different flavour of temporal modeling can also be found
+in Gu et al. (2015): using network control theory, the authors
+investigated how the brain transitions between states, and identified
+regions with higher controllability; i.e., regions that can drive the
+system to different functional configurations. In particular, it was
+found that weakly connected areas facilitate the transition to high
+energy states, while areas at the boundary between networks can
+determine segregation or integration of different cognitive systems.
+4. Origins and relevance of dynamic functional connectivity
+As reviewed until now, there exist multiple ways by which
+functional brain dynamics can be extracted and quantified. A natural
+question is whether dFC analysis, in particular sliding window-related
+approaches, captures information of relevance regarding brain functions, or simply resolves methodology-related artifacts (Handwerker
+et al., 2012; Hindriks et al., 2016).
+4.1. Statistical testing of FC fluctuations
+One important concern about dFC assessment regards the appropriate statistical testing of connectivity temporal variations, which is
+often omitted or not properly carried out. In fact, the simple recording
+of connectivity temporal fluctuations is not enough to be able to state
+the presence of true dFC, instead of simply artifacts or noise. In Section
+2.2, we already discussed the pitfalls possibly arising from the choice of
+an inappropriate window length, which might lead to spurious
+fluctuations (Leonardi and Van De Ville, 2015). However, even when
+adopting the right parameters, an appropriate statistical test where a
+test statistic of the dynamic behavior of connectivity is assessed and
+compared against a null distribution is necessary to probe truly
+dynamic connectivity (Zalesky and Breakspear, 2015; Hindriks et al.,
+2016), i.e. connectivity variations which are significantly different from
+the stationary case. With such statistical testing, one might also use
+sliding windows which are slightly shorter than what recommended by
+the rule of thumb ( 1/ f min, f min being the cut-off frequency of the highpass filter applied to the fMRI timecourses; Leonardi and Van De Ville,
+2015), being sure both to still consider only significant fluctuations,
+and not to miss any genuine dynamic behavior present in the data
+(Zalesky and Breakspear, 2015). A crucial problem at this stage is the
+approximation of the null distribution, i.e. samples following the null
+hypothesis of stationary FC. For this purpose, sets of surrogate data are
+constructed, such that they preserve the statistical properties of the
+original data, but with constant connectivity. These can be obtained by
+phase randomization of the fMRI timecourses (Handwerker et al.,
+2012; Leonardi et al., 2013) or by randomization of the scanning
+sessions (Keilholz et al., 2013). Vector autoregressive null models
+(Chang and Glover, 2010; Zalesky et al., 2014) and amplitude-adjusted
+phase randomization (Betzel et al., 2016) were also proposed, with the
+advantage of preserving the stationary FC σ originally present in the
+data (i.e., null hypothesis assuming a stationary FC equal to σ).
+Importantly, there have been several studies to date where genuine
+dFC fluctuations have been appropriately assessed with the help of
+such approaches. In most of these reports, significant excursions could
+be resolved in single RS sessions of conventional duration (∼10 min;
+Zalesky et al., 2014; Betzel et al., 2016; but see Hindriks et al., 2016,
+where single-session significant fluctuations could not be resolved).
+Frame-level models with increased temporal granularity such as DCC
+(Lindquist et al., 2014) or Kalman filtering approaches (Kang et al.,
+2011), which also enable rigorous statistical assessment, led to the
+detection of significant excursions as well. Thus, at least part of the
+fluctuations observed upon the use of dFC analytical tools seems to
+reflect truly existing FC signal variability.
+4.2. Neural correlates of dFC
+Supporting the relevance of FC fluctuations, there is also solid
+evidence demonstrating that dFC is the direct product of underlying
+brain electrical activity. Through the correlation of electroencephalography (EEG) power timecourses with fMRI dFC traces, there was α
+$\textendash \textendash$
+(8 12 Hz) and β (15 30 Hz) power negative correlation, as well as γ
+–
+(30 60 Hz) power positive correlation, with functional connectivity
+between multiple brain regions (Tagliazucchi et al., 2012b). Further, in
+the same study, α power also positively correlated with the dynamically
+computed average path length. In another methodologically similar
+piece of work, it negatively correlated with FC between and within
+DMN and dorsal attention network (DAN) regions, while θ (4–7 Hz)
+power positively correlated with the same measures (Chang et al.,
+2013a). In the anesthetized rat, connectivity between local field
+potential signals from right and left primary somatosensory cortices
+in the θ, β and γ sub-bands all positively correlated with dFC
+fluctuations (Thompson et al., 2013b).
+4.3. Relevance of dFC to demographics, consciousness and cognition
+Not only does dFC clearly relate to underlying neuronal sources, it
+is also tied to demographic characterization. For example, Hutchison
+and Morton (2015) noticed that in most cases, variability in FC over
+time positively correlated with age, and a clustering-based framework
+to extract dFC states revealed that although spatial patterns remained
+unchanged with development, in some state cases, mean dwell time
+and occurrence rate were strongly modulated. Using similar, slightly
+enhanced state descriptions, gender classification could also be
+achieved: when incorporating frequency as part of the clustered feature
+space, the balance between state occupancy was different across
+genders (Yaesoubi et al., 2015a). In a different description where
+TICA replaced hard clustering, males were also shown to occupy a more
+diverse set of state combinations (Yaesoubi et al., 2015b).
+49
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+Further, dynamic functional brain properties have often been
+related to the degree of consciousness. Initial reports demonstrated
+that even in an anesthetized state, dFC changes would partly remain
+(Keilholz et al., 2013; Hutchison et al., 2013b), implying that at least
+part of this complex activity is not the product of conscious processing.
+Subsequent studies nonetheless clarified the existence of differences
+with consciousness levels: in the rat, temporal variance in ReHo
+decreases with higher doses of anesthetics (Hudetz et al., 2015); in
+the macaque, extracted brain states are visited longer, but with less
+temporal structure, upon sedation (Barttfeld et al., 2015); in the
+human, PCC-centered CAP analysis showed, in some CAPs, a decrease
+in prefrontal or in subcortical connectivity (Amico et al., 2014). All in
+all, those reports demonstrate a reduction in dynamic complexity upon
+consciousness decrease. Interestingly, the converse is seen upon the
+intake of psylocibin, a psychedelic drug leading to unconstrained
+cognition: variability in FC between left and right hippocampi was
+increased, and a larger state space was visited over time (Tagliazucchi
+et al., 2014).
+Finally, dFC has been shown to relate to cognition in several ways:
+for example, variability in FC between the PCC and medial temporal
+lobe subsystem is larger in individuals undergoing more frequent
+daydreaming (Kucyi and Davis, 2014), and FC variability between the
+periaqueductal gray (PAG) and medial prefrontal cortex (mPFC) is
+larger in people who can more easily attend away from painful stimuli
+(Kucyi et al., 2013); the duration spent in connectivity states of a
+posteromedial cortex seed modulates mental flexibility (Yang et al.,
+2014); stronger contributions of a DAN subnetwork at rest lead to
+better attentional task performance (Madhyastha et al., 2015); a larger
+propensity of a subset of salience network nodes to interact with other
+brain modules goes with larger cognitive flexibility (Chen et al., 2016a);
+the more brain regions alternate their network participation with time,
+the lower the amount of positive self-generated thoughts (Schaefer
+et al., 2014); and from a more global viewpoint, around half of the
+variance in task performance across several cognitive domains can be
+explained by how rapidly, at rest, functional connections shift from a
+connected to an unconnected state (Jia et al., 2014).
+Equally interesting is the fact that the relationship between dFC and
+cognition does not stop at the inter-individual level: within single
+subjects as well, dFC has been related to fluctuations in cognitive
+outcomes. Amongst the main such findings, for a given subject,
+performing faster at a psychomotor vigilance task is paired with larger
+signal difference between the DMN and the TPN in the previous
+seconds (Thompson et al., 2013a); PAG-mPFC connectivity is enhanced in the epochs when a subject feels a painful stimulus to a lesser
+extent (by attending away from it; Kucyi et al., 2013); FC within the
+DMN and between the DMN and the cingulo-opercular network is
+lower, and DMN-auditory network FC is higher, before the trials where
+blindfolded subjects fail to perceive an auditory stimulus (Sadaghiani
+et al., 2015); in sleep-deprived individuals, an extracted dFC state
+characteristic of high arousal (as quantified through eyelid opening)
+occurs more in periods of low reaction time to a fast-paced auditory
+vigilance task, while the converse is true for a low arousal dFC state in
+moments of high reaction time (Wang et al., 2016); and finally, more
+variable inter-tapping interval in a finger-tapping task, a proxy of
+increased attentional load, relates to enhanced connectivity between
+the right anterior insula and the mPFC, as well as within DMN
+subregions (Kucyi et al., 2016). Although observing such relationships
+requires the experimental paradigm to include a task (and hence, not a
+sole RS recording), the results nonetheless reveal changes in FC that
+spontaneously occur within individuals.
+5. Clinical potential of dFC
+The past years have seen many attempts to address what type of
+dFC abnormalities may occur in different brain disorders. Spontaneous
+thought, and therefore RS connectivity, is in fact altered in a wide range
+of clinical conditions, which were divided into two categories: the ones
+characterized by excessive variability of thought content over time, and
+the ones marked by its excessive stability (Christoff et al., 2016). Only
+dFC is able to capture the inner dynamic nature of FC alterations and,
+therefore, to describe these two conditions standing as causes of altered
+cognitive functions.
+In particular, pathologies in which excessive variability or stability
+of thought could occur at different times for the same individual appear
+as ideal candidates to benefit from the advantages of dFC analysis. It is
+then perhaps not surprising that schizophrenia has been the most
+widely studied condition to date when it comes to dFC properties,
+offering us sufficient material to attempt a more thorough characterization of the disease, based on the dynamic features of FC. We will
+therefore show how results from distinct dFC methodological approaches found in literature can be combined to help interpreting
+different aspects of this disease, going beyond the stationary characterization. We will then briefly go over the other disorders that have
+started benefiting from the dFC research efforts.
+The computation of sliding window FC estimates, followed by dFC
+state extraction through k-means clustering, has been the most widely
+applied strategy in schizophrenia dFC studies (Du et al., 2016; Rashid
+et al., 2014; Damaraju et al., 2014; Su et al., 2016). This technique
+allows, in fact, to detect differences between schizophrenia (SZ) and
+control (CTR) groups based on the dynamic occurrence and connectivity strength of dFC states, capturing the aforementioned variability in
+thought flow and related network interplays, which cannot be depicted
+by stationary analysis. The states visited by CTR and SZ populations
+were shown to divide into two subtypes: some with clearly delineated
+FC patterns of strong, specific connectivity across brain areas, and
+others with overall less defined, lower connectivity values.
+Interestingly, SZ individuals spend a larger time in the less defined
+subtype of states, whereas the converse is seen for CTR subjects (Du
+et al., 2016; Damaraju et al., 2014). Spatially, SZ patients displayed
+both weaker across-network connectivity, including in particular subcortico-cortical connections (thalamus dysconnectivity; Damaraju
+et al., 2014) and links between the DMN and other RSNs (Su et al.,
+2016; Rashid et al., 2014), as well as within-network disruptions of the
+DMN (Du et al., 2016). In our view, these elements all contribute to the
+“profound disruption of thought” (Christoff et al., 2016) characterizing
+schizophrenia.
+The study of graph metrics allowed to refine the meaning of the
+observed spatial differences across groups: in a DMN-focused analysis,
+strength, efficiency and clustering coefficient of the dFC states were
+reduced in SZ subjects (Du et al., 2016). Extending the investigation to
+the whole brain, the same metrics were found to be less fluctuant along
+time in SZ individuals; using them for modularity-based partitioning
+and analysing the graph properties of the extracted dFC states, they
+were again reduced (Yu et al., 2015). Thus, we can posit that the
+alterations in connectivity described above have the effect of altering
+local (clustering coefficient) and global (efficiency) information flow
+through the brain.
+Further, the analysis of dFC through TICA-based meta-state
+characterisation, in which connectivity building blocks are allowed to
+combine at each time point, enabled to address dynamic abnormalities
+at a more global level, where the evolution of the global pattern of
+connectivity contributed by different states was probed.
+SZ subjects were found to exhibit diminished dynamic fluidity,
+visiting less meta-states, shifting less often across them, and traveling
+through a narrower meta-space characterised by more absorbing hubs
+(Miller et al., 2016). Note that this last finding is in accordance with the
+report of Yu et al. (2015), who also described a common state to which
+SZ subjects would return more often. The decreased diversity in visited
+meta-states may actually be a reflection of the larger time spent by SZ
+subjects in poorly defined dFC states as described above: indeed,
+alternating more across well defined dFC states with strong connectivity profiles would result in larger meta-space changes, as opposed to
+50
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+frequently staying trapped in poorly defined dFC states, where the
+dynamic interplay between RSNs is less marked. Those poorly defined
+states may also explain the findings of a very recent classification study:
+to generate dFC classification features, Rashid et al. (2016) performed
+state extraction across a CTR, a SZ and a bipolar (BP) population (5
+states each), and fitted each connectivity matrix to those 15 building
+blocks. Whereas CTR and BP subjects would have their FC fluctuations
+solely explained by the states extracted from their own group, SZ
+patients also showed prominent contribution from CTR and BP states,
+which may arise from those moments when SZ subjects lie in dFC
+states with low contrast.
+Aside from schizophrenia, another prominent neurodevelopmental
+brain disorder that has started being tackled from the dFC forefront is
+autism: recent reports indeed demonstrate that the use of a multiplenetwork, dynamic framework for classification strongly outperforms
+the more standard stationary approaches (Price et al., 2014). Recently,
+another classification attempt combined clustering at the level of the
+BOLD timecourses with sparse connectivity matrices computation, and
+subsequent use of local clustering coefficients as input features; again,
+the reached accuracy easily outperformed not only stationary approaches, but also less sophisticated dynamic ones (Wee et al., 2016b).
+A similar trend towards the use of sophisticated features has also
+bloomed recently for the classification of MCI subjects: in one suggestion, smoothness in the evolution of connectivity patterns over time is
+imposed (Wee et al., 2016a, 2013). In another, connection pairs are
+reorganized into higher-order features (Chen et al., 2016b). Both
+approaches ultimately rely on a local clustering coefficient-based
+support vector machine (SVM) classification, and outperform stationary and less developed dynamic classification frameworks. Simpler
+strategies, however, can sometimes also work: Jones et al. (2012), for
+instance, observed that the dwell time in a configuration with strong
+anterior DMN influence was much larger in Alzheimer's disease
+patients.
+Although less explored, there have also been other disorders for
+which dFC yielded relevant discriminatory information, such as TLE
+(Liao et al., 2014b, 2014a; Morgan et al., 2014; Laufs et al., 2014),
+PTSD (Li et al., 2014a), chronic back pain (Tagliazucchi et al., 2010,
+2011), dementia with Lewy bodies (Sourty et al., 2016b), multiple
+sclerosis (Leonardi et al., 2013), or MDD (Kaiser et al., 2016; Demirtas
+et al., 2016).
+Finally, aside from its potential as a biomarker of various brain
+disorders, direct therapeutical applications of dFC can also be foreseen.
+For example, in real time fMRI neurofeedback (Stoeckel et al., 2014),
+subjects must learn to regulate the activity of a target region (or
+sometimes, the connectivity within a given network; Koush et al.,
+2013), so that beneficial cognitive changes are achieved. In this context,
+tracking brain functional dynamics through dFC methods stands out as
+an attractive tool. Further, the regulation of dynamic features of
+activity or connectivity could also turn out to be a fruitful strategy for
+the treatment of conditions in which brain dynamics is specifically
+hampered.
+Acknowledgments
+The authors would like to thank M. Leonardi for providing the
+picture of the dFC states (Fig. 1C 2 ). This work was supported in part by
+each of the following: the Swiss National Science Foundation (grant
+205321_163376), the Bertarelli Foundation, the Center for Biomedical
+Imaging (CIBM) of the Geneva - Lausanne Universities and EPFL, the
+Leenaards Foundation, and the Louis-Jeantet Foundation.
+Appendix A. Supplementary data
+Supplementary data associated with this paper can be found in the
+online version at (http://dx.doi.org/10.1016/j.neuroimage.2016.12.061)
+061.(http://dx.doi.org/10.1016/j.neuroimage.2016.12.061)
+References
+[Allan, T.W., Francis, S.T., Caballero-Gaudes, C., Morris, P.G., Liddle, E.B., Liddle, P.F.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref1)
+[Brookes, M.J., Gowland, P.A., 2015. Functional connectivity in MRI is driven by](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref1)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref1)
+[Allen, E.A., Damaraju, E., Plis, S.M., Erhardt, E.B., Eichele, T., Calhoun, V.D., 2014.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref2)
+[Tracking whole-brain connectivity dynamics in the resting state. Cereb. Cortex 24](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref2)
+[(March (3)), 663–676.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref2)
+[Amico, E., Gomez, F., Di Perri, C., Vanhaudenhuyse, A., Lesenfants, D., Boveroux, P.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref3)
+[Bonhomme, V., Brichant, J.-F., Marinazzo, D., Laureys, S., 2014. Posterior cingulate](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref3)
+[cortex-related co-activation patterns: a resting state fMRI study in propofol-induced](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref3)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref3)
+[Barttfeld, P., Uhrig, L., Sitt, J.D., Sigman, M., Jarraya, B., Dehaene, S., 2015. Signature of](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref4)
+[consciousness in the dynamics of resting-state brain activity. Proc. Natl. Acad. Sci.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref4)
+[112 (January (3)), 887–892.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref4)
+[Bassett, D.S., Wymbs, N.F., Porter, M.A., Mucha, P.J., Carlson, J.M., Grafton, S.T., 2011.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref5)
+[Dynamic reconfiguration of human brain networks during learning. Proc. Natl. Acad.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref5)
+[Sci. 108 (May (18)), 7641–7646.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref5)
+[Bassett, D.S., Yang, M., Wymbs, N.F., Grafton, S.T., 2015. Learning-induced autonomy of](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref6)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref6)
+[Baumgartner, R., Scarth, G., Teichtmeiste, C., Somorjai, R., Moser, E., 1997. Fuzzy](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref7)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref7)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref7)
+[Baumgartner, R., Windischberger, C., Moser, E., 1998. Quantification in functional](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref8)
+[magnetic resonance imaging: fuzzy clustering vs. correlation analysis. Magn. Reson.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref8)
+[Imaging 16 (2), 115–125.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref8)
+[Beckmann, C.F., DeLuca, M., Devlin, J.T., Smith, S.M., 2005. Investigations into resting-](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref9)
+[state connectivity using independent component analysis. Philos. Trans. R. Soc. B:](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref9)
+[Biol. Sci. 360 (May (1457)), 1001–1013.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref9)
+[Betzel, R.F., Fukushima, M., He, Y., Zuo, X.-n., Sporns, O., 2016. Dynamic fluctuations](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref10)
+[coincide with periods of high and low modularity in resting-state functional brain](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref10)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref10)
+[Biswal, B., Zerrin Yetkin, F., Haughton, V.M., Hyde, J.S., 1995. Functional connectivity](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref11)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref11)
+[Med. 34 (4), 537–541.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref11)
+[Braun, U., Schäfer, A., Walter, H., Erk, S., Romanczuk-Seiferth, N., Haddad, L.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref12)
+[Schweiger, J.I., Grimm, O., Heinz, A., Tost, H., Meyer-Lindenberg, A., Bassett, D.S.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref12)
+[2015. Dynamic reconfiguration of frontal brain networks during executive cognition](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref12)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref12)
+[Bullmore, E., Sporns, O., 2009. Complex brain networks: graph theoretical analysis of](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref13)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref13)
+[Buzsaki, G., Draguhn, A., 2004. Neuronal oscillations in cortical networks. Science 304](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref14)
+[(June (5679)), 1926–1929.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref14)
+[Caballero Gaudes, C., Petridou, N., Francis, S.T., Dryden, I.L., Gowland, P.A., 2013.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref15)
+[Paradigm free mapping with sparse regression automatically detects single-trial](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref15)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref15)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref15)
+[Calhoun, V.D., Adali, T., 2016. Time-varying brain connectivity in fMRI data: whole-](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref16)
+[brain data-driven approaches for capturing and characterizing dynamic states. IEEE](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref16)
+[Signal Process. Mag. 33 (May (3)), 52–66.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref16)
+[Calhoun, V.D., Miller, R., Pearlson, G., Adal, T., 2014. The chronnectome: time-varying](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref17)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref17)
+[(October (2)), 262–274.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref17)
+[Chang, C., Glover, G.H., 2010. Time-frequency dynamics of resting-state brain](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref18)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref18)
+Chang, C., Leopold, D.A., Schölvinck, M.L., Mandelkow, H., Picchioni, D., Liu, X., Frank,
+Q.Y., Turchi, J.N., Duyn, J.H., 2016. Tracking brain arousal fluctuations with fmri.
+In: Proceedings of the National Academy of Sciences, 201520613.
+[Chang, C., Liu, Z., Chen, M.C., Liu, X., Duyn, J.H., 2013a. EEG correlates of time-varying](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref19)
+[BOLD functional connectivity. NeuroImage 72 (May), 227–236.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref19)
+[Chen, J.E., Chang, C., Greicius, M.D., Glover, G.H., 2015. Introducing co-activation](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref20)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref20)
+[(May), 476–488.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref20)
+[Chen, T., Cai, W., Ryali, S., Supekar, K., Menon, V., 2016a. Distinct global brain](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref21)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref21)
+[(June (6)), e1002469.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref21)
+[Chen, X., Zhang, H., Gao, Y., Wee, C.-Y., Li, G., Shen, D., 2016b. High-order resting-state](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref22)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref22)
+[(September (9)), 3282–3296.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref22)
+[Chiang, S., Cassese, A., Guindani, M., Vannucci, M., Yeh, H.J., Haneef, Z., Stern, J.M.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref23)
+[2016. Time-dependence of graph theory metrics in functional connectivity analysis.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref23)
+[NeuroImage 125 (January), 601–615.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref23)
+[Choe, A.S., Jones, C.K., Joel, S.E., Muschelli, J., Belegu, V., Caffo, B.S., Lindquist,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref24)
+[M.A., van Zijl, P.C., Pekar, J.J., 2015. Reproducibility and temporal structure](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref24)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref24)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref24)
+[Christoff, K., Irving, Z.C., Fox, K.C., Spreng, R.N., Andrews-Hanna, J.R., 2016. Mind-](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref25)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref25)
+[(11), 718–731.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref25)
+[Clauset, A., Newman, M.E., Moore, C., 2004. Finding community structure in very large](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref26)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref26)
+[Cordes, D., Haughton, V.M., Arfanakis, K., Carew, J.D., Turski, P.A., Moritz, C.H.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref27)
+[Quigley, M.A., Meyerand, M.E., 2001. Frequencies contributing to functional](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref27)
+[connectivity in the cerebral cortex in “resting-state” data. Am. J. Neuroradiol. 22 (7),](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref27)
+[1326–1333.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref27)
+51
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+[Cribben, I., Haraldsdottir, R., Atlas, L.Y., Wager, T.D., Lindquist, M.A., 2012. Dynamic](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref28)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref28)
+[NeuroImage 61 (July (4)), 907–920.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref28)
+[Cribben, I., Wager, T.D., Lindquist, M.a., 2013. Detecting functional connectivity change](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref29)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref29)
+[Damaraju, E., Allen, E., Belger, A., Ford, J., McEwen, S., Mathalon, D., Mueller, B.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref30)
+[Pearlson, G., Potkin, S., Preda, A., Turner, J., Vaidya, J., van Erp, T., Calhoun, V.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref30)
+[2014. Dynamic functional connectivity analysis reveals transient states of](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref30)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref30)
+[Damoiseaux, J.S., Rombouts, S.A.R.B., Barkhof, F., Scheltens, P., Stam, C.J., Smith, S.M.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref31)
+[Beckmann, C.F., 2006. Consistent resting-state networks across healthy subjects.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref31)
+[Proc. Natl. Acad. Sci. U. S. Am. 103 (37), 13848–13853.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref31)
+[Demirtas, M., Tornador, C., Falcón, C., López-Solà, M., Hernández-Ribas, R., Pujol, J.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref32)
+[Menchón, J.M., Ritter, P., Cardoner, N., Soriano-Mas, C., Deco, G., 2016. Dynamic](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref32)
+[functional connectivity reveals altered variability in functional connectivity among](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref32)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref32)
+[2918–2930.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref32)
+[Deng, L., Sun, J., Cheng, L., Tong, S., 2016. Characterizing dynamic local functional](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref33)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref33)
+[Di, X., Biswal, B.B., 2015. Dynamic brain functional connectivity modulated by resting-](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref34)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref34)
+[Du, Y., Pearlson, G.D., Yu, Q., He, H., Lin, D., Sui, J., Wu, L., Calhoun, V.D., 2016.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref35)
+[Interaction among subsystems within default mode network diminished in](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref35)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref35)
+[55–65.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref35)
+[Eavani, H., Satterthwaite, T.D., Gur, R.E., Gur, R.C., Davatzikos, C., 2013. Unsupervised](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref36)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref36)
+[Elton, A., Gao, W., 2015. Task-related modulation of functional connectivity variability](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref37)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref37)
+[Falahpour, M., Thompson, W.K., Abbott, A.E., Jahedi, A., Mulvey, M.E., Datko, M., Liu,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref38)
+[T.T., Müller, R.-A., 2016. Underconnected, but not broken? Dynamic functional](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref38)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref38)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref38)
+[Fox, M.D., Snyder, A.Z., Vincent, J.L., Corbetta, M., VanEssen, D.C., Raichle, M.E., 2005.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref39)
+[The human brain is intrinsically organized into dynamic, anticorrelated functional](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref39)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref39)
+[Golay, X., Kollias, S., Stoll, G., Meier, D., Valavanis, A., Boesiger, P., 1998. A new](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref40)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref40)
+[(2), 249–260.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref40)
+[Gonzalez-Castillo, J., Handwerker, D.A., Robinson, M.E., Hoy, C.W., Buchanan, L.C.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref41)
+[Saad, Z.S., Bandettini, P.A., 2014. The spatial structure of resting state connectivity](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref41)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref41)
+[Gonzalez-Castillo, J., Hoy, C.W., Handwerker, D.A., Robinson, M.E., Buchanan, L.C.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref42)
+[Saad, Z.S., Bandettini, P.A., 2015. Tracking ongoing cognition in individuals using](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref42)
+[brief, whole-brain functional connectivity patterns. Proc. Natl. Acad. Sci. 112 (July](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref42)
+[(28)), 8762–8767.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref42)
+[Gonzalez-Castillo, J., Saad, Z.S., Handwerker, D.A., Inati, S.J., Brenowitz, N., Bandettini,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref43)
+[P.A., 2012. Whole-brain, time-locked activation with simple tasks revealed using](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref43)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref43)
+[5487–5492.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref43)
+[Goutte, C., Toft, P., Rostrup, E., Nielsen, F., Hansen, L.K., 1999. On clustering fMRI time](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref44)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref44)
+[Grigg, O., Grady, C.L., 2010. Task-related effects on the temporal and spatial](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref45)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref45)
+[One 5 (10), e13311.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref45)
+[Gu, S., Pasqualetti, F., Cieslak, M., Telesford, Q.K., Yu, A.B., Kahn, A.E., Medaglia, J.D.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref46)
+[Vettel, J.M., Miller, M.B., Grafton, S.T., Bassett, D.S., 2015. Controllability of](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref46)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref46)
+[Guidotti, R., Del Gratta, C., Baldassarre, A., Romani, G.L., Corbetta, M., 2015. Visual](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref47)
+[learning induces changes in resting-state fmri multivariate pattern of information. J.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref47)
+[Neurosci. 35 (27), 9786–9798.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref47)
+[Han, Y., Wang, J., Zhao, Z., Min, B., Lu, J., Li, K., He, Y., Jia, J., 2011. Frequency-](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref48)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref48)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref48)
+[287–295.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref48)
+[Handwerker, D.A., Roopchansingh, V., Gonzalez-Castillo, J., Bandettini, P.A., 2012.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref49)
+[Periodic changes in fMRI connectivity. NeuroImage 63 (November (3)), 1712–1719.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref49)
+[Hindriks, R., Adhikari, M., Murayama, Y., Ganzetti, M., Mantini, D., Logothetis, N.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref50)
+[Deco, G., 2016. Can sliding-window correlations reveal dynamic functional](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref50)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref50)
+[Holmes, A.J., Hollinshead, M.O., O'Keefe, T.M., Petrov, V.I., Fariello, G.R., Wald, L.L.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref51)
+[Fischl, B., Rosen, B.R., Mair, R.W., Roffman, J.L., et al., 2015. Brain genomics](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref51)
+[superstruct project initial data release with structural, functional, and behavioral](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref51)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref51)
+[Hudetz, A.G., Liu, X., Pillay, S., 2015. Dynamic repertoire of intrinsic brain states is](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref52)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref52)
+[10–22.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref52)
+[Hutchison, R.M., Hutchison, M., Manning, K.Y., Menon, R.S., Everling, S., 2014.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref53)
+[Isoflurane induces dose-dependent alterations in the cortical connectivity profiles](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref53)
+[and dynamic properties of the brain's functional architecture. Hum. Brain Mapp. 35](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref53)
+[(December (12)), 5754–5775.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref53)
+[Hutchison, R.M., Morton, J.B., 2015. Tracking the Brain's functional coupling dynamics](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref54)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref54)
+[Hutchison, R.M., Womelsdorf, T., Allen, E.A., Bandettini, P.A., Calhoun, V.D., Corbetta,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref55)
+[M., Della Penna, S., Duyn, J.H., Glover, G.H., Gonzalez-Castillo, J., Handwerker,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref55)
+[D.A., Keilholz, S., Kiviniemi, V., Leopold, D.A., de Pasquale, F., Sporns, O., Walter,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref55)
+[M., Chang, C., 2013a. Dynamic functional connectivity: promise, issues, and](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref55)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref55)
+[Hutchison, R.M., Womelsdorf, T., Gati, J.S., Everling, S., Menon, R.S., 2013b. Resting-](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref56)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref56)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref56)
+[Jia, H., Hu, X., Deshpande, G., 2014. Behavioral relevance of the dynamics of the](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref57)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref57)
+[Jones, D.T., Vemuri, P., Murphy, M.C., Gunter, J.L., Senjem, M.L., Machulda, M.M.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref58)
+[Przybelski, S.A., Gregg, B.E., Kantarci, K., Knopman, D.S., Boeve, B.F., Petersen,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref58)
+[R.C., Jack, C.R., 2012. Non-stationarity in the resting brain's modular architecture.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref58)
+[PLoS One 7 (June (6)), e39731.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref58)
+[Kaiser, R.H., Whitfield-Gabrieli, S., Dillon, D.G., Goer, F., Beltzer, M., Minkel, J., Smoski,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref59)
+[M., Dichter, G., Pizzagalli, D.A., 2016. Dynamic resting-state functional connectivity](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref59)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref59)
+[Kang, J., Wang, L., Yan, C., Wang, J., Liang, X., He, Y., 2011. Characterizing dynamic](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref60)
+[functional connectivity in the resting brain using variable parameter regression and](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref60)
+[Kalman filtering approaches. NeuroImage 56 (June (3)), 1222–1234.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref60)
+[Karahanoğlu, F.I., Caballero-Gaudes, C., Lazeyras, F., Van De Ville, D., 2013. Total](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref61)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref61)
+[73, 121–134.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref61)
+[Karahanoğlu, F.I., Van De Ville, D., 2015. Transient brain activity disentangles fMRI](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref62)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref62)
+[Nat. Commun. 6, 7751.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref62)
+[Keilholz, S.D., Magnuson, M.E., Pan, W.-j., Willis, M., Thompson, G.J., 2013. Dynamic](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref63)
+[properties of functional connectivity in the rodent. Brain Connect. 3 (February (1)),](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref63)
+[31–40.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref63)
+[Kiviniemi, V., Vire, T., Remes, J., Elseoud, A.A., Starck, T., Tervonen, O., Nikkinen, J.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref64)
+[2011. A sliding time-window ICA reveals spatial variability of the default mode](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref64)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref64)
+[Koush, Y., Rosa, M.J., Robineau, F., Heinen, K., Rieger, S.W., Weiskopf, N., Vuilleumier,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref65)
+[P., Van De Ville, D., Scharnowski, F., 2013. Connectivity-based neurofeedback:](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref65)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref65)
+[Kucyi, A., Davis, K.D., 2014. Dynamic functional connectivity of the default mode](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref66)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref66)
+[Kucyi, A., Hove, M.J., Esterman, M., Hutchison, R.M., Valera, E.M., 2016. Dynamic brain](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref67)
+[network correlates of spontaneous fluctuations in attention. Cereb. Cortex, bhw029.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref67)
+[Kucyi, A., Salomons, T.V., Davis, K.D., 2013. Mind wandering away from pain](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref68)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref68)
+[Acad. Sci. 110 (November (46)), 18692–18697.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref68)
+[Kuhn, H.W., 1955. The hungarian method for the assignment problem. Nav. Res. Logist.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref69)
+[Q. 2 (1–2), 83–97.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref69)
+[Laufs, H., Krakow, K., Sterzer, P., Eger, E., Beyerle, A., Salek-Haddadi, A., Kleinschmidt,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref70)
+[A., 2003. Electroencephalographic signatures of attentional and cognitive default](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref70)
+[modes in spontaneous brain activity fluctuations at rest. Proc. Natl. Acad. Sci. 100](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref70)
+[(19), 11053–11058.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref70)
+[Laufs, H., Rodionov, R., Thornton, R., Duncan, J.S., Lemieux, L., Tagliazucchi, E., 2014.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref71)
+[Altered fMRI connectivity dynamics in temporal lobe epilepsy might explain seizure](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref71)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref71)
+[Laumann, T.O., Gordon, E.M., Adeyemo, B., Snyder, A.Z., Joo, S.J., Chen, M.-Y.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref72)
+[Gilmore, A.W., McDermott, K.B., Nelson, S.M., Dosenbach, N.U., et al., 2015.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref72)
+[Functional system and areal organization of a highly sampled individual human](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref72)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref72)
+[Laumann, T.O., et al., Snyder, A.Z., Mitra, A., Gordon, E.M., Gratton, C., Adeyemo, B.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref73)
+[Gilmore, A.W., Nelson, S.M., Berg, J.J., Greene, D.J., 2016. On the stability of bold](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref73)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref73)
+[Lee, H.-L., Zahneisen, B., Hugger, T., LeVan, P., Hennig, J., 2013. Tracking dynamic](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref74)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref74)
+[NeuroImage 65 (January), 216–222.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref74)
+[Leonardi, N., Richiardi, J., Gschwind, M., Simioni, S., Annoni, J.-M., Schluep, M.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref75)
+[Vuilleumier, P., Van De Ville, D., 2013. Principal components of functional](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref75)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref75)
+[NeuroImage 83 (December), 937–950.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref75)
+[Leonardi, N., Shirer, W.R., Greicius, M.D., Van De Ville, D., 2014. Disentangling dynamic](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref76)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref76)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref76)
+[Leonardi, N., Van De Ville, D., 2015. On spurious and real fluctuations of dynamic](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref77)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref77)
+[Li, X., Zhu, D., Jiang, X., Jin, C., Zhang, X., Guo, L., Zhang, J., Hu, X., Li, L., Liu, T.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref78)
+[2014a. Dynamic functional connectomics signatures for characterization and](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref78)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref78)
+[Li, W., Li, Y., Hu, C., Chen, X., Dai, H., 2014b. Point process analysis in brain networks of](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref79)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref79)
+[Liao, W., Wu, G.-R., Xu, Q., Ji, G.-J., Zhang, Z., Zang, Y.-F., Lu, G., 2014a. DynamicBC: a](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref80)
+[MATLAB toolbox for dynamic brain connectome analysis. Brain Connect. 4](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref80)
+[(December (10)), 780–790.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref80)
+[Liao, W., Zhang, Z., Mantini, D., Xu, Q., Ji, G.-J., Zhang, H., Wang, J., Wang, Z., Chen,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref81)
+[G., Tian, L., Jiao, Q., Zang, Y.-F., Lu, G., 2014b. Dynamical intrinsic functional](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref81)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref81)
+[(November (6)), 2001–2015.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref81)
+[Liégeois, R., Ziegler, E., Phillips, C., Geurts, P., Gómez, F., Bahri, M.A., Yeo, B.T.T.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref82)
+[Soddu, A., Vanhaudenhuyse, A., Laureys, S., Sepulchre, R., 2016. Cerebral functional](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref82)
+[connectivity periodically (de)synchronizes with anatomical constraints. Brain Struct.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref82)
+[Funct. 221 (July (6)), 2985–2997.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref82)
+[Lindquist, M.A., Xu, Y., Nebel, M.B., Caffo, B.S., 2014. Evaluating dynamic bivariate](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref83)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref83)
+[NeuroImage 101 (November), 531–546.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref83)
+52
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+[Liu, X., Chang, C., Duyn, J.H., 2013. Decomposition of spontaneous brain activity into](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref84)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref84)
+[Liu, X., Duyn, J.H., 2013. Time-varying functional network information extracted from](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref85)
+[brief instances of spontaneous brain activity. Proc. Natl. Acad. Sci. U. S. Am. 110](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref85)
+[(11), 4392–4397.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref85)
+[Ma, S., Calhoun, V.D., Phlypo, R., Adal, T., 2014. Dynamic changes of spatial functional](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref86)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref86)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref86)
+[Madhyastha, T.M., Askren, M.K., Boord, P., Grabowski, T.J., 2015. Dynamic connectivity](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref87)
+[at rest predicts attention task performance. Brain Connect. 5 (February (1)), 45–59.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref87)
+[Madhyastha, T.M., Grabowski, T.J., 2014. Age-related differences in the dynamic](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref88)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref88)
+[Majeed, W., Magnuson, M., Hasenkamp, W., Schwarb, H., Schumacher, E.H., Barsalou,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref89)
+[L., Keilholz, S.D., 2011. Spatiotemporal dynamics of low frequency BOLD](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref89)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref89)
+[Mantini, D., Perrucci, M.G., Del Gratta, C., Romani, G.L., Corbetta, M., 2007.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref90)
+[Electrophysiological signatures of resting state networks in the human brain. Proc.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref90)
+[Natl. Acad. Sci. 104 (32), 13170–13175.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref90)
+[Marusak, H.A., Calhoun, V.D., Brown, S., Crespo, L.M., Sala-Hamrick, K., Gotlib, I.H.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref91)
+[Thomason, M.E., 2016. Dynamic functional connectivity of neurocognitive networks](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref91)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref91)
+Meskaldji, D.E., Morgenthaler, S., Ville, D.V.D., 2015. New measures of brain functional
+connectivity by temporal analysis of extreme events. In: Proceedings of the Twelfth
+IEEE International Symposium on Biomedical Imaging: From Nano to Macro
+(ISBI'15). pp. 26–29.
+[Meskaldji, D.-E., Preti, M.G., Bolton, T.A., Montandon, M.-L., Rodriguez, C.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref92)
+[Morgenthaler, S., Giannakopoulos, P., Haller, S., Van De Ville, D., 2016. Prediction](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref92)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref92)
+[12, 785–795.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref92)
+Miller, R.L., Yaesoubi, M., Calhoun, V.D., 2014. Higher dimensional analysis shows
+reduced dynamism of time-varying network connectivity in schizophrenia patients.
+In: 2014 Proceedings of the 36th Annual International Conference of the IEEE
+Engineering in Medicine and Biology Society. IEEE, pp. 3837–3840.
+[Miller, R.L., Yaesoubi, M., Turner, J.A., Mathalon, D., Preda, A., Pearlson, G., Adali, T.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref93)
+[Calhoun, V.D., 2016. Higher dimensional meta-state analysis reveals reduced resting](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref93)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref93)
+[Monti, R.P., Hellyer, P., Sharp, D., Leech, R., Anagnostopoulos, C., Montana, G., 2014.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref94)
+[Estimating time-varying brain connectivity networks from functional MRI time](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref94)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref94)
+[Morgan, V.L., Abou-Khalil, B., Rogers, B.P., 2014. Evolution of functional connectivity of](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref95)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref95)
+[Connect. 5 (1), 35–44.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref95)
+[Moser, E., Baumgartner, R., Barth, M., Windischberger, C., 1999. Explorative signal](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref96)
+[processing in functional MR imaging. Int. J. Imaging Syst. Technol. 10 (2), 166–176.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref96)
+[Moser, E., Diemling, M., Baumgartner, R., 1997. Fuzzy clustering of gradient-echo](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref97)
+[functional MRI in the human visual cortex. Part II: quantification. J. Magn. Reson.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref97)
+[Imaging 7 (6), 1102–1108.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref97)
+[Mucha, P.J., Richardson, T., Macon, K., Porter, M.A., Onnela, J.-P., 2010. Community](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref98)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref98)
+[(5980), 876–878.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref98)
+[Murphy, K., Birn, R.M., Handwerker, D.A., Jones, T.B., Bandettini, P.A., 2009. The](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref99)
+[impact of global signal regression on resting state correlations: are anti-correlated](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref99)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref99)
+[Nooner, K.B., Colcombe, S., Tobe, R., Mennes, M., Benedict, M., Moreno, A., Panek,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref100)
+[L., Brown, S., Zavitz, S., Li, Q., et al., 2012. The nki-rockland sample: a model](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref100)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref100)
+152.(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref100)
+[Ou, J., Xie, L., Jin, C., Li, X., Zhu, D., Jiang, R., Chen, Y., Zhang, J., Li, L., Liu, T., 2015.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref101)
+[Characterizing and differentiating brain state dynamics via hidden Markov Models.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref101)
+[Brain Topogr. 28 (September (5)), 666–679.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref101)
+Ou, J., Xie, L., Wang, P., Li, X., Zhu, D., Jiang, R., Wang, Y., Chen, Y., Zhang, J., Liu, T.,
+2013. Modeling brain functional dynamics via hidden Markov models. In: 2013
+Proceedings of the 6th International IEEE/EMBS Conference on Neural Engineering
+(NER). No. c. IEEE, pp. 569–572.
+[Patel, A.X., Bullmore, E.T., 2016. A wavelet-based estimator of the degrees of freedom in](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref102)
+[denoised fmri time series for probabilistic testing of functional connectivity and](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref102)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref102)
+[Poldrack, R.A., Laumann, T.O., Koyejo, O., Gregory, B., Hover, A., Chen, M.-Y.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref103)
+[Gorgolewski, K.J., Luci, J., Joo, S.J., Boyd, R.L., et al., 2015. Long-term neural and](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref103)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref103)
+[Power, J.D., Schlaggar, B.L., Petersen, S.E., 2015. Recent progress and outstanding](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref104)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref104)
+Preti, M.G., Haller, S., Giannakopoulos, P., Van De Ville, D., 2015. Decomposing
+dynamic functional connectivity onto phase-dependent eigenconnectivities using the
+Hilbert transform. In: 2015 IEEE Proceedings of the 12th International Symposium
+on Biomedical Imaging (ISBI). IEEE, pp. 38–41.
+Price, T., Wee, C.-Y., Gao, W., Shen, D., 2014. Multiple-network classification of
+childhood autism using functional connectivity dynamics. In: Proceedings of the
+International Conference on Medical Image Computing and Computer-Assisted
+Intervention. Springer, pp. 177–184.
+[Qin, J., Chen, S.-G., Hu, D., Zeng, L.-L., Fan, Y.-M., Chen, X.-P., Shen, H., 2015.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref105)
+[Predicting individual brain maturity using dynamic functional connectivity. Front.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref105)
+[Hum. Neurosci. 9 (July), (Article 418).](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref105)
+[Rack-Gomer, A.L., Liu, T.T., 2012. Caffeine increases the temporal variability of resting-](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref106)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref106)
+[2994–3002.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref106)
+[Rashid, B., Arbabshirani, M.R., Damaraju, E., Cetin, M.S., Miller, R., Pearlson, G.D.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref107)
+[Calhoun, V.D., 2016. Classification of schizophrenia and bipolar patients using static](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref107)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref107)
+[Rashid, B., Damaraju, E., Pearlson, G.D., 2014. Dynamic connectivity states estimated](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref108)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref108)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref108)
+[Rubinov, M., Sporns, O., 2010. Complex network measures of brain connectivity: uses](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref109)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref109)
+[Sadaghiani, S., Poline, J.-B., Kleinschmidt, A., D'Esposito, M., 2015. Ongoing dynamics](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref110)
+[in large-scale functional connectivity predict perception. Proc. Natl. Acad. Sci. 112](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref110)
+[(27), 8463–8468.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref110)
+[Sakoglu, Ü., Pearlson, G.D., Kiehl, K.A., Wang, Y.M., Michael, A.M., Calhoun, V.D., 2010.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref111)
+[A method for evaluating dynamic functional network connectivity and task-](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref111)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref111)
+[(December (5–6)), 351–366.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref111)
+[Sami, S., Robertson, E.M., Miall, R.C., 2014. The time course of task-specific memory](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref112)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref112)
+[Schaefer, A., Margulies, D.S., Lohmann, G., Gorgolewski, K.J., Smallwood, J., Kiebel,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref113)
+[S.J., Villringer, A., 2014. Dynamic network participation of functional connectivity](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref113)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref113)
+[Shakil, S., Lee, C.-H., Keilholz, S.D., 2016. Evaluation of sliding window correlation](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref114)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref114)
+[NeuroImage 133 (June), 111–128.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref114)
+Shakil, S., Magnuson, M.E., Keilholz, S.D., Chin-Hui Lee, 2014. Cluster-based analysis
+for characterizing dynamic functional connectivity. In: 2014 Proceedings of the 36th
+Annual International Conference of the IEEE Engineering in Medicine and Biology
+Society. IEEE, pp. 982–985.
+[Shen, H., Li, Z., Qin, J., Liu, Q., Wang, L., Zeng, L.-L., Li, H., Hu, D., 2016. Changes in](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref115)
+[functional connectivity dynamics associated with vigilance network in taxi drivers.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref115)
+[NeuroImage 124 (January), 367–378.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref115)
+[Shen, H., Li, Z., Zeng, L.-L., Yuan, L., Chen, F., Liu, Z., Hu, D., 2014. Internetwork](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref116)
+[dynamic connectivity effectively differentiates schizophrenic patients from healthy](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref116)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref116)
+Shine, J.M., Bell, P.T., Koyejo, O., Gorgolewski, K.J., Moodie, C.A., Poldrack, R.A., 2015a.
+Dynamic fluctuations in integration and segregation within the human functional
+(http://arXiv:1511.02976)
+[Shine, J.M., Koyejo, O., Bell, P.T., Gorgolewski, K.J., Gilat, M., Poldrack, R.A., 2015b.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref117)
+[Estimation of dynamic functional connectivity using Multiplication of Temporal](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref117)
+[Derivatives. NeuroImage 122 (November), 399–407.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref117)
+Shine, J.M., Koyejo, O., Poldrack, R.A., 2016. Temporal metastates are associated with
+differential patterns of time-resolved connectivity, network topology, and attention.
+Proceedings of the National Academy of Sciences (August (10)), 201604898.
+[Shirer, W.R., Jiang, H., Price, C.M., Ng, B., Greicius, M.D., 2015. Optimization of rs-fmri](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref118)
+[pre-processing for enhanced signal-noise separation, test-retest reliability, and group](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref118)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref118)
+[Siegel, J.S., Mitra, A., Laumann, T.O., Seitzman, B.A., Raichle, M., Corbetta, M., Snyder,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref119)
+[A.Z., 2016. Data quality influences observed links between functional connectivity](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref119)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref119)
+[Simony, E., Honey, C.J., Chen, J., Lositsky, O., Yeshurun, Y., Wiesel, A., Hasson, U.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref120)
+[2016. Dynamical reconfiguration of the default mode network during narrative](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref120)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref120)
+[Smith, S.M., Beckmann, C.F., Andersson, J., Auerbach, E.J., Bijsterbosch, J., Douaud, G.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref121)
+[Duff, E., Feinberg, D.A., Griffanti, L., Harms, M.P., et al., 2013. Resting-state fmri in](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref121)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref121)
+[Smith, S.M., Miller, K.L., Moeller, S., Xu, J., Auerbach, E.J., Woolrich, M.W., Beckmann,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref122)
+[C.F., Jenkinson, M., Andersson, J., Glasser, M.F., et al., 2012. Temporally-](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref122)
+[independent functional modes of spontaneous brain activity. Proc. Natl. Acad. Sci.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref122)
+[109 (8), 3131–3136.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref122)
+Sourty, M., Thoraval, L., Armspach, J.-p., Foucher, J., 2016a. Product Hidden Markov
+Models for subject-based dynamic functional connectivity analysis of the resting
+state brain. In: 2016 IEEE Proceedings of the 13th International Symposium on
+Biomedical Imaging (ISBI). IEEE, pp. 1291–1294.
+[Sourty, M., Thoraval, L., Roquet, D., Armspach, J.-P., Foucher, J., Blanc, F., 2016b.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref123)
+[Identifying dynamic functional connectivity changes in dementia with lewy bodies](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref123)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref123)
+[Staresina, B.P., Alink, A., Kriegeskorte, N., Henson, R.N., 2013. Awake reactivation](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref124)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref124)
+[Stoeckel, L., Garrison, K.A., Ghosh, S.S., Wighton, P., Hanlon, C.A., Gilman, J.M., Greer,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref125)
+[S., Turk-Browne, N.B., Scheinost, D., Craddock, C., et al., 2014. Optimizing real time](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref125)
+[fmri neurofeedback for therapeutic discovery and development. NeuroImage: Clin. 5,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref125)
+[245–255.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref125)
+[Su, J., Shen, H., Zeng, L.-L., Qin, J., Liu, Z., Hu, D., 2016. Heredity characteristics of](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref126)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref126)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref126)
+[843–848.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref126)
+[Tagliazucchi, E., Balenzuela, P., Fraiman, D., Chialvo, D.R., 2010. Brain resting state is](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref127)
+[disrupted in chronic back pain patients. Neurosci. Lett. 485 (November (1)), 26–31.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref127)
+[Tagliazucchi, E., Balenzuela, P., Fraiman, D., Chialvo, D.R., 2012a. Criticality in large-](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref128)
+[scale Brain fMRI dynamics unveiled by a novel point process analysis. Front. Physiol.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref128)
+[3 (February), 1–12.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref128)
+[Tagliazucchi, E., Balenzuela, P., Fraiman, D., Montoya, P., Chialvo, D.R., 2011.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref129)
+[Spontaneous BOLD event triggered averages for estimating functional connectivity at](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref129)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref129)
+[Tagliazucchi, E., Carhart-Harris, R., Leech, R., Nutt, D., Chialvo, D.R., 2014. Enhanced](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref130)
+[repertoire of brain dynamical states during the psychedelic experience. Hum. Brain](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref130)
+[Mapp. 35 (November (11)), 5442–5456.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref130)
+53
+M.G. Preti et al. NeuroImage 160 (2017) 41–54
+[Tagliazucchi, E., Laufs, H., 2015. Multimodal imaging of dynamic functional](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref131)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref131)
+[Tagliazucchi, E., Siniatchkin, M., Laufs, H., Chialvo, D.R., 2016. The voxel-wise](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref132)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref132)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref132)
+[Tagliazucchi, E., vonWegner, F., Morzelewski, A., Brodbeck, V., Laufs, H., 2012b.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref133)
+[Dynamic BOLD functional connectivity in humans and its electrophysiological](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref133)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref133)
+[Thompson, G.J., Magnuson, M.E., Merritt, M.D., Schwarb, H., Pan, W.-j., McKinley, A.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref134)
+[Tripp, L.D., Schumacher, E.H., Keilholz, S.D., 2013a. Short-time windows of](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref134)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref134)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref134)
+[3280–3298.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref134)
+[Thompson, G.J., Merritt, M.D., Pan, W.-j., Magnuson, M.E., Grooms, J.K., Jaeger, D.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref135)
+[Keilholz, S.D., 2013b. Neural correlates of time-varying functional connectivity in the](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref135)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref135)
+[Thompson, W.H., Fransson, P., 2015a. The frequency dimension of fMRI dynamic](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref136)
+[connectivity: network connectivity, functional hubs and integration in the resting](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref136)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref136)
+Van De Ville, D., Karahanoğlu, F.I., 2016. Resting-state neuroimaging unravels
+functional organization in the brain. SPIE Newsroom, pp. 2–4.
+[Van Dijk, K.R., Hedden, T., Venkataraman, A., Evans, K.C., Lazar, S.W., Buckner, R.L.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref137)
+[2010. Intrinsic functional connectivity as a tool for human connectomics: theory,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref137)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref137)
+Wang, C., Ong, J.L., Patanaik, A., Zhou, J., Chee, M.W., 2016. Spontaneous eyelid
+closures link vigilance fluctuation with fmri dynamic connectivity states. Proceedings
+of the National Academy of Sciences, 201523980.
+Wee, C.-Y., Yang, S., Yap, P.-T., Shen, D., 2013. Temporally dynamic resting-state
+functional connectivity networks for early mci identification. In: Proceedings of the
+International Workshop on Machine Learning in Medical Imaging. Springer, pp.
+139–146.
+[Wee, C.-Y., Yang, S., Yap, P.-T., Shen, D., 2016a. Sparse temporally dynamic resting-state](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref138)
+[functional connectivity networks for early MCI identification. Brain Imaging Behav.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref138)
+[10 (June (2)), 342–356.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref138)
+[Wee, C.-Y., Yap, P.-T., Denny, K., Browndyke, J.N., Potter, G.G., Welsh-Bohmer, K.A.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref139)
+[Wang, L., Shen, D., 2012. Resting-state multi-spectrum functional connectivity](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref139)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref139)
+[Wee, C.-Y., Yap, P.-T., Shen, D., 2016b. Diagnosis of autism spectrum disorders using](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref140)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref140)
+[Ther. 22 (March (3)), 212–219.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref140)
+[Xu, Y., Lindquist, M.A., 2015. Dynamic connectivity detection: an algorithm for](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref141)
+[determining functional connectivity change points in fMRI data. Front. Neurosci. 9](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref141)
+[(September).](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref141)
+[Yaesoubi, M., Allen, E.A., Miller, R.L., Calhoun, V.D., 2015a. Dynamic coherence analysis](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref142)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref142)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref142)
+[Yaesoubi, M., Miller, R.L., Calhoun, V.D., 2015b. Mutually temporally independent](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref143)
+[connectivity patterns: a new framework to study the dynamics of brain connectivity](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref143)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref143)
+[107 (February), 85–94.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref143)
+[Yang, Z., Craddock, R.C., Margulies, D.S., Yan, C.-g., Milham, M.P., 2014. Common](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref144)
+[intrinsic connectivity states among posteromedial cortex subdivisions: insights from](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref144)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref144)
+[Yu, Q., Erhardt, E.B., Sui, J., Du, Y., He, H., Hjelm, D., Cetin, M.S., Rachakonda, S.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref145)
+[Miller, R.L., Pearlson, G., Calhoun, V.D., 2015. Assessing dynamic brain graphs of](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref145)
+[time-varying connectivity in fMRI data: application to healthy controls and patients](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref145)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref145)
+[Zalesky, A., Breakspear, M., 2015. Towards a statistical test for functional connectivity](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref146)
+(http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref146)
+[Zalesky, A., Fornito, A., Cocchi, L., Gollo, L.L., Breakspear, M., 2014. Time-resolved](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref147)
+[resting-state brain networks. Proc. Natl. Acad. Sci. 111 (July (28)), 10341–10346.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref147)
+[Zalesky, A., Fornito, A., Harding, I.H., Cocchi, L., Yücel, M., Pantelis, C., Bullmore, E.T.,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref148)
+[2010. Whole-brain anatomical networks: does the choice of nodes matter?](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref148)
+[Neuroimage 50 (3), 970–983.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref148)
+[Zuo, X.-N., Di Martino, A., Kelly, C., Shehzad, Z.E., Gee, D.G., Klein, D.F., Castellanos,](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref149)
+[F.X., Biswal, B.B., Milham, M.P., 2010. The oscillating brain: complex and reliable.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref149)
+[Neuroimage 49 (2), 1432–1445.](http://refhub.elsevier.com/S1053-8119(16)30788-1/sbref149)
+54
+=== END: 1-s2.0-S1053811916307881-main.pdf (1 equations) ===

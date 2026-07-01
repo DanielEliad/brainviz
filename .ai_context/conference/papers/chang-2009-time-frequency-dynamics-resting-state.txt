@@ -1,0 +1,1150 @@
+=== PDF: 1-s2.0-S1053811909012981-main.pdf ===
+
+NeuroImage 50 (2010) 81–98
+[Contents lists available at ScienceDirect](http://www.sciencedirect.com/science/journal/10538119)
+NeuroImage
+journal homepage: www.elsevier.com/locate/ynimg
+–
+Time frequency dynamics of resting-state brain connectivity measured with fMRI
+Catie Chang ⁎, Gary H. Glover
+Department of Electrical Engineering, Stanford University, Stanford, CA 94305, USA
+Department of Radiology, Stanford University, Stanford, CA 94305, USA
+a r t i c l e i n f o a b s t r a c t
+Article history:
+Received 9 September 2009
+Revised 30 November 2009
+Accepted 1 December 2009
+Available online 16 December 2009
+Keywords:
+Functional magnetic resonance imaging
+Resting state
+Networks
+Wavelets
+Dynamics
+Negative correlations
+Spontaneous activity
+Functional connectivity
+Default mode network
+Nonstationarity
+Introduction
+Most studies of resting-state functional connectivity using fMRI employ methods that assume temporal
+stationarity, such as correlation and data-driven decompositions computed across the duration of the scan.
+However, evidence from both task-based fMRI studies and animal electrophysiology suggests that functional
+connectivity may exhibit dynamic changes within time scales of seconds to minutes. In the present study, we
+investigated the dynamic behavior of resting-state connectivity across the course of a single scan, performing
+a time–frequency coherence analysis based on the wavelet transform. We focused on the connectivity of the
+posterior cingulate cortex (PCC), a primary node of the default-mode network, examining its relationship
+with both the “anticorrelated” (“task-positive”) network as well as other nodes of the default-mode network.
+It was observed that coherence and phase between the PCC and the anticorrelated network was variable in
+time and frequency, and statistical testing based on Monte Carlo simulations revealed the presence of
+significant scale-dependent temporal variability. In addition, a sliding-window correlation procedure
+identified other regions across the brain that exhibited variable connectivity with the PCC across the scan,
+which included areas previously implicated in attention and salience processing. Although it is unclear
+whether the observed coherence and phase variability can be attributed to residual noise or modulation of
+cognitive state, the present results illustrate that resting-state functional connectivity is not static, and it may
+therefore prove valuable to consider measures of variability, in addition to average quantities, when
+characterizing resting-state networks.
+© 2009 Elsevier Inc. All rights reserved.
+Studies of the human brain using functional magnetic resonance
+imaging (fMRI) have revealed collections of distributed regions that
+exhibit low-frequency, temporally correlated BOLD signal fluctuations
+in the absence of an explicit task (resting state). Remarkably, these
+“resting-state networks” tend to comprise regions that are coactivated during tasks and are observed with consistency across
+subjects and scanning sessions (Damoiseaux et al., 2006; De Luca et al.,
+2006; Shehzad et al., 2009), suggesting a general principle of
+functional organization. In recent years, a large number of studies
+have emerged in an effort to understand the purpose of resting-state
+networks in subserving cognitive function or basic brain physiology
+(for reviews, see (Buckner and Vincent, 2007; Fox and Raichle, 2007)).
+Currently, the analysis of resting-state networks across a single
+scanning session typically employs techniques that assume temporal
+stationarity: measures of linear dependence are computed over the
+entire scan and used to characterize the strength of connections
+across regions. Popular methods include seed-based region-ofinterest (ROI) analysis, in which the time series of an ROI is used as
+⁎ Corresponding author. Lucas MRI/S Center, MC 5488, 1201 Welch Road, Stanford,
+CA 94305-5488, USA. Fax: +1 650 723 5795.
+[E-mail address: catie@stanford.edu (C. Chang).](mailto:catie@stanford.edu)
+1053-8119/$ – see front matter © 2009 Elsevier Inc. All rights reserved.
+(http://dx.doi.org/10.1016/j.neuroimage.2009.12.011)
+a regressor to query regions of similar temporal behavior across the
+brain (Biswal et al., 1995; Greicius et al., 2003; Lowe et al., 1998), and
+independent component analysis (Beckmann et al., 2005; Kiviniemi et
+al., 2003; McKeown et al., 1998), which is a model-free approach for
+identifying spatial regions with temporally coordinated activity. Other
+methods for characterizing resting-state networks include partial
+correlation (Fransson and Marrelec, 2008), coherence and partial
+coherence (Salvador et al., 2005), phase relationships (Sun et al.,
+2005), clustering (Cordes et al., 2002; Mezer et al., 2009), and graph
+theory (Achard et al., 2006; Dosenbach et al., 2007).
+Previous studies have demonstrated dynamic changes in network
+connectivity throughout development (Fair et al., 2008; Supekar et al.,
+2009), aging (Beason-Held et al., 2009), visual state (Bianciardi et al.,
+2009) and as a function of conscious awareness (Greicius et al., 2008;
+Horovitz et al., 2009; Martuzzi et al., 2009; Picchioni et al., 2008).
+Furthermore, there is evidence that inter-regional correlations can be
+modulated by cognitive processes that occur on time-scales of a
+typical (several-minute) scan. Task-based studies have revealed that
+attention (Esposito et al., 2006; Fransson, 2006), learning (Sun et al.,
+2007), and muscle fatigue (Deshpande et al., 2006) can effect changes
+in low-frequency dynamics and/or connectivity throughout the
+performance of the task and in subsequent resting-state scans (Barnes
+et al., 2009; Duff et al., 2008; Waites et al., 2005). Because the resting
+state is a condition of undirected wakefulness that may encompass
+82 C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98
+varying levels of attention, mind-wandering, and arousal, one may
+hypothesize that the connectivity between and within networks may
+undergo substantial changes across the duration of a scan.
+The aim of the present study was to investigate the temporal
+dynamics of connectivity between nodes of resting-state networks
+within the course of a 12- or 15-min scanning session. Here, we focus
+specifically on the default-mode network (DMN) and regions with
+which it has negative correlations (the “anticorrelated” network, also
+referred to as the “task-positive” or “executive-control” network)
+(Fox et al., 2005; Fransson, 2005; Greicius et al., 2003). These
+networks, comprised of spatially distinct brain regions, have been
+shown to have negative correlations in the resting state, a finding that
+mirrors the opposing signal changes displayed by the two networks
+during controlled tasks (Toro et al., 2008) and which may emerge in
+simulated cortical networks (Deco et al., 2009). However, compared
+with the positive correlations exhibited between nodes within the
+same network, the magnitude of negative correlations between the
+two networks have been reported to be weaker and much less
+consistent (Shehzad et al., 2009), particularly without the controversial processing step of global signal removal (Chang and Glover, 2009;
+Fox et al., 2009; Murphy et al., 2009).
+A possible explanation for the relative weakness of negative
+correlations is that the presence of common noise across the brain,
+such as that due to respiration and cardiac processes (Birn et al., 2006;
+Chang et al., 2009; Shmueli et al., 2007; Wise et al., 2004), biases interregional correlation coefficients in the positive direction. A second
+possibility is that the phase difference between the two networks is
+variable in time, driven perhaps by cognitive state. Using local field
+potentials recorded in the feline homologues of the DMN and its
+anticorrelated network, (Popa et al., 2009) found variable phase
+differences between gamma power fluctuations of the two networks
+wherein negative correlations were more frequent during waking and
+REM sleep compared to slow-wave sleep.
+As previous fMRI studies of temporal relationships between the
+DMN and its anticorrelated network have computed correlation
+coefficients across all time points in the scan, the observed relative
+weakness of the negative correlations raises a number of interesting
+questions. For instance, to what extent, and at what frequencies, do
+the magnitude and the phase relationships between the networks
+fluctuate over time? Are negative correlations between the two
+networks consistently weak, or marked by transient periods of strong
+negative correlation?
+$\textendash \textendash$
+In the current study, we apply a time frequency analysis in particular, wavelet transform coherence–to examine temporal variability in
+the relationship between nodes of the DMN and its anticorrelated
+network. Time–frequency methods are popular in the analysis of EEG,
+MEG, and electrophysiological data (e.g. see (Le Van Quyen and Bragin,
+2007; Mitra and Pesaran, 1999; Roach and Mathalon, 2008)). Wavelet
+transform coherence has previously been applied to the analysis of
+neural signals using spike trains and EEG (e.g. (Klein et al., 2006; Li et al.,
+2007; Zhan et al., 2006) and to fMRI data to study the temporal
+variability in the phase relationships between different brain regions in
+a visual task (Muller et al., 2004), and to study resting-state network
+nodes throughout the course of a working-memory task (Almeida et al.,
+2007). In addition, to explore regions of the brain having potentially
+interesting dynamic connectivity with the default-mode network, a
+whole-brain sliding correlation analysis was applied and regions with
+large temporal variability in connectivity were identified.
+Methods
+Data acquisition and standard processing
+Subjects
+Participants included 12 healthy adults (6 female, aged 27.7±
+12.4 years) recruited from the Stanford University community. All
+subjects provided written, informed consent, and all protocols were
+approved by the Stanford Institutional Review Board.
+Imaging parameters
+Magnetic resonance imaging was performed at 3.0 T using GE
+whole-body scanners (GE Healthcare Systems, Milwaukee, WI). Four
+–
+of the 12 subjects (those henceforth labeled as Subjects 1 4) were
+scanned on a GE Signa HDX (rev. 12M5) using a custom quadrature
+birdcage head coil, while the remaining 8 subjects were scanned on a
+GE Signa 750 (rev. 20M3) using an 8-channel head coil. Head
+movement was minimized with a bite bar. Thirty oblique axial slices
+were obtained parallel to the AC-PC with 4-mm slice thickness, 1-mm
+skip. T2-weighted fast spin echo structural images (TR=3000 ms,
+TE=68 ms, ETL=12, FOV=22 cm, matrix 192×256) were acquired
+for anatomical reference. A T2⁎-sensitive gradient echo spiral-in/out
+pulse sequence (Glover and Lai, 1998; Glover and Law, 2001) was
+used for functional imaging (TR=2000 ms, TE=30 ms, flip
+angle=77°, matrix 64×64, FOV=22 cm, same slice prescription as
+the anatomic images). A high-order shimming procedure was used to
+reduce B0 heterogeneity prior to the functional scans (Kim et al.,
+2002). Importantly, a frequency navigation correction was employed
+during reconstruction of each image to eliminate blurring from
+breathing-induced changes in magnetic field; no bulk mis-registration
+occurs from off-resonance in spiral imaging (Pfeuffer et al., 2002).
+Resting state scan
+All subjects underwent a resting state scan, for which they were
+instructed only to keep their eyes closed and remain awake. For 5 of
+the subjects, the duration of the scan was 12 min; for 6 subjects, the
+total scan duration was 16 min, from which the latter 15 min were
+extracted for analysis. This is because subjects had been cued to
+perform a single 10 s breath hold at the beginning of the scan as part
+of a separate study, and breath-holding has been shown to affect the
+BOLD signal for approximately 40 s (Birn et al., 2008). One subject was
+scanned for 16 min without performing the initial BH, but only 12 min
+was used for analysis due to excessive motion during the final minutes
+of the scan, despite the bite bar.
+Physiological monitoring
+Cardiac and respiratory processes were monitored using the
+scanner's built-in photoplethysmograph placed on a finger of the
+left hand and a pneumatic belt strapped around the upper abdomen,
+respectively. Cardiac and respiratory data were both sampled at 40 Hz
+on the Signa HDX, and at 100 Hz and 25 Hz, respectively, on the Signa
+750. A file containing cardiac trigger times and respiratory waveforms
+was generated for each scan by the scanner's software.
+fMRI pre-processing and physiological noise reduction
+Functional images were pre-processed using custom C and Matlab
+routines. The first 5 time frames were discarded to allow the MR signal
+to achieve T1 equilibration. Preprocessing included slice-timing
+correction using sinc interpolation, spatial smoothing with a 3D
+Gaussian kernel (FWHM=5 mm), and removal of linear and
+quadratic temporal trends. No additional temporal band-pass filtering
+was performed. Images were corrected for physiological noise by (1)
+applying RETROICOR (Glover et al., 2000) for the removal of timelocked cardiac and respiratory artifacts, and (2) filtering of lowfrequency respiratory volume and heart rate effects using methods
+(“RVHRCOR”) described in (Chang and Glover, 2009). The time series
+of ROIs in the white matter and cerebrospinal fluid (CSF) and 6 affine
+motion parameters were also regressed out of the data. The white
+matter and CSF ROIs were 3-mm radius spheres centered at MNI
+coordinates (26, −12, 35) and (19, −33, 18), reverse-normalized to
+each subject's brain (described below), and are identical to those used
+in (Chang and Glover, 2009). Importantly, global signal removal was
+not performed, as it is known to falsely increase anticorrelations
+C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98 83
+**f** **f** **f** **f** **f** **f** **f**
+between time series (Murphy et al., 2009). Motion parameters were
+calculated using methods described in Friston et al. (1996).
+Normalization and group analysis
+Unless otherwise mentioned, analyses were performed in native
+subject space. ROIs at specific standard coordinates were defined in
+[MNI space using MarsBar (http://marsbar.sourceforge.net) and](http://marsbar.sourceforge.net)
+reverse-normalized to each subject's mean functional image using
+SPM5 (http://www.fil.ion.ucl.ac.uk/spm). To examine results at the
+group level, the relevant single-subject images were normalized to
+the SPM5 EPI template and entered into a group-level random-effects
+analysis using SPM5. A nuisance factor of “scanner” was included
+since subjects had been scanned on 1 of 2 different scanners. Singlesubject correlation maps were converted to Fisher z-statistics prior tof **f** i f **f** i f **f** i f **f** i f **f** i f **f** i f **f**
+group analysis using the formula z = tanh − 1 ð Þ �r pN − 3, where r is
+the correlation coefficient and N is the number of time points. All
+coordinates are reported in MNI space, and all figures of group-level
+activation appear in neurological convention, superimposed on the
+(http://www.mricron.com)
+Defining network regions of interest
+$Default-mode and \textquotedblleftanticorrelated\textquotedblright network$
+A region in the posterior cingulate (3 mm-radius sphere, centered
+at (x = −6, y = −58, z =28)) was selected as the primary ROI for the
+default-mode network. This region corresponds to a peak coordinate
+in a meta-analysis of task-based coactivation with DMN regions (Toro
+et al., 2008), and has been shown to display resting-state connectivity
+with other DMN regions with high test-retest reliability (Shehzad et al.,
+2009). To examine the set of voxels with similar temporal behavior
+across the entire duration of the scan, the Pearson correlation
+coefficient was computed between the full time series of the PCC ROI
+and that of every other voxel in the brain. It was verified that the PCC
+ROI exhibited strong correlations with high specificity, at both the
+individual and group level (Fig. 1), with other regions reported to be
+involved in the DMN.
+One objective of the current study is to examine the dynamic
+behavior of regions that are most strongly and consistently negatively
+correlated with the DMN. Because having a large magnitude of overall
+negative or positive correlation implies small variability of correlation
+Table 1
+Clusters of positive and negative correlation with the PCC ROI selected for analysis. The
+column ‘No.' contains the label of the cluster within Fig. 1. BA, Brodmann area; L, left; R,
+right; MPFC, medial prefrontal cortex; DLPFC, dorsolateral prefrontal cortex; SMG,
+supramarginal gyrus.
+**f** **f** **f** **f** **f** **f** **f**
+across time, the degree of coupling between these regions and the DMN
+over time may be considered to yield an upper bound on the
+stationarity, or constant nature, of negative correlations within the
+current dataset. Accordingly, regions demonstrating strong negative
+correlations with the DMN were identified with the following approach.
+First, single-subject correlation maps with the PCC ROI (computed
+across all time points, as described above) were entered into a grouplevel analysis. The resulting (negative) contrast map was thresholded at
+p b 0.01 uncorrected (t N 2.76), and bilateral clusters in the supramarginal gyrus (SMG), dorso-lateral prefrontal cortex (DLPFC), and insula
+were extracted (Table 1). These 6 clusters were reverse-normalized to
+each subject, and–within each cluster–the voxel having the maximum
+negative correlation with the PCC across the entire scan was identified.
+Spheres of 3 mm-radius were then drawn around each such voxel,
+$yielding 6 subject-specific \textquotedblleftanticorrelated\textquotedblright ROIs.$
+The above procedure aims to maximize the sensitivity of selecting
+voxels having negative correlation with the PCC, while maintaining
+anatomical constraints such that results may be compared between
+subjects and across different brain regions. Two alternative
+–
+approaches selecting the peak coordinate of the group analysis to
+be the same ROI for all subjects, or using independent coordinates
+from the literature–were not found to yield the strongest negative
+correlations for all subjects.
+**f** **f** **f** **f** **f** **f** **f**
+**f** **f** **f** **f** **f** **f** **f**
+Fig. 1. Group-level thresholded t-maps for positive (red) and negative (blue) correlations with the PCC. Clusters are labeled according to Table 1.
+84 C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98
+**f** **f**
+For comparison, regions with the strongest positive correlation
+were defined in a similar manner. The most significant clusters (Table 1),
+occurring in the medial prefrontal cortex (MPFC) and the left and
+right angular gyri, were extracted by thresholding the positive
+contrast of the group-level analysis at t N 8 (this threshold is more
+stringent than that used for negative clusters due to the very large
+cluster sizes). These 3 clusters were reverse-normalized to each
+subject, and voxels having maximum positive correlation with the
+PCC across the entire scan within each cluster were used to define 3
+$subject-specific 3-mm radius \textquotedblleftdefault-mode\textquotedblright ROIs.$
+Detecting regions with variable default-mode connectivity
+In addition to examining the dynamics of regions having the most
+consistent positive and negative correlations with the PCC, regions of
+the brain demonstrating variable correlations with the PCC were
+queried. For each subject, a whole-brain sliding-window correlation
+analysis (further described below) was performed against the time
+series of the PCC ROI. Window sizes of both 2 min and 4 min (60 and
+120 time frames, respectively) were used. For each voxel, the standard
+deviation of its sequence of sliding-window correlation coefficients
+across the scan was computed. Maps were created to depict the
+standard deviation values across the brain for each subject, and a
+group analysis was performed by averaging the spatially-normalized
+single-subject maps.
+Dynamic analysis methods
+Wavelet transform coherence
+Wavelet transform coherence (WTC) is a method for analyzing the
+coherence and phase lag between two time series as a function of both
+time and frequency (Torrence and Compo, 1998), and is therefore
+well suited to investigating nonstationary changes in coupling
+between fMRI time series. WTC is based on the continuous wavelet
+–
+transform, which decomposes a single time series into time
+frequency space by successively convolving the time series with
+scaled and translated versions of a wavelet function ψ 0 (Mallat, 1999).
+The continuous wavelet transform of a time series x n of length N,
+sampled from an underlying continuous waveform at equal time steps
+of size Δt, is defined as:
+**f** **f**
+**f** **f**
+Δt
+$n X 0 =1 x n \psi 4 0 ��n 0 - n�� s$
+**f** **f**
+Δt
+$��n 0 - n�� s ��; \dh1\TH$
+(n,s)}) (cross-wavelet phase) describes their relative phase. Following
+(Torrence and Webster, 1999), the wavelet transform coherence is
+defined as
+$jhs - 1 W XY \dhn; s\THij 2 R 2 \dhn; s\TH = jhs - 1 j W X \dhn; s\THjij 2 jhs - 1 j W Y \dhn; s\THjij 2 ; \dh2\TH$
+which reveals localized regions of phase-locked behavior. R 2 ranges
+between 0 and 1, and can be conceptualized as a localized correlation
+coefficient in time and frequency space (Grinsted et al., 2004). The
+brackets 〈·〉 indicate smoothing in both time and scale: the filter for
+temporal smoothing is a Gaussian function, which is matched to the
+Morlet wavelet; the scale smoothing is a boxcar filter (for further
+discussion, see (Torrence and Webster, 1999)). Implementation of the
+WTC and cross-wavelet transform was based on a library of MATLAB
+(http://www.pol.ac.uk/home/research/waveletcoherence/)
+(http://www.pol.ac.uk/home/research/waveletcoherence/)
+Illustrative example
+An example of the cross-wavelet power and WTC for simulated
+time series is shown in Fig. 2. The 2 simulated time series consist of
+negatively-correlated sinusoids with variable frequency (f =1/16 Hz
+for 0 b t b 200 s, f =1/32 Hz for 200 b t b 400 s, and f =1/96 Hz for
+400 b t b 720 s), embedded in additive independent Gaussian noise
+with a signal-to-noise ratio (SNR) of 1.25. Time is plotted on the xaxis, scale (which has been converted to its equivalent Fourier period)
+is on the y-axis. For the cross-wavelet power, the color scale
+represents the normalized log-spectrum (log 2 j σ W x σ XY y j [) and in the]
+CWT plot, the color scale represents the magnitude of coherence (R 2 ;
+Eq. (2)). The phase angle between the 2 time series at particular
+–
+samples of the time frequency plane is indicated by an arrow: a
+rightward-pointing arrow indicates that the time series are in phase,
+or positively correlated (ϕ =0); a leftward-pointing arrow indicates
+anticorrelation (ϕ = π), and the downward- and upward-pointing
+arrows indicate phase angles of π/2 and −π/2, respectively. Areas
+inside the “cone of influence”, which are locations in the time–
+frequency plane where edge-effects give rise to lower confidence in
+the computed values, are shown in faded color outside of the conical
+contour. At longer Fourier periods, more time points are included in
+the cone of influence since wavelets at larger scales have substantial
+**f** **f**
+energy over a time window whose length approaches the total length
+of the data record. Note that due to the smoothing necessary for the
+WTC, there is poorer time and frequency resolution in the WTC
+relative to the cross-wavelet power.
+Significance testing of wavelet transform coherence variability
+It is of interest to know whether the observed pattern of coherence
+over time between brain regions exhibits significantly greater
+temporal variability than would be expected if the underlying
+relationship between the two signals were stationary (time-invariant). To this end, statistical testing of WTC temporal variability was
+performed using a Monte Carlo procedure based on time-series
+bootstrapping (Efron and Tibshirani, 1986), described as follows.
+Let x and y represent the BOLD signal time series from 2 different ROIs.
+We first fit a (stationary) vector autoregressive (VAR) model to x and y:
+**f** **f**
+$W X \dhn; s\TH =$
+Δf **f** **f** t **f** N
+r s X
+f **f** i f **f** i **f**
+Δt
+s
+**f** **f**
+where n is a time index and s denotes the wavelet scale. The function
+ψ 0 is chosen to be the complex Morlet wavelet:
+$\psi 0 \eta\dh \TH = \pi - 1 = 4 e i\omega 0 \eta e - \eta 2  = 2 ;$
+where the parameter ω 0 governs the relative time and frequency
+resolution; here, ω 0 =6, which has been shown to provide a good
+trade-off between time and frequency localization (Grinsted et al.,
+2004; Muller et al., 2004). For the Morlet wavelet with ω 0 =6, the
+Fourier period (T) associated with scale s is approximately equal to
+the value of s (T =1.03 s). Note that ψ 0 is normalized to unit energy at
+each scale in Eq. (1), so that the wavelet transforms at each scale are
+directly comparable.
+The wavelet transform W X (n,s) is a complex quantity whose
+modulus expresses the amount of power in x as a function of time and
+frequency (scale), and whose angle represents the local phase. Similarly,
+the cross-wavelet transform can be defined for two time series as:
+$W XY \dhn; s\TH = W X \dhn; s\THW Y4 \dhn; s\TH;$
+whose modulus |W XY (n,s)|, known as the cross-wavelet power,
+expresses the amount of joint power between x and y as a function
+of time and frequency, and whose angle tan − 1 (Im{W XY (n,s)}/Re{W XY
+**f** **f**
+$8>>>>><>>>>>:$
+**f** **f**
+p
+$x t\dh \TH = X$
+**f** **f**
+p p
+$X a x i x t \dh  - i \TH + X$
+i =1 i =1
+p p
+$X a y i x t \dh  - i \TH + X$
+i =1 i =1
+**f** **f**
+$X b x i y t \dh  - i \TH + u x \dh \THt$
+i =1
+**f** **f**
+$\dh3\TH$
+**f** **f**
+p
+$y t\dh \TH = X$
+**f** **f**
+$X b y i y t \dh  - i \TH + u y \dh \THt$
+i =1
+**f** **f**
+;
+**f** **f**
+where the optimal model order p is chosen according to the Bayesian
+information criterion (BIC) score, and t is a time index. Coefficients of
+the VAR model are estimated using least squares. Secondly, we
+generate 1000 bootstrap time series pairs having the same VAR
+C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98 85
+Fig. 2. Example of the cross-wavelet power (above left) and wavelet transform coherence (above right) for simulated data (bottom). The simulated data consist of negativelycorrelated sinusoids with piecewise frequency content (f =1/16 Hz for 0 b t b 200 s, f =1/32 Hz for 200 b t b 400 s, and f =1/96 Hz for 400 bt b 720 s; thick lines in figure), embedded
+in Gaussian white noise (SNR=1.25; thin lines in figure). For the WTC, the phase angle between the 2 time series at particular locations in the time–frequency plane is indicated by
+an arrow (see text for further detail). Regions inside the cone of influence appear in faded color.
+coefficients (i.e. same stationary relationship) as Eq. (3); see
+Appendix A for further detail concerning the generation of bootstrap
+samples. For each bootstrap time series pair, the WTC is computed,
+yielding both a coherence magnitude (R 2 b (n,s[)) and phase (]ϕ b (n,s))
+which can be represented together as the complex quantity
+WTC b nð ; sÞ = R 2 b ð n; s Þ � e i/ b  n ð ;s Þ, where n denotes time, s denotes scale,
+and b denotes the bootstrap iteration. A measure of temporal
+variability at each scale s is computed on WTC b (n,s) (i.e. for each
+row in the WTC matrix). Specifically, we define the variability at scale
+s to be σ 2b (s)= var(WTC b (n,s)), where the function var(z)= b (z − μ z )
+(z − μ z )⁎N is the sample variance over a set of complex values
+(brackets b·N denote the sample mean, ⁎ denotes complex conjugate,
+and μ z = bzN). By storing σ 2b (s) for each of the 1000 bootstrap samples,
+we obtain a null distribution for the complex variance at each scale of
+the WTC, which can be used to obtain confidence intervals and pvalues for the WTC of real data (σ 2 (s)). We have treated each wavelet
+scale independently because the smoothness characteristics of the
+WTC are scale-dependent. Note that throughout this procedure, only
+WTC indices outside the cone of influence (i.e. those less susceptible
+to edge-effects) are considered.
+Significance testing of wavelet transform coherence magnitude
+Statistical significance of WTC magnitude (R 2 (n,s)) is estimated
+using a similar Monte Carlo approach. An autoregressive process of
+order p was fit to each input pair of time series (x and y), and a large
+number (here, 300) of bootstrapped time series pairs with the same
+AR coefficients and model order as x and y were generated. For each
+bootstrapped pair, one can calculate the WTC and estimate a null
+distribution for each scale, from which significance levels are derived.
+Unlike the above case, which involves testing for significant temporal
+variation in the WTC, here we are testing for significant coherence
+magnitude, and thus we do not model AR dependences between the
+surrogate time series pairs (as the null hypothesis is that a given
+coherence magnitude can arise between independently-generated
+processes). The model order for each time series was determined
+according to the BIC score.
+Sliding window correlation analysis
+The sliding-window correlation between two time series (x and y)
+is defined as ρ(t)= corr(x t+wt − 1 and y t+wt − 1 ), where w is the window
+size, x t+wt − 1 and y t+wt − 1 denote the portion of the time series from
+time t to t+w-1, and corr( ) denotes computation of the correlation
+coefficient. Sliding window correlation was performed to complement the wavelet coherence analysis and investigate the variability of
+correlations across the scan. Whole-brain sliding window calculations
+were implemented in C.
+Analysis of potential confounds
+Relationship between motion and variable connectivity
+Although motion parameters are regressed out of the data as a preprocessing step, it is still possible that intermittent motion may
+contribute to any observed nonstationarity in the relationship
+between BOLD signal time series. We thus tested for relationships
+between motion and correlation variability on both an inter- and
+intra-subject basis.
+Each subject's sequence of 6 rigid-body motion parameters across
+the scan was converted into two summary measures: (1) maximum
+86 C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98
+Table 2
+Correlation coefficients (r) between the PCC ROI and subject-specific ROIs corresponding to the 6 anticorrelated and 3 default-mode clusters. N, total number of time points analyzed
+in the scan; L, left; R, right; SMG, supramarginal gyrus; MPFC, medial prefrontal cortex; DLPFC, dorsolateral prefrontal cortex.
+drift (peak-to-peak excursion) and (2) maximum root-mean-square
+(RMS) fluctuation, where the maximum was taken across all 6
+parameters. The Pearson correlation coefficient was used to compare,
+on an inter-subject basis, each of the two motion statistics with each
+of two different measures of connectivity variability between the PCC
+and anticorrelated ROIs: (1) the standard deviation of the 2-min
+sliding-window correlation coefficients and (2) the variance of the
+WTC at each wavelet scale (σ 2 (s), defined above). To examine the
+relationship between motion and connectivity variability on an intrasubject (intra-scan) basis, we partitioned the scan into non-overlapping time intervals of length 20 frames and calculated the
+fluctuation across motion parameters for each interval; more
+Fig. 3. Wavelet transform coherence between the PCC and 3 of its anticorrelated ROIs, shown for 6 subjects: (top row) right SMG, (middle row) right insula, and (bottom row) right
+DLPFC. For each WTC map, time is on the x-axis and scale (Fourier period) is on the y-axis. Maps have been thresholded to include only regions that were significant at 95%
+confidence based on Monte Carlo tests. Colors indicate ranges of the wavelet coherence phase. A phase difference of 0 indicates positive correlation; π indicates negative correlation;
+π/2 indicates that the PCC ROI leads the anticorrelated ROI; −π/2 indicates that the anticorrelated ROI leads the PCC ROI. Regions of insignificant coherence appear in dark blue, and
+areas inside the cone of influence are in purple.
+C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98 87
+precisely, the motion fluctuation for the kth interval (having time
+response to a single deep breath is well-modeled by a function that
+decays to 0 after approximately 40 s (Birn et al., 2008), then
+discarding the first 1 min of data would largely remove the effects
+of the BH. However, the effect of a brief BH on longer-term correlation
+dynamics has not yet been studied, and it has been reported that more
+extreme challenges (e.g. (Kiviniemi et al., 2009), who used 2-min of
+hyperventilation) can alter the dynamic properties of individual BOLD
+time series. We compared connectivity variability between the 6
+$\textquotedblleftnon-BH\textquotedblright subjects and 6 \textquotedblleftBH\textquotedblright subjects, where a measure of$
+connectivity variability for each subject was obtained by taking the
+variance over the sequence of 2-min sliding-window correlation
+coefficients between the PCC and each of the 6 anticorrelated ROIs
+over 12 min of data, and summing the resulting variance across the 6
+ROI pairs (similar to the above test for the influence of motion).
+Measures from the BH and non-BH groups were compared using a
+Wilcoxon rank-sum test, both with and without covarying for motion
+(maximum drift and RMS fluctuation) and scanner. Differences
+between subjects scanned at the Signa HDX and those scanned on
+the Signa 750 were queried using the same procedure.
+Results
+Default-mode network and anticorrelations
+Fig. 1 shows group-level t-maps of positive and negative
+correlation with the PCC ROI, where correlations for each subject
+were taken over all time points. The maps in Fig. 1 are displayed at a
+threshold identical to that used for obtaining the default-mode and
+6
+$points t k \textellipsis.t k + 20- 1 ) was defined as M k = P$
+j =1
+t k + 20 − 1 2
+$P �m j t\dh \TH - \textasciitilde\textasciitildem\textasciitilde\textasciitilde j;k �,$
+t = t k
+where m j is the jth motion parameter and m \jk m j
+the kth interval. We then calculated the fluctuation across the slidingwindow correlation coefficients that were temporally aligned with
+the same non-overlapping intervals used in the calculation of M k ; i.e.,
+connectivity fluctuation associated with the for the kth interval was
+6
+defined as V k = P
+r =1
+t k + 20 − 1 2
+$P �\rho r t\dh \TH - \textasciitilde\textasciitilde\rho\textasciitilde\textasciitilde r;k �, where \rho r (t) is the sliding$
+t = t k
+window correlation coefficient (formula provided above) between
+the PCC and the rth anticorrelated ROI (r ranges over A1,…A6 in Table
+$1), and \rho \textbackslash r,k \rho r k$
+sequence M k of motion-based deviations were then compared to the
+sequence V k of connectivity-based deviations using Pearson correlation. Note that non-overlapping time intervals were used in order to
+minimize autocorrelations between the observations. Note also that
+V k represents a longer effective time window than M k, as each ρ(t)
+already integrates over a window of data in order to estimate a
+connectivity value, so this analysis in effect tests whether motion has
+an influence on the subsequent evolution of correlation variability.
+Sliding window sizes of both 40 s and 2 min were examined.
+Effects of scanner and breath-holding
+Inter-subject differences in connectivity variability across subjects
+may also relate to differences in the scanner used (Signa HDX vs. Signa
+750) or the performance of the initial 10-s breath hold (BH) by a
+subset of subjects. We hypothesized that because the BOLD-signal
+Fig. 4. Wavelet transform coherence between the PCC and default-mode ROIs, shown for 6 subjects: (top row) MPFC, (middle row) right angular gyrus, (bottom row) left angular
+gyrus. For further detail, please refer to the caption of Fig. 3.
+88 C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98
+Fig. 5. Significance of temporal variability in the wavelet transform coherence. Each plot shows the number of subjects for which the variance in the WTC between the PCC and the
+indicated ROI exceeded the 90% (blue) and 95% (red) confidence levels, for each wavelet scale (Fourier period).
+anticorrelated clusters used as masks for deriving the subject-specific
+ROIs. Cluster locations (centroids and Brodmann areas) are provided
+in Table 1. The correlation coefficient (over all time points) between
+the PCC ROI and the subject-specific ROIs within the default-mode
+and anticorrelated clusters are provided in Table 2. Negative
+correlations with the anticorrelated network were weaker than
+positive correlations within the DMN, having across-subject mean
+values ranging from − 0.26 (L. insula) to −0.40 (L. and R. SMG); those
+of the positive correlations ranged from 0.78 (R. angular gyrus) to 0.82
+(MPFC).
+Wavelet coherence between default-mode and anticorrelated ROIs
+The wavelet transform coherence was computed between the
+PCC ROI and each of the 6 anti-correlated ROIs and 3 default-mode
+ROIs. Results of the WTC analysis for anticorrelated ROIs in the right
+SMG, right insula, and right DLPFC are shown in Fig. 3 for 6 subjects
+(see supplementary Fig. S1 for all subjects). Also shown are the
+WTC results between the PCC ROI and the 3 ROIs of the default
+mode network (Fig. 4; see supplementary Fig. S2 for all subjects).
+The WTC maps of Figs. 3 and 4 are of a similar format as Fig. 2.
+however, for ease of visualization, only pixels whose coherence
+magnitude exceeds a 95% significance threshold are shown, and
+discrete ranges of the coherence phase are color-coded as indicated
+in the figure.
+Fig. 3 demonstrates that the anticorrelated ROIs exhibit considerable modulation of coherence across the time–frequency plane and
+that significant coherence was often focal in time, information that
+would be lost if performing a single (stationary) Fourier coherence
+analysis across the entire time series. The degree to which coherence
+varied over time was not uniform across subjects, as some subjects
+(e.g. Subject 8) showed more persistent significant negative correlations than others (e.g. Subject 12). On the other hand, positive
+correlations were more widespread for all subjects, as shown in Fig. 4.
+We note that using the peak (maximal negatively-correlated) voxel in
+each anticorrelated cluster, instead of spatially averaging voxels across
+the 3 mm spheres, yielded very similar results (data not shown).
+A statistical test based on Monte Carlo simulations was used to
+quantify the significance of variability in the wavelet transform
+Table 3
+Model order p (Eq. (3)), as determined by the BIC score, for the vector autoregressive model fit between the PCC and (A) each anticorrelated ROI, and between the PCC and (B) each
+of the 5 ROIs indicated in Fig. 9A. L, left; R, right; SMG, supramarginal gyrus; DLPFC, dorsolateral prefrontal cortex.
+Fig. 6. Time-averaged coherence (see Eq. (4)), shown for default-mode (top row) and anticorrelated (middle and bottom rows) ROIs. Thick lines represent the mean across subjects (N =12), and error bars represent standard error.
+90 C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98
+Fig. 7. Percentage of the total significant coherence occurring within each phase range (ϕ ±π/4), within each of 5 different frequency bands. Lines and error bars represent the mean±SD,
+respectively, across the 3 DMN ROIs (left) and 6 anticorrelated ROIs (right).
+coherence between the PCC and each of the anticorrelated ROIs. The
+results are summarized in Fig. 5, which depicts the number of subjects
+having significantly nonstationary variation (as a function of scale) at
+both the 90% and 95% confidence levels. The identities of the subjects
+comprising the elements of each plot in Fig. 5 are indicated in
+Supplementary Fig. S3. The BIC model order used for the significance
+testing is reported for each subject in Table 3A.
+To examine the distribution of phase values for which significant
+coherence was attained, we defined the time-averaged coherence as:
+1
+$c s\dh ; /\TH = N coi s\dh \TH$
+$X R 2 \dht; s\TH � InR 2 \dht; s\TH N a 95 o � Inarg R� 2 \dht; s\TH�$
+$tgCOI\dh \TH s$
+$a\textonehalf / F \pi = 4� \dh4\TH$
+o
+where N coi is the number of pixels outside the cone of influence, I{·} is
+the indicator function (equal to 1 when its argument is true, and 0
+otherwise), a 95 is the 95% significance level for coherence magnitude,
+R 2 is as defined in Eq. (2), arg(R 2 ) is the coherence phase, and ϕ ∈ {0,
+π/2, π, −π/2}. Only scales that were common to all subjects were
+used (4bsb241.6, corresponding to 4.13 b T b 249.6 s). The value of c(s,
+ϕ) is, in other words, the total significant coherence at scale s occurring
+within a phase range of ϕ ± π/4, normalized by the maximum possible
+coherence at scale s (which is equal to N coi (s), as maximum coherence
+would mean that R 2 =1 at each pixel outside the COI at scale s).
+Fig. 6 shows the time-averaged coherence across subjects
+(mean±SE, N =12). Because of disparities in time/frequency resolution across scales, c(s,ϕ) for a given ϕ does not strictly represent the
+“time” spent in significant coherence, and caution should be taken
+when comparing across scales for a given ϕ. However, the shape of the
+curve, and the relative magnitudes of different values of ϕ at a given
+scale can be compared across distinct WTC analyses, indicating
+–
+possible differences in the time frequency relationships of different
+time series pairs. It can be seen that the anticorrelated ROIs have a
+distribution that is predominantly unimodal, peaking around a period
+of T =32 s (f ∼ 0.03 Hz). Note that the time-averaged coherence differs
+from standard (stationary) cross-spectral analysis because the latter
+estimates a single magnitude and phase value for each frequency,
+while the former depicts the extent to which coherence can transition
+between different phase ranges (across time) at a given frequency.
+Fig. 7 shows the percentage of the total coherence that occurred
+within each phase range (ϕ ± π/4), quantified separately for 5
+$frequency bands: (1) 0.128\textendash0.242 Hz (T \sim 4\textendash8 s), (2) 0.064\textendash 0.128 Hz (T \sim 8\textendash16 s), (3) 0.032\textendash0.064 Hz (T \sim 16\textendash32 s), (4) 0.016\textendash 0.032 Hz (T \sim 32\textendash64 s), and (5) 0.008\textendash0.016 Hz (T \sim 64\textendash128 s). Within$
+a given frequency band, the anticorrelated ROIs were similar to one
+another with respect to phase content. The high frequency bands
+exhibited the greatest diversity of phase angles.
+Wavelet coherence: comparing positive and negative correlations
+We also examined the coherence properties between the PCC and
+voxels having positive correlation coefficients of approximately the
+same magnitude as the negative correlation coefficients observed
+between the PCC and the anticorrelated ROIs. The motivation for this
+comparison was to see whether there is a symmetry between the
+coherence patterns of positive and negative correlation in the brain at
+an equivalent signal-to-noise ratio, wherein the source of the “noise”
+is embedded in the fMRI signal itself.
+For each subject, a single voxel whose correlation with the PCC fell
+between 0.28 and 0.41 was identified for this comparison. To maintain
+a degree of spatial localization (and thus noise homogeneity), this
+voxel was constrained to lie within the MPFC cluster (Fig. 1, Table 1).
+Fig. 8. (A) WTC analysisand (B) time-averaged coherence between the PCC ROI and voxels
+in the MPFC having an overall correlation coefficient with the same approximate SNR as
+the anticorrelated ROIs in the actual data (for the instance shown here, r =0.35±0.03
+(mean±SD across subjects)). For the time-averaged coherence, error bars indicate the
+standard error of the mean over 50 iterations.
+Fig. 9. (A) Variability (standard deviation) over the sequence of 2-min sliding-window correlation coefficients, averaged across all 12 subjects. Five ROIs chosen for further analysis are labeled. (B) t-maps of positive and negative correlations
+with the PCC (red and blue, respectively, and thresholded identically to Fig. 1), superimposed for anatomical comparison with regions of high variability (SD N 0.18; magenta). (C) The intersection of group-level seeded correlation maps
+(computed across all time points in the scan) using ROIs 1, 2, and 3 as seed regions (green overlay), and using ROIs 4 and 5 as seed regions (cyan overlay). The slice location (z, mm) appears in white numerals and also applies to parts (A) and (B).
+92 C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98
+Fig. 10. Range of sliding-window correlation values for ROIs 1–5 (Fig. 9A), for window sizes of 2 min (top row) and 4 min (bottom row). Vertical lines indicate the minimum and
+maximum values of the windowed correlation coefficient across the scan, and the dot on each bar indicates the mean.
+A WTC analysis between the PCC and this voxel was computed
+(Fig. 8A), and the time-averaged coherence was obtained to
+summarize the WTC results over all 12 subjects. This procedure was
+repeated 50 times, each time with a different choice of voxels. The
+grand average over the 50 time-averaged coherence curves is
+displayed in Fig. 8B. It can be seen that the primary peak of the timeaveraged coherence occurs at a period slightly shorter than 64 s
+∼
+(f 0.016 Hz), a lower frequency than was observed for the anticorrelated ROIs in Fig. 6. The same procedure was repeated when
+constraining voxels to lie in the cluster of the right angular gyrus; the
+plot was similar to that of the MPFC cluster, though the peak occurred
+at an even lower frequency (96 s; data not shown).
+Brain regions of variable default-mode connectivity
+A map of variability (standard deviation) over the sequence of 2min sliding-window correlation coefficients is shown in Fig. 9A,
+averaged across all 12 subjects. The map corresponding to 4-min
+sliding window was qualitatively similar, with identical maxima.
+Regions of highest variability included voxels in the supplementary
+motor area (SMA)/anterior cingulate cortex (ACC)/superior medial
+Table 4
+Summary of sliding-window correlation coefficients for the 5 ROIs (Fig. 9A) having
+variable connectivity with the PCC. The mean value, variability (standard deviation;
+SD), and percentage of sliding-window correlation coefficients that were less than 0 are
+shown for each of 5 ROIs, averaged across all 12 subjects.
+frontal cortex (BA 8, 24, 32); superior and inferior parietal cortex (BA 7,
+40); precentral (BA 6) and frontal operculum (BA 44, 48); ventrolateral prefrontal cortex (VLPFC; BA 45) and middle/inferior orbitofrontal cortex (BA 47); and superior (BA 21, 22) and middle (BA 37)
+temporal cortex. Five foci corresponding to local maxima were defined
+as ROIs (Fig. 9A): these included regions in the right inferior parietal
+cortex (“ROI1”, x =34, y= − 58, z=44), right inferior frontal
+$operculum/BA44 (\textquotedblleftROI2\textquotedblright; x =50, y=18, z=32), right inferior$
+temporal cortex (“ROI3”; x =58, y = −38, z = − 16), right inferior
+orbitofrontal cortex (“ROI4”; x =50, y =26, z = −8), and ACC/BA24
+(“ROI5”; x = −2, y =26, z =24). For comparison, the t-maps for the
+DMN and its anticorrelated network are shown in Fig. 9B along with a
+thresholded version of the map in Fig. 9A.
+Ranges of sliding-window correlation coefficients for ROIs 1–5 and
+window lengths of 2 min and 4 min are described in Fig. 10 and Table 4.
+Due to the smoothing properties of longer sliding-window lengths, the
+Fig. 11. Group average (N =12) of Fisher z-transformed correlation coefficients
+between 5 ROIs (Fig. 9A) whose correlation with the PCC was highly variable over time.
+High mutual correlation was observed between ROIs 1–3, and between ROIs 4–5.
+Fig. 12. (Top row) Time-averaged coherence for the 5 ROIs indicated in Fig. 9A. Thick lines represent the mean across subjects (N =12), and error bars represent standard error. (Bottom row) Histograms of the number of subjects for which the
+variance in the WTC between the PCC and the indicated ROI exceeded the 90% (blue) and 95% (red) confidence levels, for each wavelet scale (Fourier period).
+94 C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98
+range of variation within a given subject was smaller for a window
+length of 4 min compared to 2 min. As can be seen from Fig. 10, there
+are subjects and ROIs for which the correlation coefficients range from
+negative to positive over time. Across subjects, the range of sliding
+–
+correlation values were centered more closely around zero for ROIs 4
+5 compared to ROIs 1–3.
+To examine whether the locations of high variability exhibit
+temporal activity that is similar to one another, correlation coefficients
+between the raw time series of the 5 ROIs were computed (Fig. 11). In
+addition, each ROI was used as a seed to generate a correlation map for
+each subject, using all time-points in the scan. As expected by their
+high mutual correlation, a group analysis of the correlation map for
+each ROI revealed that ROIs 1, 2, and 3 generated highly overlapping
+networks, and that ROIs 4 and 5 generated overlapping networks that
+were primarily distinct from those of 1, 2, and 3 (Fig. 9C). The network
+formed by the intersection of seeded correlation maps from ROIs 1, 2,
+and 3 includes the ventro-lateral prefrontal cortex (BA 45, 47)
+extending into DLPFC (BA 46), superior/inferior parietal lobule (BA
+7, 40) and the middle/inferior temporal cortices (BA 21, 20, 37). The
+network formed by the intersection of seeded correlation maps from
+ROIs 4 and 5 includes the anterior cingulate cortex (BA 24, 32),
+supplementary motor area (BA 6), basal ganglia, and SMG extending
+into the superior temporal cortex (BA 40, 42). These resemble restingstate networks that have previously been reported in the literature
+(Damoiseaux et al., 2006; Seeley et al., 2007), and thus further analysis
+of the time–frequency dynamics of their seed ROIs relative to the PCC
+(default-mode) is of interest.
+WTC analyses were performed between the PCC and each of the 5
+ROIs; the resulting time-averaged coherence and scale-dependent
+significance in temporal variability are shown in Fig. 12. The BIC
+model order used for the significance testing is reported for each
+subject in Table 3B. WTC maps for two ROIs (ROI2 and ROI5) are
+Fig. 13. Raw time series and sliding-window correlation coefficients between the PCC and (A) ROI5 and (B) ROI2, shown for one subject (Subject 1). Sliding-window correlation
+coefficients are plotted at the time point corresponding to the center of its associated window.
+C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98 95
+Table 5
+Summary of subject motion. Values are specified in mm, and refer to the maximum over
+all 6 motion parameters.
+provided in supplementary Fig. S4. Examples of raw time series from
+ROIs 2 and 5, along with their sliding-window correlation sequences
+for window lengths of 2 min and 4 min, are shown in Fig. 13 for one
+subject (Subject 1).
+Effects of motion, scanner, and breath-holding on connectivity variability
+Motion parameters for each subject are reported in Table 5,
+and were minimal (mean drift=0.9 mm, mean RMS deviation=
+0.12 mm). The inter-subject comparison between motion and
+connectivity variability yielded no significant relationships (p N 0.05)
+with either the maximum drift or maximum RMS deviation. The inter
+subject comparison between motion and scale-dependent variability
+in the WTC showed a significant (p b 0.05) relationship at some scales
+for some ROIs (supplementary Table S1); however, this occurred only
+for very high frequencies (T b 6.5 s) and very low frequencies
+(T N 112 s). Thus a large fraction of the spectrum does not appear to
+be related to motion, including frequencies in which high variability
+was observed (such as 16–64 s; see Fig 5). The intra-subject
+correlations between the sequence of motion-based deviations and
+the sequence of correlation-based deviations were not significant for
+any subject, for either of the 2 sliding-window lengths examined.
+Results of the comparison between BH and non-BH subjects were
+not significant (p =0.24), even after covarying for effects of motion
+and scanner (p =0.39). Results of the between-scanner comparison
+were also not significant (p =0.68). We further verified that none of
+these comparisons became significant when using 1- and 4-min
+sliding-window lengths, in addition to the 2-min sliding window, to
+compute the connectivity variability measure. Therefore, while
+scanner and BH do not appear to influence variability in the current
+dataset, the number of subjects in these between-group comparisons
+is small (N 1 = N 2 =6 for the BH comparison and N 1 =4/N 2 =8 for the
+scanner comparison) and thus further study with larger subject
+groups would be necessary to attain the power required for a more
+conclusive inference concerning these effects.
+Discussion
+This study presents a preliminary analysis of dynamic behavior
+between nodes of resting-state networks. We demonstrate the use of
+wavelet coherence analysis for analyzing time-varying interactions
+between brain regions in the resting state, focusing on the defaultmode network and its negative correlations with regions of the
+“anticorrelated” network. In addition, regions of the brain with
+temporally-variable connectivity to the PCC, a major node of the
+default-mode network, were identified using sliding-window correlations. Results indicate that resting-state BOLD connectivity has
+dynamic properties that may be overlooked by stationary analyses,
+observations that complement recent studies of dynamic spontaneous
+activity in animal models (Majeed et al., 2009; Popa et al., 2009).
+When considering all time points in the data, correlation
+coefficients between the PCC and its anticorrelated regions were
+found to be substantially weaker than those of the positive
+correlations within regions of the DMN, in agreement with previous
+literature. WTC analysis showed clear fluctuations in the magnitude of
+coherence for phase angles of π ± π/4 within the course of a single
+scan, revealing the presence of temporally-localized periods of
+negative correlation. Significance tests indicated the existence of
+scale-dependent temporal variability beyond that which may be
+expected by a stationary VAR model. In addition, differences in the
+time-averaged coherence were observed between the anticorrelated
+and positively-correlated ROIs of approximately the same SNR,
+indicating either (a) functional differences in the way negatively
+and positively correlated regions couple to the PCC, and/or (b)
+differences in the noise characteristics of these anatomic regions.
+A sliding-window correlation procedure was applied in order to
+detect areas across the whole brain whose linear relationship with the
+PCC had high relative variation across the duration of the scan.
+Interestingly, high variation was found in brain areas that have been
+implicated in higher-level cognitive function, such as attention and
+salience processing (Corbetta and Shulman, 2002; Seeley et al., 2007),
+and a seed-based ROI analysis suggested a general organization of
+these regions into two disjoint networks that resemble resting-state
+networks reported in previous studies (e.g. (Damoiseaux et al., 2006;
+Seeley et al., 2007). Further dynamic analysis of the associated seed
+ROIs revealed that for some subjects and ROIs, sliding-window
+correlation coefficients were ranged from positive to negative over
+time, particularly for ROIs in the ACC and right orbitofrontal cortex
+(ROIs 4 and 5; Table 4). For ROIs 1–3, WTC analyses revealed that the
+phase distribution associated with significant coherence magnitude
+was dominated by phase angles centered around 0 (positive
+correlation) at most scales; however, a suppression of positive
+correlations (and accompanying increase of negative correlations)
+was observed in the range of ∼16–32 Hz, particularly for ROI 2. ROIs 4
+and 5 exhibited a more uniform phase distribution (Fig. 12).
+Further studies will be required to address the potential functional
+relevance of the observed temporal variability between these region
+and the default-mode networks in the resting state. In addition,
+because the map in Fig. 9 represents an average variability rather than
+a proper statistical measure, further analysis will be required to
+identify other regions of the brain that may have lower average
+variability and yet equal (or higher) statistical significance when
+accounting for autoregressive properties on a voxel-wise basis, as was
+done here for significance testing of the WTC.
+One implication of the present findings is that the appearance of
+negative correlations, as calculated by seed-based correlation of ICA,
+may depend on the temporal segment of data considered for analysis.
+Thus, one is likely to observe inter-trial variability across scans of, e.g.,
+6 min in length, which is a typical acquisition time for a resting-state
+scan (Fig. 14). Furthermore, where weak and/or negative correlations
+are concerned, a single correlation coefficient computed across the
+duration of a longer scan may oversimplify the dynamic relationship
+between time series. Phase variability over time, such as observed in
+the ROIs identified by the sliding-window method, is also likely to
+confound measurements of causality computed across the entire scan.
+Therefore, quantifying the variability of interactions, in addition to
+averages across a scan, may be informative for characterizing the
+dynamics of resting-state networks.
+–
+Yet, the wealth of information provided by a time frequency
+analysis of connectivity (beyond than that of a conventional stationary
+analysis) presents additional challenges when studying multiple
+subjects and spatial locations. One way of handling this growth of
+information is to summarize the dynamic information (e.g. WTC maps)
+along several potentially-relevant dimensions such as those presented
+herein, e.g. time-averaged coherence, scale-dependent variability, and
+variance of the sliding-window correlations. Metrics that take into
+96 C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98
+Fig. 14. Negative correlations with the PCC across two successive 7-min segments of resting-state data, shown for one subject. (A) First 7 min, (B) second 7 min. Intensity values
+represent correlation coefficient (color scale is 0.08 b r b 0.4), and map is superimposed on the subject's T2-weighted anatomic image. Substantial differences between the two
+segments are apparent.
+account even more “higher-order” aspects of variability, such as the
+rate at which correlations and phase are modulated in addition to the
+overall degree of change, may also prove important. Such metrics can
+be examined for variability within and between groups of subjects,
+yielding features that can complement those of static analyses when
+characterizing neural activity across subject groups and cognitive
+states. Future work will be required to determine the most informative
+metrics for a given hypothesis and subject population.
+Given the design of this study, it is not possible to resolve the cause
+of the observed nonstationary relationships. As there are few
+constraints on a subject's cognitive processes during a resting-state
+scan, it is possible that changes in network dynamics may reflect
+changes in brain state or arousal. However, it is also possible that the
+apparent changes are driven simply by the noise (e.g. motion,
+physiological) at a given time, despite efforts to correct for known
+sources based on previous models and despite the lack of significant
+relationship between motion and variability using the tests described
+herein. Further experiments involving task manipulations or multiple
+modalities, such as combined fMRI-EEG or electrophysiology, will be
+required to better understand the sources of the time-varying
+dynamics between brain regions in the resting state.
+Additional limitations pertaining to the methodology used herein
+suggest avenues of future work. For example, although we focus on
+connectivity with the PCC, previous studies have indicated the
+presence of heterogeneity across components of the DMN and their
+respective anticorrelations (Uddin et al., 2009), and thus greater
+insight may be obtained by examining the dynamics within subsets of
+networks. In addition, wavelet coherence was applied here to pairs of
+time series. In the future, it may be fruitful to apply multivariate
+analysis methods to resting-state data in a nonstationary sense, such
+as with sliding-window ICA (Karvanen and Theis, 2004) and adaptive
+multivariate autoregressive models (Deshpande et al., 2006; Sato
+et al., 2006).
+Acknowledgments
+This work was supported by NIH grants F31-AG032168 (CC) and
+P41-RR009784 (GHG). The authors gratefully acknowledge Jonathan
+Taylor, Ryan Tibshirani, Richard Olshen, Noah Simon, Mike Love, and
+Nelson Ray for valuable discussions regarding statistical methodology,
+and two anonymous reviewers for suggestions that have substantially
+improved this manuscript.
+C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98 97
+̂
+Appendix A
+Bootstrapping procedure
+Given a VAR model of order p on the actual data (Eq. (3)), each
+bootstrap time series pair ((x b n,y b n), n =1…N, b =1…1000) is
+generated as follows:
+1. Select a time point n 0, 1 ≤ n 0 ≤ (N − p), uniformly at random.
+2. Set (x b n,y b n), n =1…p to be equal to (xm,ym), m = n 0 …
+(n 0 + p − 1). This step thus initializes the first p values of the
+bootstrap process to be a randomly-selected contiguous block of
+p observations from the actual data (Stine, 1987).
+3. For each n = (p+1)…N, select a time index nˆ (1 ≤ n ≤ N) uniformly
+at random, and let û x n= u x nˆ and û y n= u y nˆ. In other words,
+the innovation term of the bootstrap process at the current time
+step consists of a randomly-sampled residual of the VAR fit to the
+original data. Then, let
+̂
+$8>>>>>>>>><>>>>>>>>>: ̂$
+p
+x b n½ � = X
+i =1
+p
+y b n½ � = X ̂
+p p
+$X a x i x b \textonehalf n - i � + X$
+i =1 i =1
+p p
+$X a y i x b \textonehalf n - i � + X ̂$
+i =1 i =1
+$X b x i y b \textonehalf n - i � + u x \textonehalf � n$
+i =1
+p
+$X b y i y b \textonehalf n - i � + û y \textonehalf �n ;$
+i =1
+̂
+where the coefficients a x i, a y i, b x i, b y i
+squares fit of the pth-order VAR model to the original data.
+Appendix B. Supplementary data
+Supplementary data associated with this article can be found, in
+(http://dx.doi.org/10.1016/j.neuroimage.2009.12.011)
+References
+Achard, S., Salvador, R., Whitcher, B., Suckling, J., Bullmore, E., 2006. A resilient, lowfrequency, small-world human brain functional network with highly connected
+association cortical hubs. J. Neurosci. 26, 63–72.
+Almeida, M., Botelho, L.F., da Silva, A.M., Brett, M., Poline, J.B., Anton, J.-L., Andrade, A.,
+2007. Time–frequency analysis of brain connectivity with fMRI: A new method
+based on Wavelet Transform Coherence. Organization for Human Brain Mapping,
+12th Annual Meeting, Chicago. Poster 250 M-PM.
+Barnes, A., Bullmore, E.T., Suckling, J., 2009. Endogenous human brain dynamics recover
+slowly following cognitive effort. PLoS One 4, e6626.
+Beason-Held, L.L., Kraut, M.A., Resnick, S.M., 2009. Stability of default-mode network
+activity in the aging brain. Brain Imaging Behav. 3, 123–131.
+Beckmann, C.F., DeLuca, M., Devlin, J.T., Smith, S.M., 2005. Investigations into restingstate connectivity using independent component analysis. Philos. Trans. R. Soc.
+Lond. B. Biol. Sci. 360, 1001–1013.
+Bianciardi, M., Fukunaga, M., van Gelderen, P., Horovitz, S.G., de Zwart, J.A., Duyn, J.H.,
+2009. Modulation of spontaneous fMRI activity in human visual cortex by
+behavioral state. NeuroImage 45, 160–168.
+Birn, R.M., Diamond, J.B., Smith, M.A., Bandettini, P.A., 2006. Separating respiratoryvariation-related fluctuations from neuronal-activity-related fluctuations in fMRI.
+NeuroImage 31, 1536–1548.
+Birn, R.M., Smith, M.A., Jones, T.B., Bandettini, P.A., 2008. The respiration response
+function: the temporal dynamics of fMRI signal fluctuations related to changes in
+respiration. NeuroImage 40, 644–654.
+Biswal, B., Yetkin, F.Z., Haughton, V.M.,Hyde,J.S., 1995. Functional connectivity inthemotor
+cortex of resting human brain using echo-planar MRI. Magn. Reson. Med. 34, 537–541.
+Buckner, R.L., Vincent, J.L., 2007. Unrest at rest: default activity and spontaneous
+network correlations. NeuroImage 37, 1091–1096 discussion 1097-1099.
+Chang, C., Glover, G.H., 2009. Effects of model-based physiological noise correction on
+default mode network anti-correlations and correlations. NeuroImage 47, 1448–1459.
+Chang, C., Cunningham, J.P., Glover, G.H., 2009. Influence of heart rate on the BOLD
+signal: the cardiac response function. NeuroImage 44, 857–869.
+Corbetta, M., Shulman, G.L., 2002. Control of goal-directed and stimulus-driven
+attention in the brain. Nat. Rev. Neurosci. 3, 201–215.
+Cordes, D., Haughton, V., Carew, J.D., Arfanakis, K., Maravilla, K., 2002. Hierarchical
+clustering to measure connectivity in fMRI resting-state data. Magn. Reson.
+Imaging 20, 305–317.
+Damoiseaux, J.S., Rombouts, S.A., Barkhof, F., Scheltens, P., Stam, C.J., Smith, S.M.,
+Beckmann, C.F., 2006. Consistent resting-state networks across healthy subjects.
+Proc. Natl. Acad. Sci. U. S. A. 103, 13848–13853.
+De Luca, M., Beckmann, C.F., De Stefano, N., Matthews, P.M., Smith, S.M., 2006. fMRI
+resting state networks define distinct modes of long-distance interactions in the
+human brain. NeuroImage 29, 1359–1367.
+Deco, G., Jirsa, V., McIntosh, A.R., Sporns, O., Kotter, R., 2009. Key role of coupling, delay, and
+noise in resting brain fluctuations. Proc. Natl. Acad. Sci. U. S. A. 106, 10302–10307.
+Deshpande, G., LaConte, S., Peltier, S., Hu, X., 2006. Directed transfer function analysis of
+fMRI data to investigate network dynamics. Conf. Proc. IEEE Eng. Med. Biol. Soc. 1,
+671–674.
+Dosenbach, N.U., Fair, D.A., Miezin, F.M., Cohen, A.L., Wenger, K.K., Dosenbach, R.A., Fox,
+M.D., Snyder, A.Z., Vincent, J.L., Raichle, M.E., Schlaggar, B.L., Petersen, S.E., 2007.
+Distinct brain networks for adaptive and stable task control in humans. Proc. Natl.
+Acad. Sci. U. S. A. 104, 11073–11078.
+Duff, E.P., Johnston, L.A., Xiong, J., Fox, P.T., Mareels, I., Egan, G.F., 2008. The power of
+spectral density analysis for mapping endogenous BOLD signal fluctuations. Hum.
+Brain Mapp. 29, 778–790.
+Efron, B., Tibshirani, R., 1986. Bootstrap methods for standard errors, confidence
+intervals, and other measures of statistical accuracy. Stat. Sci. 1, 54–74.
+Esposito, F., Bertolino, A., Scarabino, T., Latorre, V., Blasi, G., Popolizio, T., Tedeschi, G.,
+Cirillo, S., Goebel, R., Di Salle, F., 2006. Independent component model of the
+default-mode brain function: assessing the impact of active thinking. Brain Res.
+Bull. 70, 263–269.
+Fair, D.A., Cohen, A.L., Dosenbach, N.U., Church, J.A., Miezin, F.M., Barch, D.M., Raichle,
+M.E., Petersen, S.E., Schlaggar, B.L., 2008. The maturing architecture of the brain's
+default network. Proc. Natl. Acad. Sci. U. S. A. 105, 4028–4032.
+Fox, M.D., Raichle, M.E., 2007. Spontaneous fluctuations in brain activity observed with
+functional magnetic resonance imaging. Nat. Rev. Neurosci. 8, 700–711.
+Fox, M.D., Snyder, A.Z., Vincent, J.L., Corbetta, M., Van Essen, D.C., Raichle, M.E., 2005.
+The human brain is intrinsically organized into dynamic, anticorrelated functional
+networks. Proc. Natl. Acad. Sci. U. S. A. 102, 9673–9678.
+Fox, M.D., Zhang, D., Snyder, A.Z., Raichle, M.E., 2009. The global signal and observed
+̂ anticorrelated resting state brain networks. J. Neurophysiol. 101, 3270–3283.
+Fransson, P., 2005. Spontaneous low-frequency BOLD signal fluctuations: an fMRI
+investigation of the resting-state default mode of brain function hypothesis. Hum.
+Brain Mapp. 26, 15–29.
+Fransson, P., 2006. How default is the default mode of brain function? Further evidence
+from intrinsic BOLD signal fluctuations. Neuropsychologia 44, 2836–2845.
+Fransson, P., Marrelec, G., 2008. The precuneus/posterior cingulate cortex plays a
+pivotal role in the default mode network: evidence from a partial correlation
+network analysis. NeuroImage 42, 1178–1184.
+Friston, K.J., Williams, S., Howard, R., Frackowiak, R.S., Turner, R., 1996. Movementrelated effects in fMRI time-series. Magn. Reson. Med. 35, 346–355.
+Glover, G.H., Lai, S., 1998. Self-navigated spiral fMRI: interleaved versus single-shot.
+Magn. Reson. Med. 39, 361–368.
+Glover, G.H., Law, C.S., 2001. Spiral-in/out BOLD fMRI for increased SNR and reduced
+susceptibility artifacts. Magn. Reson. Med. 46, 515–522.
+Glover, G.H., Li, T.Q., Ress, D., 2000. Image-based method for retrospective correction of
+physiological motion effects in fMRI: RETROICOR. Magn. Reson. Med. 44, 162–167.
+Greicius, M.D., Krasnow, B., Reiss, A.L., Menon, V., 2003. Functional connectivity in the
+resting brain: a network analysis of the default mode hypothesis. Proc. Natl. Acad.
+Sci. U. S. A. 100, 253–258.
+Greicius, M.D., Kiviniemi, V., Tervonen, O., Vainionpaa, V., Alahuhta, S., Reiss, A.L.,
+Menon, V., 2008. Persistent default-mode network connectivity during light
+sedation. Hum. Brain Mapp. 29, 839–847.
+Grinsted, A., Moore, J.C., Jevrejeva, S., 2004. Application of the cross wavelet transform
+and wavelet coherence to geophysical time series. Nonlinear Process. Geophys. 11,
+561–566.
+Horovitz, S.G., Braun, A.R., Carr, W.S., Picchioni, D., Balkin, T.J., Fukunaga, M., Duyn, J.H.,
+2009. Decoupling of the brain's default mode network during deep sleep. Proc. Natl.
+Acad. Sci. U. S. A. 106, 11376–11381.
+Karvanen, J., Theis, F., 2004. Spatial ICA of fMRI data in time windows. AIP Conf. Proc.
+735, 312–319.
+Kim, D.H., Adalsteinsson, E., Glover, G.H., Spielman, D.M., 2002. Regularized higherorder in vivo shimming. Magn. Reson. Med. 48, 715–722.
+Kiviniemi, V., Kantola, J.H., Jauhiainen, J., Hyvarinen, A., Tervonen, O., 2003. Independent
+component analysis of nondeterministic fMRI signal sources. NeuroImage 19,
+253–260.
+Kiviniemi, V., Remes, J., Starck, T., Nikkinen, J., Haapea, M., Silven, O., Tervonen, O., 2009.
+Mapping transient hyperventilation induced alterations with estimates of the
+multi-scale dynamics of BOLD signal. Front. Neuroinformatics 3, 18.
+Klein, A., Sauer, T., Jedynak, A., Skrandies, W., 2006. Conventional and wavelet
+coherence applied to sensory-evoked electrical brain activity. IEEE Trans. Biomed.
+Eng. 53, 266–272.
+Le Van Quyen, M., Bragin, A., 2007. Analysis of dynamic brain oscillations:
+methodological advances. Trends Neurosci. 30, 365–373.
+Li, X., Yao, X., Fox, J., Jefferys, J.G., 2007. Interaction dynamics of neuronal oscillations
+analysed using wavelet transforms. J. Neurosci. Methods 160, 178–185.
+Lowe, M.J., Mock, B.J., Sorenson, J.A., 1998. Functional connectivity in single and multislice
+echoplanar imaging using resting-state fluctuations. NeuroImage 7, 119–132.
+Majeed, W., Magnuson, M., Keilholz, S.D., 2009. Spatiotemporal dynamics of low
+frequency fluctuations in BOLD fMRI of the rat. J. Magn. Reson. Imaging 30,
+384–393.
+Mallat, S., 1999. A wavelet tour of signal processing. Academic Press, London, U.K.,
+pp. 79–88.
+Martuzzi, R., Ramani, R., Qiu, M., Rajeevan, N., Constable, R.T., 2009. Functional
+connectivity and alterations in baseline brain state in humans. NeuroImage 49,
+823–834.
+98 C. Chang, G.H. Glover / NeuroImage 50 (2010) 81–98
+McKeown, M.J., Makeig, S., Brown, G.G., Jung, T.P., Kindermann, S.S., Bell, A.J., Sejnowski,
+T.J., 1998. Analysis of fMRI data by blind separation into independent spatial
+components. Hum. Brain Mapp. 6, 160–188.
+Mezer, A., Yovel, Y., Pasternak, O., Gorfine, T., Assaf, Y., 2009. Cluster analysis of restingstate fMRI time series. NeuroImage 45, 1117–1125.
+Mitra, P.P., Pesaran, B., 1999. Analysis of dynamic brain imaging data. Biophys. J. 76,
+691–708.
+Muller, K., Lohmann, G., Neumann, J., Grigutsch, M., Mildner, T., von Cramon, D.Y., 2004.
+Investigating the wavelet coherence phase of the BOLD signal. J. Magn. Reson.
+Imaging 20, 145–152.
+Murphy, K., Birn, R.M., Handwerker, D.A., Jones, T.B., Bandettini, P.A., 2009. The impact
+of global signal regression on resting state correlations: are anti-correlated
+networks introduced? NeuroImage 44, 893–905.
+Pfeuffer, J., Van de Moortele, P.F., Ugurbil, K., Hu, X., Glover, G.H., 2002. Correction of
+physiologically induced global off-resonance effects in dynamic echo-planar and
+spiral functional imaging. Magn. Reson. Med. 47, 344–353.
+Picchioni, D., Fukunaga, M., Carr, W.S., Braun, A.R., Balkin, T.J., Duyn, J.H., Horovitz, S.G.,
+2008. fMRI differences between early and latestage-1 sleep.Neurosci.Lett. 441, 81–85.
+Popa, D., Popescu, A.T., Pare, D., 2009. Contrasting activity profile of two distributed
+cortical networks as a function of attentional demands. J. Neurosci. 29, 1191–1201.
+Roach, B.J., Mathalon, D.H., 2008. Event-related EEG time–frequency analysis: an
+overview of measures and an analysis of early gamma band phase locking in
+schizophrenia. Schizophr. Bull. 34, 907–926.
+Salvador, R., Suckling, J., Schwarzbauer, C., Bullmore, E., 2005. Undirected graphs of
+frequency-dependent functional connectivity in whole brain networks. Philos.
+Trans. R. Soc. Lond., B Biol. Sci. 360, 937–946.
+Sato, J.R., Junior, E.A., Takahashi, D.Y., de Maria Felix, M., Brammer, M.J., Morettin, P.A.,
+2006. A method to produce evolving functional connectivity maps during the
+course of an fMRI experiment using wavelet-based time-varying Granger causality.
+NeuroImage 31, 187–196.
+Seeley, W.W., Menon, V., Schatzberg, A.F., Keller, J., Glover, G.H., Kenna, H., Reiss, A.L.,
+Greicius, M.D., 2007. Dissociable intrinsic connectivity networks for salience
+processing and executive control. J. Neurosci. 27, 2349–2356.
+Shehzad, Z., Kelly, A.M., Reiss, P.T., Gee, D.G., Gotimer, K., Uddin, L.Q., Lee, S.H.,
+Margulies, D.S., Roy, A.K., Biswal, B.B., Petkova, E., Castellanos, F.X., Milham, M.P.,
+2009. The resting brain: unconstrained yet reliable. Cereb. Cortex 19, 2209–2229.
+Shmueli, K., van Gelderen, P., de Zwart, J.A., Horovitz, S.G., Fukunaga, M., Jansma, J.M.,
+Duyn, J.H., 2007. Low-frequency fluctuations in the cardiac rate as a source of
+variance in the resting-state fMRI BOLD signal. NeuroImage 38, 306–320.
+Stine, R.A., 1987. Estimating properties of autoregressive forecasts. J. Am. Stat. Assoc. 82,
+1072–1078.
+Sun, F.T., Miller, L.M., D'Esposito, M., 2005. Measuring temporal dynamics of functional
+networks using phase spectrum of fMRI data. NeuroImage 28, 227–237.
+Sun, F.T., Miller, L.M., Rao, A.A., D'Esposito, M., 2007. Functional connectivity of cortical
+networks involved in bimanual motor sequence learning. Cereb. Cortex 17,
+1227–1234.
+Supekar, K., Musen, M., Menon, V., 2009. Development of large-scale functional brain
+networks in children. PLoS Biol. 7, e1000157.
+Toro, R., Fox, P.T., Paus, T., 2008. Functional coactivation map of the human brain. Cereb.
+Cortex 18, 2553–2559.
+Torrence, C., Compo, G., 1998. A practical guide to wavelet analysis. Bull. Am. Meteo.
+Soc. 79, 61–78.
+Torrence, C., Webster, P., 1999. Interdecadal changes in the ENSO-Monsoon system.
+J. Clim. 12, 2679–2690.
+Uddin, L.Q., Kelly, A.M., Biswal, B.B., Xavier Castellanos, F., Milham, M.P., 2009.
+Functional connectivity of default mode network components: correlation, anticorrelation, and causality. Hum. Brain Mapp. 30, 625–637.
+Waites, A.B., Stanislavsky, A., Abbott, D.F., Jackson, G.D., 2005. Effect of prior cognitive
+state on resting state networks measured with functional connectivity. Hum. Brain
+Mapp. 24, 59–68.
+Wise, R.G., Ide, K., Poulin, M.J., Tracey, I., 2004. Resting fluctuations in arterial carbon
+dioxide induce significant low frequency variations in BOLD signal. NeuroImage 21,
+1652–1664.
+Zhan, Y., Halliday, D., Jiang, P., Liu, X., Feng, J., 2006. Detecting time-dependent
+coherence between non-stationary electrophysiological signals—a combined
+statistical and time–frequency approach. J. Neurosci. Methods 156, 322–332.
+=== END: 1-s2.0-S1053811909012981-main.pdf (34 equations) ===

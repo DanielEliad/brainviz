@@ -1,0 +1,28 @@
+\begin{tikzpicture}[
+    font=\footnotesize,
+    box/.style={draw, rounded corners=2pt, align=center, inner sep=4pt,
+                minimum height=10mm, fill=black!4, line width=0.5pt},
+    op/.style={draw, rounded corners=2pt, align=center, inner sep=4pt,
+               minimum height=10mm, fill=blue!7, line width=0.5pt},
+    view/.style={draw, rounded corners=2pt, align=center, inner sep=4pt,
+                 minimum height=10mm, fill=red!7, line width=0.5pt},
+    arr/.style={-{Stealth[length=4pt]}, line width=0.6pt},
+  ]
+  \node[box] (raw) {Raw rs-fMRI\\\textit{ABIDE I+II}};
+  \node[box, right=5mm of raw] (ica) {Group ICA\\\textit{32 components}};
+  \node[box, right=5mm of ica] (rsn) {14 RSN\\time series};
+  \node[op,  right=5mm of rsn] (corr) {Sliding-window\\connectivity};
+  \node[op,  right=5mm of corr] (frames) {Dynamic\\graph frames};
+  \node[view, right=5mm of frames] (vis) {Interactive\\exploration};
+
+  \draw[arr] (raw) -- (ica);
+  \draw[arr] (ica) -- (rsn);
+  \draw[arr] (rsn) -- (corr);
+  \draw[arr] (corr) -- (frames);
+  \draw[arr] (frames) -- (vis);
+
+  \node[anchor=north, font=\scriptsize, text width=22mm, align=center,
+        text=black!60] at (corr.south) {Pearson $\cdot$ Spearman $\cdot$ wavelet phase-lead};
+  \node[anchor=north, font=\scriptsize, text width=22mm, align=center,
+        text=black!60] at (vis.south) {timeline $\cdot$ graph $\cdot$ HC/ASD overview};
+\end{tikzpicture}

@@ -1,0 +1,603 @@
+=== PDF: 1-s2.0-S0169260717303097-main.pdf ===
+
+Computer Methods and Programs in(https://doi.org/10.1016/j.cmpb.2017.11.017) Biomedicine 154 (2018) 143–151
+Contents lists available at [ScienceDirect](http://www.ScienceDirect.com)
+$\textasciitilde\textasciitildeComputer Methods and Programs in Biomedicine\textasciitilde\textasciitilde$
+journal homepage: (http://www.elsevier.com/locate/cmpb)
+Wavelet coherence-based classifier: A resting-state functional MRI study on neurodynamics in adolescents with high-functioning autism
+Antoine Bernas a,c,∗, Albert P. Aldenkamp a,b,c, Svitlana Zinger a,c
+a Department of Electrical Engineering, Eindhoven University of Technology, P.O. Box 513, 5600MB, Eindhoven, The Netherlands
+b Department of Neurology, Maastricht University Medical Center, P.O. Box 5800, 6202 AZ, Maastricht, The Netherlands
+c Department of Behavioral Sciences, Epilepsy Center Kempenhaeghe, P.O. Box 61, 5590 VE, Heeze, The Netherlands
+a r t i c l e i n f o
+Article history:
+Received 27 March 2017
+Revised 3 August 2017
+Accepted 15 November 2017
+Keywords:
+Neurodynamics
+fMRI
+Autism spectrum disorder
+Wavelet coherence
+Resting-state networks
+Biomarkers
+**1.** **Introduction**
+a b s t r a c t
+Background and Objective: The autism spectrum disorder (ASD) diagnosis requires a long and elaborate
+procedure. Due to the lack of a biomarker, the procedure is subjective and is restricted to evaluating behavior. Several attempts to use functional MRI as an assisting tool (as classifier) have been reported, but
+they barely reach an accuracy of 80%, and have not usually been replicated or validated with independent datasets. Those attempts have used functional connectivity and structural measurements. There is,
+nevertheless, evidence that not the topology of networks, but their temporal dynamics is a key feature in
+ASD. We therefore propose a novel MRI-based ASD biomarker by analyzing temporal brain dynamics in
+resting-state fMRI.
+Methods: We investigate resting-state fMRI data from 2 independent datasets of adolescents: our inhouse data (12 ADS, 12 controls), and the Leuven dataset (12 ASD, 18 controls, from Leuven university).
+Using independent component analysis we obtain relevant socio-executive resting-state networks (RSNs)
+and their associated time series. Upon these time series we extract wavelet coherence maps. Using these
+maps, we calculate our dynamics metric: time of in-phase coherence . This novel metric is then used to
+train classifiers for autism diagnosis. Leave-one-out cross validation is applied for performance evaluation.
+To assess inter-site robustness, we also train our classifiers on the in-house data, and test them on the
+Leuven dataset.
+Results: We distinguished ASD from non-ASD adolescents at 86.7% accuracy (91.7% sensitivity, 83.3%
+specificity). In the second experiment, using Leuven dataset, we also obtained the classification performance at 86.7% (83.3% sensitivity, and 88.9% specificity). Finally we classified the Leuven dataset, with
+classifiers trained with our in-house data, resulting in 80% accuracy (100% sensitivity, 66.7% specificity).
+Conclusions: This study shows that change in the coherence of temporal neurodynamics is a biomarker
+of ASD, and wavelet coherence-based classifiers lead to robust and replicable results and could be used
+as an objective diagnostic tool for ASD.
+© 2017 The Authors. Published by Elsevier Ireland Ltd.
+This is an open access article under the CC BY-NC-ND license.
+[(http://creativecommons.org/licenses/by-nc-nd/4.0/)](http://creativecommons.org/licenses/by-nc-nd/4.0/)
+Autism spectrum disorder (ASD) is diagnosed in more than 1%
+of the world population. For example in the US, 1 in 68 children has an ASD 1. This neurodevelopmental disorder is mainly
+characterized by social communication impairments as well as restrictive and repetitive behavior. A distinction is often made between low-functioning and high-functioning autism – the latter
+∗ Corresponding author at: Eindhoven University of Technology, Den Dolech
+25612AZ, Eindhoven, The Netherlands
+E-mail address: (mailto:a.b.bernas@tue.nl) (A. Bernas).
+tending to have an IQ higher than 80. Over the past decade, ASD
+has been studied using fMRI, in setups where participants had to
+perform a specific task or during resting-state fMRI, in order to
+find a biomarker for autism. Unfortunately, current literature provides mixed and inconsistent results regarding strength and location of functional disparities 2–5. Yet, several attempts to classify
+autism, based on functional connectivity measurements have been
+made 6,7. In a review paper, Plitt and his colleagues show that
+functional connectivity classification using resting-state fMRI can
+be done with statistical significance 8. However, such a classifier
+falls short of biomarker standards such as high classification accuracy and with a proven multi-sites robustness: peak accuracy of
+(https://doi.org/10.1016/j.cmpb.2017.11.017)
+0169-2607/© 2017 The Authors. Published by Elsevier Ireland Ltd. This is an open access article under the CC BY-NC-ND license.
+[(http://creativecommons.org/licenses/by-nc-nd/4.0/)](http://creativecommons.org/licenses/by-nc-nd/4.0/)
+144 A. Bernas et al. / Computer Methods and Programs in Biomedicine 154 (2018) 143–151
+76.7% for resting-state fMRI based methods. In another study, using seed-based connectivity measurements between regions of interest, an accuracy of 79% (83% sensitivity, and 75% specificity) is
+obtained, and 71% accuracy is achieved in a replication dataset 6.
+Finally, using large-scale networks, Uddin and her colleagues
+reached 78% classification accuracy (75% sensitivity, 80% specificity) using solely the salient network connectivity, and could classify an independent dataset at 83% accuracy (67% sensitivity, 100%
+specificity) 9.
+In this paper, we propose a novel approach to find a biomarker
+of autism. There is evidence that not the topology of networks, but
+their temporal dynamics is a key feature in ASD 10–13. Our approach aims at assessing the temporal dynamics processes in the
+brain, which we call neurodynamics—quantifying, in our study, interactions between functional networks over time. We found only
+few fMRI studies that reports abnormal brain dynamics in adults
+with autism in terms of effective connectivity, i.e. the causal influence of one brain area on another. Nevertheless these studies were
+performed between regions of interest during explicit emotionrelated tasks and show atypical effective connectivity patterns in
+social brain networks 12,13. We could not find any study dealing with effective connectivity, or other dynamics measurements,
+between or within large-scale functional networks at rest.
+Wavelet decomposition and wavelet transform coefficients represent a powerful tool to assess transient or non-stationary processes, and get insights in brain temporal dynamics. Cross-wavelet
+transform provides information of localized (in time and frequency) correlations between temporal signals 14. It is also possible to derive from the wavelet transforms the phase shift between
+two signals. Combining these methods, we can extract waveletbased coherence maps as originally performed in geophysics 15.
+In neuroscience the wavelet transforms have been recently applied, mainly as a filtering tool or transient detector in EEG studies
+16,17. Regarding resting-state fMRI, only few exploratory studies
+have been conducted in order to show non-stationarity in brain
+resting-state network fluctuations 18,19.
+In this study, we explore the coherence maps to extract our
+novel metric–“time of in-phase coherence”. This metric describes
+in-phase and coherent patterns (synchronicity) between pairwise
+large-scale resting-state functional networks. To our knowledge,
+this is the first study of temporal dynamics between brain networks evaluating pairwise synchronicity using wavelet coherence.
+We also present our classification results for distinguishing ASD
+from healthy adolescents, using our wavelet-based dynamics fea
+tures.
+**2.** **Methods**
+2.1. Participants
+Two independent samples were used in this study. In our inhouse sample, 15 adolescents with ASD and 18 age- and IQmatched controls initially participated in this study. Due to signal
+distortions caused by their braces, 2 participants with ASD and 5
+control individuals were excluded from data analysis. Further in
+the study, an adolescent with ASD was also excluded because of
+an inaccurate brain registration during the preprocessing of the
+resting-state fMRI data, leading to 12 participants in each group
+for our in-house dataset.
+To retest our classification approach, as well as for validating classifiers using an independent dataset, we used resting-state
+fMRI data from University of Leuven in Belgium, available on the
+Autism Brain Imaging Data Exchange (http://fcon_1000.projects.
+nitrc.org/indi/abide). This dataset was chosen based on the similarity with our in-house data, i.e. matching in age (all adolescents) and having a sufficiently ‘normal’ IQ( > 80). After preprocess
+ing of Leuven sample, we excluded 5 participants (bad registration
+and/or too large head-motion), leading to 18 control adolescents
+and 12 ASD. In both datasets, participants were selected from a
+clinical sample of children with previous diagnosis made by a multidisciplinary team including a pediatric neurologist/psychiatrist
+and based on the DSM-IV-TR criteria. To meet these criteria, we
+used the Autism Diagnostic Observation Schedule (ADOS) scores,
+whereas in Leuven sample, the Social Communication Questionnaire (SCQ) and Social Responsiveness scale (SRS) were used. IQ
+scores were, in both samples, assessed using the Dutch Wechsler
+Intelligence Scale for Children (WISC-III). Table 1 shows the descriptive data and psychological scores of the two samples, and
+Analyses of Variance (ANOVA) F -test results showing significant
+differences (if p -value < .05).
+Finally in both datasets written informed consent was obtained
+from the next of kin, caretakers, or guardians on behalf of the adolescents enrolled in this study. Our in-house protocol was approved
+by the Medical Ethical Commission of the Maastricht University
+Medical Center.
+2.2. Data acquisition
+Our in-house dataset, MRI acquisition was performed on a 3.0Tesla unit (Philips Achieva) equipped with an 8-channel receiveronly head coil. For anatomical reference, a T1-weighted 3D fast
+(spoiled) gradient echo sequence was acquired with the following
+parameters: repetition time (TR) 8.2 ms, echo time (TE) 3.7 ms, inversion time (TI) 1022 ms, flip angle 8°, voxel size 1 × 1 × 1 mm 3,
+field of view (FOV) 240 × 240 mm 2, 150 transverse slices. Then,
+resting-state fMRI data were acquired using the whole brain singleshot multi-slice BOLD echo-planar imaging (EPI) sequence, with
+TR 2 s, TE 35 ms, flip angle 90°, voxel size 2 × 2 × 4 mm 3, matrix
+128 × 128, 32 contiguous transverse slices per volume, and 210 volumes per acquisition; resulting in total a resting-state acquisition
+of 7 min.
+In the dataset from Leuven University, MRI data were acquired
+with a 3.0-Tesla unit (Philips Intera) also equipped with an 8channel receiver head coil. Anatomical T1-weigthed images were
+3D fast field echo sequences with TR = 9.6 ms and TE = 4.6 ms,
+flip angle 8°, voxel size 0.98 × 0.98 × 1.2 mm 3, field of view
+250 × 250 mm 2, 182 Coronal slices (218 mm).
+Regarding the resting-state fMRI, a multi-slice FFE singleshot EPI was acquired with the following parameters: TR
+1656 ms, TE 33 ms, flip angle 90°, 3.59 × 3.59 × 4.0 mm 3 with FOV
+230 × 230 mm, and 32 transverse slices (128 mm) per volume, and
+250 volumes, resulting in a total scan time of 7 min and 6 s. For
+the resting-state scan, participants were instructed to lie with their
+eyes closed, to think of nothing but not to fall asleep. Also, in both
+datasets, the resting-state scans were acquired under similar conditions.
+2.3. Resting-state ICA time-series extraction
+In order to conduct the wavelet coherence classification using
+resting-state time series, we first extracted spatial RSN maps, using a group Independent Component Analysis (gICA) on restingstate fMRI preprocessed dataset. First the following preprocessing steps were applied using FEAT–a software from FMRIB Software Library [(www.fmrib.ox.ac.uk/fsl):](http://www.fmrib.ox.ac.uk/fsl) discarding the first 3 volumes allowing the magnetization to reach equilibrium; rigid-body
+motion correction; non-brain tissue removal; slice-timing correction; registration to the Montreal Neurological Institute (MNI) standard space (2 mm isotropic); spatial smoothing using a Gaussian
+kernel of 4.0 mm full-width at half-maximum (FWHM); grandmean intensity normalization; and high-pass temporal filtering
+A. Bernas et al. / Computer Methods and Programs in Biomedicine 154 (2018) 143–151 145
+**Table** **1**
+Demographic and clinical characteristics of the two datasets.
+ASD Mean (SD) Controls Mean (SD) F -test (df1, df2) P -value
+**In-house** **dataset** N = 12 (12M) N = 12 (12M) F(1,22) –
+Ages (year) 15.5 (1.0) 14.4 (1.3) 2.509 .127
+VCI a 117.1 (9.0) 117 (10.4) 0.00 .968
+POI b 114.0 (5.8) 109 (7.8) 4.85 .038 ∗
+FDI c 99.5 (14.5) 101.9 (14.6) 0.19 .670
+FSIQ d 116.7 (5.0) 113.2 (7.8) 1.92 .179
+**Leuven** **dataset** N = 12 (9M/3F) N = 18 (14M/4F) F(1,28) –
+Ages (yr) 13.7 (1.2) 14.4 (1.6) 1.96 .172
+VIQ e 92.9 (18.8) 114.1 (12.7) 13.58 .001 ∗
+PIQ f 101.9 (14.7) 106.1(8.6) 0.98 33
+a Verbal Comprehension Index.
+b Perceptual Organization Index.
+c Freedom from Distractibility Index.
+d Full Scale IQ.
+e Verbal IQ.
+f Performance IQ.
+∗ Statistically significant.
+at 100 s (0.01 Hz). “Then, using the FSL MELODIC tool, a temporally concatenated probabilistic ICA was applied Briefly, we temporally concatenate all preprocessed fMRI data from all participants into a single new 4D ‘group’ fMRI series. To obtain the
+intrinsic brain components (RSNs) we applied the following steps.
+We started with the voxel-wise demeaning and variance normalization. Subsequently, the pre-processed data were projected into a
+34-dimentional subspace using principal component analysis. Then
+these observations were decomposed into sets of vectors which describe signal variations across the temporal domain (time-courses),
+the session/subject domain and the spatial domain (maps) by optimizing for non-Gaussian spatial source distributions using a fixedpoint iteration technique. The resulting estimated component maps
+were divided by the standard deviation of the residual noise and
+thresholded at a posteriori probability threshold of p > .5 (i.e., an
+equal loss is placed on false positives and false negatives) by fitting a Gaussian/gamma mixture model to the histogram of intensity values 20. The number of components was set to 34 as it
+seems to be a good trade-off to get a sufficient number of relevant
+networks (around ten) without splitting them into subcomponents
+21.
+The most relevant RSNs were then selected, by first discarding
+the components with very high power (more than a third of the
+total power) in high-frequency range ( > 0.1 Hz) of their spectrum;
+and then using an in-house ‘goodness-of-fit’ MatLab function upon
+the 10 RSN map templates from Smith et al. 22. Briefly, we calculated the difference between the average Z -scores of the voxels
+of our group RSNs falling within the template networks and the
+average Z -score for voxels falling outside the template networks
+23,24. The best ‘fit’ networks were represented by the highest difference score. Also, as final step, we visually checked and validated
+the networks. This final step can also lead to selecting other networks that are not in Smith’s template, but which passes the first
+(power) selection criterion (2/3 of power under 0.1 Hz), while not
+describing noise or artifacts. Finally, a dual regression was used,
+with these selected group RSNs, in order to extract subject-specific
+RSN maps and their associated time series 25. Briefly, we first
+extracted subject-specific time series by regressing the group RSN
+maps into the individual raw fMRI. Then we regressed these time
+series into the individual raw fMRI, giving us the subject-specific
+RSN spatial maps. Here, we used that second output: subjectspecific maps, to test whether or not groups differ in spatial connectivity (within RSN). And we used the first regression output:
+subject-specific time series (of the RSNs) for our wavelet coherence
+analysis described in the next subsection. This procedure of preprocessing the data and extracting subject-specific maps and time
+series was performed for both the in-house and Leuven datasets
+(independently). Prior to the wavelet coherence analysis presented
+in the next section, it is worth noticing that a group-wise comparison of each of the RSNs was applied on the subject-specific
+spatial RSN maps, using Threshold Free Cluster Enhanced (TFCE)
+method, and a non-parametric 5000-permutations test. In short,
+TFCE enhances areas of signal that exhibit some spatial contiguity, i.e., cluster-like regions, without losing local maxima, unlike a
+hard-threshold clustering 26.
+2.4. Wavelet coherence and time of in-phase coherence
+Using the aforementioned selected RSN time series, wavelet coherence maps between pairs of brain networks can be drawn. More
+details of how wavelet coherence maps (or scalogram) are constructed can be found in the paper from 14. Briefly, they define **R** 2 ( **s,** **τ** ) as local correlation coefficients in time ( **τ** ) and wavelet
+scale ( s ), between two signals X and Y . In order to get the coefficients, a wavelet cross-spectrum between the two signals is applied, measuring the common power between the signals at various scales ( s ) and time ( **τ** ). Also, the phase difference between X
+and Y is calculated with arg ( R 2 ( t, s )) . When applied on pairs of
+RSN time series, subject-specific wavelet coherence scalograms are
+extracted. Fig. 2 shows an example of two wavelet transforms, and
+the derived wavelet coherence scalograms (or maps) from an ASD
+patient.
+By combining the wavelet coherence coefficients **R** 2 ( **s,** **τ** ) and
+their phase information arg ( **R** 2 ( **t** , **s** )), we measured the average of
+time of in-phase coherence 27, per wavelet scale (Fourier period)
+as
+which can be seen as the level/density of coherent synchronicity
+between two RSNs over time. N represents the number of time
+points (fMRI volumes); I{.} is 1 or 0 whether or not the conditions
+between brackets is true (here significance and in-phase conditions); and a95 is the coherence coefficient threshold above which
+the wavelet-coherence coefficients are considered significant.
+Finally, to determine this threshold, the significance of the coherence coefficients (delineated areas in Fig. 2) was tested against
+wavelet coherence of random red noise signals using Monte Carlo
+methods with 1000 surrogate data set pairs 15. Briefly, we apply the wavelet coherence upon 1000 random signal pairs (red
+noise) with similar 1-lag autoregressive (AR1) coefficients as our
+RSN time series pairs. Thus we get a null distribution of wavelet
+$**\pi** 4 � arg � **R** 2 ( **t** , **s** ) �� **\pi** 4$
+4
+**c** ( **s** ) = 100
+**N**
+**N**
+�
+$� **t** =1 **I** � **R** 2 ( **t** , **s** ) > **a** 95 � . **I** � - **\pi** 4$
+(1)
+�
+146 A. Bernas et al. / Computer Methods and Programs in Biomedicine 154 (2018) 143–151
+coherence coefficients, which we used to define the 5% significance
+level, i.e., to threshold (here drawn as a contour) our wavelet coherence coefficient maps.
+Wavelet coherence maps, or scalograms, were calculated using the method explained above and the toolbox from 15
+[(http://www.glaciology.net/wavelet-coherence).](http://www.glaciology.net/wavelet-coherence) Also, we used the
+complex Morlet wavelet as it has the best ratio (=1.03) between
+Fourier period and wavelet scale which helps interpreting results
+in the frequency domain 14. Finally, these maps were composed
+with 12 subscales per octave–an octave being the range of periods between 2 n and 2 n+1 s, with n an integer between 2 and 6.
+The seventh octave ( n = 7) (128–256 s) being incomplete and under 0.01 Hz we did not test them because of our high-pass filtering cut-off frequency. For the first octave (2–4 s), the frequencies
+are greater than the Nyquist frequencies (0.25 Hz and 0.31 Hz for
+in-house and Leuven datasets respectively). Therefore we did not
+test them either. Finally, the sixty subscales (12 sub-octaves in 5
+octaves) described above represent the rows of the wavelet coherence maps (Fig. 2).
+2.5. Classification
+After extracting the time of in-phase coherence between pairs
+of RSNs, we trained classifiers and compared the performance results of several classifications methods. In this study, Linear Discriminant Analysis (LDA), and Support Vector Machine (SVM) were
+used. Two kernels for SVM classifiers were tested: a polynomial
+(Poly-SVM) and a Radial basis function (Rbf-SVM). All these classifiers were tested using our in-phase coherence features extracted
+at each of the sub-octaves. Using these features we train and validate independently each aforementioned classifier type (LDA and
+SVMs). The feature vectors in this study are the dynamics, in
+term of time of in-phase coherence, between pairs of RSNs. At final stage, two setups for the feature vector are constructed: using 4 features, i.e., the time of in-phase coherence from 4 RSNs
+pairs; and 2 features (from 2 RSNs pairs). Those 2 or 4 pairs are
+compound with networks involving auditory, visual, fronto-parietal
+(right and left) and the attention ventral stream (more details for
+the choice of the networks for the 2 setups in the Results section). In order to validate the classifiers, we used the leave-oneout cross-validation technique upon each of the sample (in-house
+and Leuven). This leads to a 24- and 30-folds LOOCV, for the inhouse and Leuven data respectively. Finally, we trained our classifiers on the in-house dataset and tested them on the Leuven data.
+The classification quality is measured in terms of sensitivity (proportion of (true) ASD correctly classified), specificity (proportion of
+the (true) controls correctly classified), positive predictive value or
+precision (PPV, proportion of the predicted ASDs correctly classified), and negative predictive value (NPV, proportion of the predicted controls correctly classified).
+**3.** **Result**
+3.1. Resting-state network extraction
+After preprocessing the data and applying gICA upon our inhouse sample, eleven networks that most optimally matched the
+template of Smith et al. (2009) 22 were selected. For further
+analysis, we focused on the seven fronto-parietal and temporal
+networks, typically involved in the executive and socio-cognitive
+functions, since they are proven to be relevant large-scale functional networks impaired in ASD [2,3,5,9] The seven networks, depicted in Fig. 1, encompass the ventral stream (VENT) network, the
+central-executive network (EXE), the fronto-parietal left and right
+(respectively FPL, FPR), the auditory system (AUDI), the visual cortex (VISU) and the default-mode network (DMN). Except for VENT,
+all the aforementioned RSNs are described in 22. VENT is composed of lateral visual, superior temporal sulci, frontal poles and
+opercula cortices. It also overlaps with executive networks (EXE,
+FPL, FPR) in the medial superior frontal gyrus, and with the sensorimotor network through the supplementary motor area. This network configuration can be seen as a combination of well-known
+networks: the attentional-ventral, sensorimotor-ventral and salient
+networks 28,29. Next, in the Leuven dataset, the same seven networks were extracted using the same method.
+When comparing each of these relevant networks, using TFCE
+and the permutation test implemented in FSL, none of them
+showed spatial differences between controls and ASD, i.e., in average controls and ASD adolescents have the same functional networks. This was replicated in the Leuven dataset, and showed no
+differences in spatial RSNs maps between ASD and controls.
+3.2. Wavelet coherence maps and time of in-phase coherence
+With the dual-regression method implemented in FSL 25, we
+extracted from the 7 RSNs (Fig. 1) subject specific RSN time series.
+On these signals, a wavelet coherence analysis can be conducted,
+as explained in methods. This was done upon the 21 possible RSN
+time series pairs we could form.
+Fig. 2 shows two wavelet transforms, and an example of the
+wavelet coherence map obtained between DMN and AUDI for one
+ASD participant from our in-house sample. Also as we used a complex wavelet (Morlet) it provided us with phase information, allowing visualization of directionality in the dynamics between signals (in-phase, leading, lagging, or anti-phase).
+3.3. Time of in-phase coherence
+We obtained, as shown in Fig. 2, the wavelet coherence scalograms for each subject and for each pair of relevant RSN time series. The ratio of the red area over the full time length (7 min)
+of a row of these wavelet coherence scalograms, represents the
+time (in %) of in-phase coherence for a specific period (the chosen row). Fig. 3 shows a group-wise (ASD and controls) average of
+these times of in-phase coherence per subscale (from 4 s to 128 s
+periods). For different pairwise combinations of the seven relevant
+networks (Fig. 1), we can observe noticeable differences between
+the groups in Fig. 3. For instance, in the periods of 8 s–16 s for the
+pair VENT–FPR, a clear difference between the groups is visible
+(Fig. 3, top graphs), whereas we observe less variability between
+groups in the pairs DMN-EXE. The pairs of networks where such
+differences between the groups were visible were intuitively good
+features to test our classifiers upon.
+3.4. Classification and performance
+Using the aforementioned wavelet coherence maps (e.g., Fig. 2)
+of pairs of networks, the times (in %) of in phase coherence per
+scale and subject can be extracted. These measurements were then
+used as features for the classifiers. We used two to five pairs of
+network and their time of in-phase coherence to feed three types
+of classifiers: LDA, rbf-SVM and poly-SVM. To select the best pairs
+of socio-executive networks, we inspected the average per group
+of time of in-phase coherence of all pairwise combination of the
+seven relevant networks (example in Fig. 3). Interestingly, most of
+the pairs involving the VENT network showed a clear discrepancy
+in the wavelet octave 8 s–16 s.
+By training our classifiers with the time of in-phase coherence of the pairs VENT-AUDI, VENT-VISU, VENT-FPL, and VENT-FPR,
+we obtain the best results for our in-house datasets (using leaveone-out cross-validation): 87.5% accuracy (91.7% sensitivity, 83.3%
+specificity). However, this classifier was built at 6 s period for the
+A. Bernas et al. / Computer Methods and Programs in Biomedicine 154 (2018) 143–151 147
+**Fig.** **1.** The seven most relevant networks identified in our in-house sample for both groups (ASD and normal controls).
+**Fig.** **2.** Continuous wavelet transform upon two resting-state signals: default mode network (top-left scalogram) and auditory system (top-right scalogram), and their wavelet
+coherence (bottom scalogram) for the 6th ASD subject of our in-house dataset. In the wavelet coherence scalogram, delineated and colored area indicates significant coherence. Colors within the areas determined the phase difference between the two networks (DMN and AUDI): signals are in phase (red), anti-phased (green); DMN leads AUDI
+(orange), and AUDI leads DMN (light blue). Outside the delineated area, there is no coherence (dark blue). For each scalogram, x -axis indicates time, y -axis–scale (in Fourier
+periods). (For interpretation of the references to color in this figure legend, the reader is referred to the web version of this article.)
+wavelet scale, which is outside the frequency range of resting-state
+brain oscillation (from 0.01 to 0.1 Hz) 30. Also, with an identical
+setup replicated with the Leuven dataset, the same LDA classifier
+scored at best at 73.3%, and around 11 s periods.
+In a second setup, we reduced the number of feature vector elements to two by removing the pairs linked to visual and auditory
+networks. This led to classifiers solely trained and validated with
+our dynamics features based on the pairs VENT-PFL and VENT-FPL.
+In that case, the results were more consistent: we obtained in both
+datasets the best results within the same range of frequency (9 s–
+12 s), and with the same classifier type (SVM). We obtained, in
+Leuven dataset at the range of 9 s–12 s periods, a performance peak
+(at 10 s) of 86.7% (91.7% sensitivity, 83.3% specificity). However, in
+this setup, our in-house classifiers performed less accurately than
+in the first setup with 4 feature vector elements (peak performance
+of 79.2% when tested with SVM, around 9 s periods).
+Finally, using still the second setup, we could distinguished ASD
+from non-ASD in Leuven participants at 80% accuracy (with 100%
+148 A. Bernas et al. / Computer Methods and Programs in Biomedicine 154 (2018) 143–151
+**Fig.** **3.** Average of time of in-phase coherence per bin (12 scales per octave) in ASD (red) and controls (blue) for the pairs of networks VENT-FPR (top), or DMN-EXE (bottom).
+Left–graphs for the in-house dataset, right–results for the Leuven dataset. (For interpretation of the references to color in this figure legend, the reader is referred to the web
+version of this article.)
+sensitivity, 66.7% specificity), using a poly-SVM classifier trained
+with our in-house dataset. For both setups mentioned above, a
+summary of the best classification performances, for each classifier,
+and along with the periods at which the featured were extracted,
+is depicted in Table 2. More performance details at each subscale
+(periods) is available in the Supporting information (SI).
+**4.** **Discussion**
+Many studies have shown changed functional networks in children with ASD as compared to normal controls. Under- or hyperconnectivity within and between different RSNs is reported. The
+networks usually involved in such studies are the executive networks (EXE, or FPL, FPR) showing correlation with autistic behavior
+(restrictive). Also the default mode and other socio-emotional networks (involving limbic cortices) were identified, correlating generally with social ability impairments. However, results are contradictory and dependent on the scan protocol, age of the patient and
+other factors. In our study, for both datasets we actually did not
+find any statistically significant differences within relevant functional RSN between autism and control adolescents. This can be
+explained by the age range of the participants. Indeed, Nomi and
+Uddin demonstrated that, unlike children, within-network functional connectivity in adolescents with ASD do not differ from controls, but the between-network connectivity decreases in ASD 31.
+This is in line with our current results of between-network syn
+chronicity being weaker in ASD, and our previous findings where
+we did not find within-network differences 32
+However, more than their topology, temporal dynamics of functional network is a key feature in ASD 10–13. In our study, we
+focused on temporal brain dynamics between RSNs, using wavelet
+coherence maps. We found that these subject-specific maps can
+display pattern of synchronicity between brain networks over
+time, at different scales (or frequency ranges). Considering socioexecutive networks, we detected group-wise differences, especially
+in the coherence between VENT-FPR and VENT-FPL. Using these
+two features in a machine learning algorithm, we could actually
+reach 86.7% accuracy of classifying ASD versus controls in both
+datasets. Also, we reached 80% accuracy while training our classifier on one dataset and testing it on other independent data. Our
+results are based on time of in-phase coherence. The anti-phased
+coherence could also be a strategy for further research. For example by involving EXE and DMN, that are usually functionally anticorrelated, an insightful metric to test our classifier could be developed. In the study of Yerys et al. (2015) 33, the ASD groups
+demonstrated under-connectivity within the DMN, and a poorer
+network segregation of its midline core functional connectivity, as
+compared with controls. This midline core of the DMN encompassed the medial prefrontal cortex and posterior cingulate cortex. Even though testing our classifier upon pairs of networks including the DMN was not successful, the DMN midline core areas
+described in the study of Yerys et al. are actually the overlapping
+parts of our three networks VENT, FPL, FPR (see Fig. 4).
+A. Bernas et al. / Computer Methods and Programs in Biomedicine 154 (2018) 143–151 149
+**Table** **2**
+Best classifier performances for ASD detection.
+Periods a Type Accuracy Sensitivity Specificity PPV NPV
+**Features** **based** **on** **VENT-AUDI,** **VENT-FPL,** **VENT-FPR,** **VENT-VISU**
+In-house set leave-one-out cross-validation (24-fold)
+6 s LDA 87.5 91.7 83.3 84.6 90.9
+13 s Rbf-SVM 86.7 91.7 83.3 78.6 93.7
+5 s Poly-SVM 70.8 66.7 75.0 72.7 69.2
+Leuven dataset leave-one-out cross-validation (30-fold)
+11 s LDA 73.3 66.7 77.8 66.7 77.8
+10 s Rbf-SVM 76.7 75.0 77.8 69.2 82.4
+10 s Poly-SVM 86.7 83.3 88.9 83.3 88.9
+In-house dataset for training with Leuven dataset for validation
+15 s LDA 66.7 100 44.4 54.6 100
+10 s Rbf-SVM 66.7 91.7 50.0 55.0 90.0
+11 s Poly-SVM 63.3 75 55.6 52.9 76.9
+**Features** **based** **on** **VENT-FPL,** **VENT-FPR**
+In-house set leave-one-out cross-validation (24-fold)
+10 s LDA 75.0 83.3 66.7 71.4 80.0
+12 s Rbf-SVM 70.8 83.3 58.3 66.7 77.8
+9 s Poly-SVM 79.2 83.3 75.0 76.9 81.8
+Leuven dataset leave-one-out cross-validation (30-fold)
+10 s LDA 83.3 91.7 77.8 73.3 93.3
+10 s Rbf-SVM 86.7 91.7 83.3 78.6 93.8
+10 s Poly-SVM 83.3 91.7 77.8 73.3 93.3
+In-house dataset for training with Leuven dataset for validation
+10.5 s LDA 56.7 100 27.8 48.0 100
+9 s Rbf-SVM 60.0 91.7 38.9 50.0 87.5
+11 s Poly-SVM 80.0 100 66.7 66.7 100
+a Fourier periods at which the classifier has been tested (the frequency of the
+in-phase coherence).
+**Fig.** **4.** Medial and bilateral (left and right) visualization of the group-wise RSNs
+(Leuven dataset): ventral stream (in yellow), and fronto-parietal left and right (respectively green and blue). (For interpretation of the references to color in this figure legend, the reader is referred to the web version of this article.)
+The fact that the best and consistent performance scores
+are obtained using only VENT-FPR and VENT-FPL is understandable. Indeed, the ventral stream encompassed the ventral part of
+the more frequently mentioned attentional network and partially
+(insular nodes) the salient network. Those two networks have been
+shown to have an important role in attention, and the dynamic
+switch between attention and executive control processes 29,34.
+Interestingly, the FPL and FPR involve language-related cognitive
+functions and perception-somesthetic functions, which are functions that can be impaired in ASD.
+Moreover, the pairs VENT-FPL and VENT-FPR show ipsilateral
+and contralateral connectivity. Hence, our results suggest impairment in the temporal dynamics of the inter- or intra-hemispheric
+functional connectivity. In Lee et al. (2016), abnormalities were
+found in the functional connectivity density of both ipsilateral and
+contralateral part of the brain 35. These decreases in functional
+connectivity density (FDC) were located in the cingulate cortex, lingual/parahippocampal and postcentral gyrus cluster. More specifically, they found that the contralateral FCD of the posterior cingulate cortex and the precuneus correlated negatively with restrictive
+and repetitive behavior scores (ADOS-RRB). These two cortices represent, again, our main overlapping areas in the parietal cortex.
+Our results are also in line with recent findings involving
+autism and temporo-parietal junctions. Indeed, Igelstrüm and his
+colleagues demonstrated that these junctions and their connectivity with the cerebellum were crucial in social cognition 36. We
+did not try combination of pairs of networks with the cerebellum
+to test our classifiers upon, but it is clear that parts of the cerebellum are contralaterally and functionally connected to the FPL and
+FPR (Fig. 4.) Also these temporo-parietal junctions are mainly composed of our ventral stream.
+To summarize, the aforementioned studies informed us about
+three findings: contralateral connections are weaker in ASD, especially in the regions that overlap and are inside the FPL, FPR,
+and VENT, as identified in our study; temporo-parietal connectivity
+plays a crucial role in social ability; and the ventral stream is usually seen as a dynamic switch between socio-executive functional
+networks. Moreover, when including the dynamics feature of the
+direct pair FPL-FPR into our classifiers, we did not obtain successful
+results (accuracy under 67%). Hence, our capacity to classify autism
+using only the pairs VENT-FPL and VENT-FPR can be explained by
+a less coherent fronto-parietal synchronicity, mediated by the ventral stream, and is associated with the deficit in language processes
+or the restrictive behavior observed in ASD.
+For a more technical point of view, we can see that poly-SVM
+is leading to the most stable results, providing, for all classifier
+tested around the periods 9–12 s, an average of classification accuracy greater than 75%. Hence, the combinations of the dynamics
+(for 2 or 4 pairs) are non-linear, as compared to the LDA, or rbfSVM. This also emphasized the non-linearity of brain connectivity
+(at least in terms of dynamics).
+And, as already mentioned in results, the periods at which coherences seem to differ between the group (ASD and controls) and
+in both datasets (in-house and Leuven) are around 10 s. By smoothing, i.e., the features through 3 subscales (taking feature at quarteroctave ranges of periods) we did not get better results but the
+tendency of high accuracy around the central periods of 10 s still
+holds. However testing at larger ranges (e.g., half-octaves) leads to
+worse results. The performances of these classifiers with smoothed
+features are available in the Supporting Information (SI) document.
+But we would like to point out the main limitation of the methods presented in this study: We cannot ensure similar diagnostic performances in an infant group with autism. To test whether
+or not, the pairs of networks and their coherent dynamics used
+in this study provides similar results in young children, one can
+do 2 thing: i) replicate the analyses with a large group (including
+150 A. Bernas et al. / Computer Methods and Programs in Biomedicine 154 (2018) 143–151
+children) and check if the features are age independent; ii) or use
+a stratified approach (by range of ages) and replicated the analyses, i.e., try to refine our current model. But this classification approach was the first step testing validity of our MRI methods and
+homogeneous group with confirmed diagnostic certainty is exactly
+suitable for that. But the subsequent studies have to test the value
+in younger and more heterogeneous groups. Also the issue of maturation affect remains unsolved in our present study.
+Finally, not only ASD can benefit from our approach for
+computer-aided diagnosis. Our wavelet coherence approach that
+we coined as neurodynamics is likely to be suitable for a wider
+range of neuropsychiatric disorders, such as ADHD, schizophrenia,
+bipolar disorders, and perhaps dementia. So far, promising results
+for disorder classification were only obtained for schizophrenia,
+and the proposed method is also based on brain dynamics measurements 18. In fact our computer-aided diagnosis approach using brain dynamics metrics and fMRI opens a path for further research in psychoradiology.
+**5.** **Conclusion**
+We showed that wavelet-based coherence maps can be used
+to visualize coherent patterns (or time-synchronicity) between
+large-scale resting-state networks. Also the extracted times of inphase coherence between socio-executive networks were especially good descriptors for ASD, and present themselves as a potential biomarker or at least can be used to as an additional tool
+for ASD diagnosis. The obtained wavelet time-synchronicity characteristics in ASD may reflect a less coherent fronto-parietal synchronicity, mediated by the ventral stream These findings suggest
+the importance of assessing not only functional connectivity, but
+also brain temporal dynamics, in order to better describe a developmental disorder such as ASD.
+**Authors’** **contributions**
+The authors contributed equally to this work. AB was responsible for the experiments, while SZ and APA supervised respectively
+the technical and clinical aspects of the study.
+**Conflict** **of** **interest**
+There is no conflict of interest.
+**Ethics** **committee** **approval**
+The study protocol was approved by the Medical Ethical Commission of the Maastricht University Medical Center.
+**Supplementary** **materials**
+Supplementary material associated with this article can be
+found, in the online version, at (https://doi.org/10.1016/j.cmpb.2017.11.017)
+**References**
+1 Centers for Disease Control and Prevention, Community report from the
+Autism and Developmental Disabilities Monitoring (ADDM) network, 2016.
+(http://www.cdc.gov/ncbddd/autism/addm.html)
+2 R.A. Müller, P. Shih, B. Keehn, J.R. Deyoe, K.M. Leyden, D.K. Shukla, Underconnected, but how? A survey of functional connectivity MRI studies in autism
+spectrum disorders, Cereb. Cortex. 21 (2011) 2233–2243, doi:10.1093/cercor/
+bhq296.
+3 J.S. Anderson, M.A. Ferguson, J.A. Nielsen, Imaging the Brain in Autism,
+Springer New York, New York, 2013 NY, (https://doi.org/10.1007/978-1-4614-6843-1)
+4 J.M. Tyszka, D.P. Kennedy, L.K. Paul, R. Adolphs, Largely typical patterns of
+resting-state functional connectivity in high-functioning adults with autism,
+Cereb. Cortex. 24 (2014) 1894–1905, (https://doi.org/10.1093/cercor/bht040)
+5 P. Rane, D. Cochran, S.M. Hodge, C. Haselgrove, D.N. Kennedy, J.A. Frazier, Connectivity in autism, Harv. Rev. Psychiatry 23 (2015) 223–244, doi:10.1097/HRP.
+0000000000000072.
+6 J.S. Anderson, J.A. Nielsen, A.L. Froehlich, M.B. DuBray, T.J. Druzgal,
+A.N. Cariello, J.R. Cooperrider, B.A. Zielinski, C. Ravichandran, P.T. Fletcher,
+A.L. Alexander, E.D. Bigler, N. Lange, J.E. Lainhart, Functional connectivity magnetic resonance imaging classification of autism, Brain 134 (2011) 3742–3754,
+(https://doi.org/10.1093/brain/awr263)
+7 J.A Nielsen, B.A. Zielinski, P.T. Fletcher, A.L. Alexander, N. Lange, E.D. Bigler,
+J.E. Lainhart, J.S. Anderson, Multisite functional connectivity MRI classification
+of autism: ABIDE results, Front. Hum. Neurosci. 7 (2013) 599, doi:10.3389/
+fnhum.2013.00599.
+8 M. Plitt, K.A. Barnes, A. Martin, Functional connectivity classification of autism
+identifies highly predictive brain features but falls short of biomarker standards, NeuroImage Clin. 7 (2015) 359–366, (https://doi.org/10.1016/j.nicl.2014.12.013)
+9 L.Q. Uddin, K. Supekar, C.J. Lynch, A. Khouzam, J. Phillips, C. Feinstein, S. Ryali,
+V. Menon, Salience network-based classification and prediction of symptom
+severity in children with autism, JAMA [Psychiatry](https://doi.org/10.1001/jamapsychiatry.2013.104) 70 (2013) 869–879, doi:10.
+1001/jamapsychiatry.2013.104.
+10 R.K. Kana, L.Q. Uddin, T. Kenet, D. Chugani, R.-A. Müller, Brain connectivity in
+autism, Front. Hum. Neurosci. 8 (2014) 349, (https://doi.org/10.3389/fnhum.2014.00349)
+11 H. Chen, L.Q. Uddin, Y. Zhang, X. Duan, H. Chen, Atypical effective connectivity
+of thalamo-cortical circuits in autism spectrum disorder, Autism Res. (2016)
+1–8, (https://doi.org/10.1002/aur.1614)
+12 B. Wicker, P. Fonlupt, B. Hubert, C. Tardif, B. Gepner, C. Deruelle, Abnormal
+cerebral effective connectivity during explicit emotional processing in adults
+with autism spectrum disorder, Soc. Cogn. Affect. Neurosci. 3 (2008) 135–143,
+(https://doi.org/10.1093/scan/nsn007)
+13 C. Hanson, S.J. Hanson, J. Ramsey, C. Glymour, Atypical effective connectivity
+of social brain networks in individuals with autism, Brain Connect. 3 (2013)
+578–589, (https://doi.org/10.1089/brain.2013.0161)
+14 C. Torrence, G.P. Compo, A practical guide to wavelet analysis, Bull. Am. Meteorol. Soc. 79 (1998) 61–78. doi: [10.1175/1520-0477(1998)079](http://doi.org/10.1175/1520-0477(1998)079%3C0061:APGTWA%3E2.0.CO;2) ⟨ 0061:APGTWA ⟩
+2.0.CO;2.
+15 A. Grindsted, J.C. Moore, S. Jevrejava, Application of the cross wavelet transform and wavelet coherence to geophysical time series, Nonlinear Process.
+Geophys. 11 (2004) 561–566, (https://doi.org/10.1607-7946/npg/2004-11-561)
+16 P. Indic, J. Narayanan, Wavelet based algorithm for the estimation of frequency
+flow from electroencephalogram data during epileptic seizure, Clin. Neurophysiol. 122 (2011) 680–686, (https://doi.org/10.1016/j.clinph.2010.10.030)
+17 A. Catarino, A. Andrade, O. Churches, A.P. Wagner, S. Baron-Cohen, H. Ring,
+Task-related functional connectivity in autism spectrum conditions: an EEG
+study using wavelet transform coherence, Mol. Autism. 4 (2013) 1, doi:10.1186/
+2040-2392-4-1.
+18 E. Damaraju, E.A. Allen, A. Belger, J.M. Ford, S. McEwen, D.H. Mathalon,
+B.A. Mueller, G.D. Pearlson, S.G. Potkin, A. Preda, J.A. Turner, J.G. Vaidya,
+T.G. Van Erp, V.D. Calhoun, Dynamic functional connectivity analysis reveals
+transient states of dysconnectivity in schizophrenia, NeuroImage Clin. 5 (2014)
+298–308, (https://doi.org/10.1016/j.nicl.2014.07.003)
+19 C. Chang, G.H. Glover, Time-frequency dynamics of resting-state brain connectivity measured with fMRI, [NeuroImage](https://doi.org/10.1016/j.neuroimage.2009.12.011) 50 (2010) 81–98, doi:10.1016/j.
+neuroimage.2009.12.011.
+20 C.F. Beckmann, S.M. Smith, Probabilistic independent component analysis for
+functional magnetic resonance imaging, IEEE Trans. Med. Imaging 23 (2004)
+137–152, (https://doi.org/10.1109/TMI.2003.822821)
+21 X. Wang, P. Foryt, R. Ochs, J.-H. Chung, Y. Wu, T. Parrish, A.B. Ragin, Abnormalities in resting-state functional connectivity in early human immunodeficiency
+virus infection, Brain Connect 1 (2011) 207–217, (https://doi.org/10.1089/brain.2011.0016)
+22 S.M. Smith, P.T. Fox, K.L. Miller, D.C. Glahn, P.M. Fox, C.E. Mackay, N. Filippini,
+K.E. Watkins, R. Toro, A.R. Laird, C.F. Beckmann, Correspondence of the brain’s
+functional architecture during activation and rest, Proc. Natl. Acad. Sci. USA
+106 (2009) 13040–13045, (https://doi.org/10.1073/pnas.0905267106)
+23 M.D. Greicius, G. Srivastava, A.L. Reiss, V. Menon, {D}efault-mode network activity distinguishes {A}lzheimer’s disease from healthy aging: evidence from
+functional {MRI}, Proc. Natl. Acad. Sci. USA 101 (2004) 4637–4642, doi:10.1073/
+pnas.0308627101.
+24 A. Vanhaudenhuyse, Q. Noirhomme, L.J.-F. Tshibanda, M.-A. Bruno, P. Boveroux, C. Schnakers, A. Soddu, V. Perlbarg, D. Ledoux, J.-F. Brichant, G. Moonen,
+P. Maquet, M.D. Greicius, S. Laureys, M. Boly, Default network connectivity
+reflects the level of consciousness in non-communicative brain-damaged patients, Brain 133 (2010) 161–171, (https://doi.org/10.1093/brain/awp313)
+25 C.F. Beckmann, C.E. Mackay, N. Filippini, S.M. Smith, Group comparison of
+resting-state FMRI data using multi-subject ICA and dual regression, in:
+Hum. Brain Mapp. Conf., 2009, p. 181. (http://fsl.fmrib.ox.ac.uk/analysis/dualreg/dualreg_poster.pdf)
+dualreg_poster.pdf.
+26 S.M. Smith, T.E. Nichols, Threshold-free cluster enhancement: addressing problems of smoothing, threshold dependence and localisation in cluster inference,
+NeuroImage 44 (2009) 83–98, (https://doi.org/10.1016/j.neuroimage.2008.03.061)
+27 A. Bernas, E.M. Barendse, S. Zinger, A.P. Aldenkamp, ESMRMB 2016, 33rd Annual Scientific Meeting, Vienna, AT, September 29–October 1: Abstracts, Saturday, in: Magn. Reson. Mater. Physics, Biol. Med., 2016, pp. 247–400, doi:10.
+1007/s10334-016-0570-3.
+28 A.S. Choe, C.K. Jones, S.E. Joel, J. Muschelli, V. Belegu, B.S. Caffo, M.A. Lindquist,
+P.C.M. Van Zijl, J.J. Pekar, Reproducibility and temporal structure in weekly
+resting-state fMRI over a period of 3.5 years, PLoS One 10 (2015) 1–29,
+(https://doi.org/10.1371/journal.pone.0140134)
+A. Bernas et al. / Computer Methods and Programs in Biomedicine 154 (2018) 143–151 151
+29 V. Menon, L.Q. Uddin, Saliency, switching, attention and control: a network
+model of insula function, Brain Struct. Funct. 214 (2010) 655–667, doi:10.1007/
+s00429-010-0262-0.
+30 B. Biswal, F. Zerrin Yetkin, V.M. Haughton, J.S. Hyde, Functional connectivity
+in the motor cortex of resting human brain using echo???planar mri, Magn.
+Reson. Med. 34 (1995) 537–541, (https://doi.org/10.1002/mrm.1910340409)
+31 J.S. Nomi, L.Q. Uddin, Developmental changes in large-scale network connectivity in autism, NeuroImage Clin 7 (2015) 732–741, (https://doi.org/10.1016/j.nicl.2015.02.024)
+32 A. Bernas, Neurodynamics in functional MRI and its clinical applications, 2016.
+33 B.E. Yerys, E.M. Gordon, D.N. Abrams, T.D. Satterthwaite, R. Weinblatt,
+K.F. Jankowski, J. Strang, L. Kenworthy, W.D. Gaillard, C.J. Vaidya, Default mode
+network segregation and social deficits in autism spectrum disorder: Evidence
+from non-medicated children DMN in children with ASD, NeuroImage Clin. 9
+(2015) 223–232, (https://doi.org/10.1016/j.nicl.2015.07.018)
+34 L.Q. Uddin, K.S. Supekar, S. Ryali, V. Menon, Dynamic reconfiguration of structural and functional connectivity across core neurocognitive brain networks
+with development, J. Neurosci. 31 (2011) [18578–18589,](https://doi.org/10.1523/JNEUROSCI.4465-11.2011) doi:10.1523/JNEUROSCI.
+4465-11.2011.
+35 J.M.L. Lee, S. Kyeong, E. Kim, K.-A. Cheon, Abnormalities of inter- and intrahemispheric functional connectivity in autism spectrum disorders: a study
+using the autism brain imaging data exchange database, Front. Neurosci. 10
+(2016) 1–11, (https://doi.org/10.3389/fnins.2016.00191)
+36 K.M. Igelström, T.W. Webb, M.S.A. Graziano, Functional connectivity between
+the temporoparietal cortex and cerebellum in autism spectrum disorder, Cereb.
+Cortex. (2016) bhw079, (https://doi.org/10.1093/cercor/bhw079)
+=== END: 1-s2.0-S0169260717303097-main.pdf (3 equations) ===

@@ -1,0 +1,137 @@
+=== PDF: Topology-Guided-Volume-Fusion-for-Multi-Energy-Spectral-Computed-Tomography.pdf ===
+
+Eurographics Workshop on Visual Computing for Biology and Medicine (2025) Poster
+T. Gerrits and C. Gillmann (Poster Chairs)
+**Topology-Guided Volume Fusion for Multi-Energy Spectral** **Computed Tomography**
+M. Sharma †, E. Nilsson, M. Falk, T. B. Masood, L. Jollans, A. Persson, T. Ebbers and I. Hotz
+Linköping University, Sweden
+**Abstract**
+Photon-Counting Computed Tomography (PCCT) captures multiple volumetric datasets at different X-ray energy levels, of-
+fering rich spectral information for improved tissue differentiation and material analysis. However, the high dimensionality
+and redundancy of these datasets pose challenges for visualization using conventional CT workflows. Standard techniques,
+including single-channel transfer functions or dimensionality reduction methods, often fail to exploit the complementary nature
+of spectral data, missing important features. We propose a topology-guided volume fusion pipeline that reduces multi-volume
+spectral CT data into a single fused scalar field while preserving key anatomical and material structures. Using topological data
+analysis (TDA), specifically extremum graphs from 2D histograms of the two least correlated volumes, we identify prominent
+structures and map them onto a single scalar field, enabling effective visualization and segmentation with standard tools.
+**CCS Concepts**
+• **Human-centered computing** → **Scientific visualization;**
+**1. Introduction**
+Photon-Counting Computed Tomography (PCCT) captures perphoton spectral information, producing a set of volumes at different
+energy levels [FSUA23]. These volumes encode overlapping and
+complementary attenuation properties of materials, enabling better tissue differentiation and material characterization [GVR → 25].
+However, due to strong correlations between adjacent energy levels, standard visual exploration techniques (e.g., isosurfaces or 1D
+histograms) often fail to reveal the full spectrum of features present
+in the data.
+This motivates the need to generate a fused volume that retains
+the key features of the multivolume dataset while remaining compatible with conventional visualization methods. We address this
+through a topology-guided pipeline, structured as follows: (1) we
+select the two least correlated volumes to maximize complementary information; (2) compute a 2D joint histogram from these volumes, capturing their joint density distribution; (3) interpret this
+histogram as a scalar field and compute its Morse–Smale (MS)
+complex [For98,YMS → 21] to extract critical points—minima, maxima, and saddles—and their spatial relationships; (4) focus on
+maxima-saddle connections, forming the extremum (maximum)
+graph CLB11, which better captures salient features such as tissue boundaries; (5) construct a minimum spanning tree (MST) over
+† e-mail: {mohit.sharma, emma.nilsson, martin.falk, talha.bin.masood,
+lee.jollans, anders.s.persson, tino.ebbers, ingrid.hotz}@liu.se
+© 2025 The Author(s).
+Proceedings published by Eurographics - The European Association for Computer Graphics.
+This is an open access article under the terms of the Creative Commons Attribution License, which
+permits use, distribution and reproduction in any medium, provided the original work is properly
+cited.
+this graph, with edge weights defined by the absolute scalar difference between connected maxima and saddles; (6) extract a representative path along the MST, either automatically or interactively,
+capturing the main ridges of the histogram; (7) project all histogram
+points onto a smoothed spline fitted to this path and assign each a
+new scalar value based on its arc-length position; and finally, (8)
+transfer these scalar values back to the spatial domain to generate the fused volume. This fused field preserves joint features from
+both input volumes and significantly simplifies the visualization.
+An overview of these steps is provided in Figure 1, using a synthetic dataset for illustration.
+**2. Results**
+We evaluate our method on three datasets:
+• **Circular Gaussians:** Figure 1 Demonstrates the method’s abil
+ity to resolve eight overlapping bivariate features that are indistinguishable in individual 1D projections. PCA can’t distinguish these featuers due to rotational symmetry and absence of
+a prominent direction, while our fused volume reveals all eight
+peaks clearly.
+• **Human heart:** Figure 2 demonstrates the effectiveness of the
+method on a human heart dataset. Volumes at 40 keV and 110
+keV are fused, and the resulting histogram (Figure 2(e)) captures
+combined features from both inputs. The fused volume exhibits
+enhanced contrast compared to either input alone.
+• **Phantom lamb heart:** Figure 3 illustrates a complex case in
+volving metal artifacts in the lamb heart, which produce signifi
+2 of 3 M. Sharma & E. Nilsson & M. Falk & T. B. Masood & L. Jollans & A. Persson & T. Ebbers & I. Hotz / EG
+Figure 1: Volume fusion of two hypothetical volumes producing
+a 2D histogram resulting in eight Gaussian-distributed peaks on a
+circular path. (a) Synthetic 2D histogram; x-axis: scalar field from
+volume 1, y-axis: from volume 2; projected 1D histograms of individual volumes shown along the axes are unable to separate all
+features. (b) Morse–Smale complex of histogram density field; red:
+maxima, white: saddles, blue: minima. (c) Minimum spanning tree
+(green) of extremum graph, i.e., restricted to maxima and saddles;
+the longest simple path of the minimum spanning tree captures major ridge structure, traversing all eight Gaussian peaks. (d) Smooth
+spline (aqua) fitted to the path extracted in (c); fused scalar field
+generated by projecting histogram points to this spline; 1D histogram reveals the eight key features.
+(a) 40 keV (b) 110 keV (c) fused volume
+(d) (e)
+Figure 2: Volume rendering of the human heart dataset. (a)-(c) A
+basic grayscale transfer function is applied to the input volumes
+for 40 keV and 110 keV, and the fused volume. (d)-(e) The 1D histograms corresponding to the underlying scalar fields.
+cant noise and scatter in the joint histogram. Two distinct topological ridges (highlighted in red and green) are extracted, fused
+separately, and then combined to emphasize different anatomical materials. Figure 4 presents the designed transfer functions
+and corresponding renderings for the 40 keV input and the fused
+volumes. The red path captures the noisy scatter visible in Figure 3(b), while the fused volume generated using both paths significantly reduces this noise, as seen in Figure 4(c,d).
+**3. Conclusion**
+We present a topology-guided method to fuse multi-energy spectral
+CT volumes into a single scalar field that preserves key anatomi
+Figure 4: Volume rendering of the artificial heart in the phantom
+lamb heart dataset. (a)-(b) The fused volume results in less clutter
+with an almost identical transfer function. (c)-(d) The 1D histogram
+of the fused volume reveals more features and thereby eases the
+transfer function design.
+cal features while reducing dimensionality, allowing use with standard CT tools. Using extremum graphs and spline projections in
+histogram space, our approach enables effective visualization and
+segmentation with feature-aware simplification and compatibility
+with traditional rendering. Future work will extend to multiple volumes, automate path extraction, and incorporate more topological
+information.
+**Acknowledgments.** This work was supported by the Wallenberg
+AI, Autonomous Systems and Software Program – Data-Driven
+Life Science (WASP-DDLS) project “HUDI: Huge Complex Diag-
+nostic Imaging Data: Towards personalized models in the clinical
+workflow” funded by the Knut and Alice Wallenberg Foundation,
+the SeRC (Swedish e-Science Research Center), and the Swedish
+Research Council (VR) grants 2019-05487 and 2023-0480.
+© 2025 The Author(s).
+Proceedings published by Eurographics - The European Association for Computer Graphics.
+(f) 40 keV (g) 90 keV (h) fused volume (c)
+(i) fused volume (e)
+(j)
+Figure 3: Phantom lamb heart dataset. Volume fusion (a)-(e) and
+volume rendering (f)-(j). (a) Log scale histogram exhibiting undesired scatter caused by the presence of an artificial metallic heart.
+(b) Two prominent paths, shown in red and green, are interactively
+selected to extract branching structures within the histogram. Three
+fused volumes are generated: (c) grid parameterization along the
+green path (used in (h)), (d) along the red path, and (e) the combined parameterization merging both paths (used in (i)). (j) slightly
+adjusted transfer function for fused volume (c).
+(a) 40 keV (b) fused volume (green
+path)
+(c) fused volume (both
+paths)
+(d) fused volume (both
+paths)
+M. Sharma & E. Nilsson & M. Falk & T. B. Masood & L. Jollans & A. Persson & T. Ebbers & I. Hotz / EG 3 of 3
+**References**
+CLB11 C ORREA C., L INDSTROM P., B REMER P.-T.: Topological
+spines: A structure-preserving visual representation of scalar fields.
+IEEE Transactions on Visualization and Computer Graphics 17, 12
+[(2011), 1842–1851. doi:10.1109/TVCG.2011.244. 1](https://doi.org/10.1109/TVCG.2011.244)
+For98 F ORMAN R.: Morse theory for cell complexes. Advances in
+mathematics 134, 1 (1998), 90–145. 1
+[FSUA23] F LOHR T., S CHMIDT B., U LZHEIMER S., A LKADHI H.: Cardiac imaging with photon counting ct. British Journal of Radiology 96,
+[1152 (10 2023), 20230407. doi:10.1259/bjr.20230407. 1](https://doi.org/10.1259/bjr.20230407)
+[GVR → 25] G REFFIER J., V IRY A., R OBER A., K HORSI M., S I M OHAMED S.: Photon-counting ct systems: A technical review of current clinical possibilities. Diagnostic and Interventional Imaging 106
+(2025), 53–59. 1
+[YMS → 21] Y AN L., M ASOOD T. B., S RIDHARAMURTHY R., R ASHEED
+F., N ATARAJAN V., H OTZ I., W ANG B.: Scalar field comparison with
+topological descriptors: Properties and applications for scientific visualization. Computer Graphics Forum 40, 3 (2021), 599–633. doi:(https://doi.org/10.1111/cgf.14331)
+[10.1111/cgf.14331. 1](https://doi.org/10.1111/cgf.14331)
+© 2025 The Author(s).
+Proceedings published by Eurographics - The European Association for Computer Graphics.
+=== END: Topology-Guided-Volume-Fusion-for-Multi-Energy-Spectral-Computed-Tomography.pdf (0 equations) ===

@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d (TeX Live 2025/nixos.org)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: brainviz-vcbm2026.aux
+The style file: eg-alpha-doi.bst
+Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
+Reallocated global_strs (elt_size=200001) to 20 items from 10.
+Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: brainviz.bib
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+You've used 9 entries,
+            3585 wiz_defined-function locations,
+            822 strings with 8495 characters,
+and the built_in function-call counts, 5891 in all, are:
+= -- 608
+> -- 324
+< -- 0
++ -- 120
+- -- 120
+* -- 548
+:= -- 908
+add.period$ -- 27
+call.type$ -- 9
+change.case$ -- 83
+chr.to.int$ -- 9
+cite$ -- 9
+duplicate$ -- 126
+empty$ -- 428
+format.name$ -- 126
+if$ -- 1335
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 9
+newline$ -- 58
+num.names$ -- 27
+pop$ -- 92
+preamble$ -- 1
+purify$ -- 92
+quote$ -- 0
+skip$ -- 283
+stack$ -- 0
+substring$ -- 238
+swap$ -- 36
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 81
+warning$ -- 0
+while$ -- 43
+width$ -- 12
+write$ -- 138

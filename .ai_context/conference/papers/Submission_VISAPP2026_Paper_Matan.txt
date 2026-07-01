@@ -1,0 +1,503 @@
+=== PDF: Submission_VISAPP2026_Paper_Matan.pdf ===
+
+**Diagnosing Autism Spectrum Disorder Based on the Brain’s Functional** **Connectome**
+Matan Haver 1 a, Sjir J.C. Schielen 1 b, Danny Ruijters 1 , 2 c, Albert P. Aldenkamp 1 , 3 d and Svitlana
+Zinger 1 e
+1 Department of Electrical Engineering, Eindhoven University of Technology, The Netherlands
+2 Image Guided Therapy, Philips Healthcare
+3 Department of Behavioral Sciences, Epilepsy Center Kempenhaeghe
+Keywords: Functional Magnetic Resonance Imaging, Resting-State Networks, Functional Connectivity, ABIDE, ASD
+Abstract: Autism Spectrum Disorder (ASD) diagnosis currently depends on subjective behavioral assessments, motivating the search for objective neuroimaging biomarkers. This study evaluates different types of connectivity
+measures from Resting-State Function Magnetic Resonance Imaging (rs-fMRI) to diagnose ASD in a large
+multisite dataset. Different Functional Connectivity (FC) measures were computed between the time series
+corresponding to resting state networks. FC was obtained via the Pearson and Spearman Correlation Coefficient (PCC and SCC), but also through a non-linear lag-independent method called Dynamic Time Warping
+(DTW). Feature vectors were input to five different classifiers, obtaining their performance matrices, which
+were assessed using nested cross-validation to prevent data leakage. The highest classification accuracy (65%)
+was achieved using DTW features on a homogeneous sub dataset, indicating that non-linear correlation may
+outperform linear methods under consistent scan protocols. Compared to prior studies that often rely solely on
+linear correlation methods and use relatively small datasets, this research highlights the importance of robust
+validation, non-linear metrics and consistent scanning protocols in developing reliable ASD classifiers from
+rs-fMRI.
+**1 INTRODUCTION**
+Autism Spectrum Disorder (ASD) is a neurodevelopmental condition characterized by deficits in
+social interaction, communication, and restrictive,
+repetitive patterns of behavior. Early diagnosis of
+this condition is essential to enable timely intervention and effective treatment. Currently, ASD identification often involves behavioral observation, which in
+some cases can be prolonged and may require the expertise of a multidisciplinary team of highly trained
+specialists. However, in some cases, limited understanding of the underlying neuropathology may lead
+to suboptimal treatment outcomes, as the current diagnosis remains subjective while an objective one is
+desired [S´olon et al., 2017] [Insel et al., 2010].
+Functional Magnetic Resonance Imaging (fMRI),
+an imaging technique that measures brain activity,
+a https://orcid.org/0009-0006-1998-0354
+b https://orcid.org/0009-0005-1223-0449
+c https://orcid.org/0000-0002-9931-4047
+d https://orcid.org/0000-0003-3362-9756
+e https://orcid.org/0000-0001-9357-3067
+has gained significant popularity in recent decades
+for investigating potential differences between individuals with ASD and Healthy Controls (HC) [Santana et al., 2022] [Schielen et al., 2024b]. Its ability
+to monitor brain activity with sufficiently high spatial resolution in a safe and noninvasive manner plays
+a key rule driving its widespread adoption [Poldrack
+et al., 2011]. A variety of studies seek to identify a
+neural biomarker for ASD by measuring the byproduct of neural activity, the concentration of deoxygenated hemoglobin known as the Blood-OxygenLevel-Dependent (BOLD) signal.
+Several approaches aim to identify such a
+biomarker, commonly through Functional Connectivity (FC). FC is a connectivity method which describes
+the statistical dependency between the activity of two
+brain regions.
+FC can be assessed using various methods, with
+Pearson’s Correlation Coefficient (PCC) being the
+most commonly used method in diagnostic MRI research [Santana et al., 2022] [Schielen et al., 2024b].
+The PCC method assumes synchronization and measures the linear relationship between two time series
+but does not account for time lags or variations in
+speed between them. In addition, PCC assumes widesense stationarity, meaning that the mean and the covariance between the input signals remain unchanged
+over the course of the experiment. The stationarity of fMRI signals can be challenged, especially in
+the common event of head motion [Laumann et al.,
+2017]. Another method examined is Spearman’s Correlation Coefficient (SCC), a rank-based correlation
+method that does not assume stationarity or linearity,
+allowing it to identify linear and non-linear correlations between time series whose statistical properties
+can vary with time. SCC captures monotonic trends,
+but it does not necessarily account for temporal misalignments.
+In contrast, Dynamic Time Warping (DTW) is
+a non-linear correlation method, which estimates
+the cost of warping one signal to align with another and therefore accommodates temporal misalignments, shifts, and non-stationary signals. The latter
+deserves closer attention as the assumption of stationarity is often not satisfied in fMRI [Muhei-Aldin et al.,
+2014]. This motivates the relatively novel computations of DC through DTW.
+This research aims to compare the use of the PCC,
+SCC, and DTW methods to evaluate which method
+more efficiently improves ASD classification, using
+the Autism Brain Imaging Data Exchange (ABIDE)
+dataset [Martino, 2017] [Martino, 2014] [Schielen
+et al., 2024a].
+This paper makes three key contributions: first, it
+evaluates the use of DTW as a non-linear method for
+FC, challenging the commonly used PCC for FC. It
+is also compared to SCC, which is similar to PCC
+but does not assume linearity. Second, it examines
+the impact of dataset heterogeneity on classification
+performance by comparing results across homogeneous and heterogeneous data subsets, and demonstrates that DTW outperforms other correlation methods in a large homogeneous subset. Lastly, it offers a
+potential framework for the clinical interpretation of
+the classification results.
+The remainder of the paper starts with a state-ofthe-art review in section 2, followed by the methodology applied in this research in Section 3. The results
+are discussed in Section 4, with the drawn conclusions
+provided in Section 5.
+**2 RELATED WORK**
+In this section, the current literature approaches to
+classifying ASD with fMRI are discussed. FC is expressed between the time series of two regions of interest (ROIs). Two ways of obtaining these exist: a
+predefined atlas and a parcellation directly obtained
+on the studied sample with group ICA. The use of
+Independent Component Analysis (ICA) to identify
+ROIs and remove low-frequency noise and motion effects at Resting-State fMRI (rs-fMRI) has been successfully demonstrated and applied by different researchers [Beckmann et al., 2005, Beckmann et al.,
+2009,Schielen et al., 2024a]. To express statistical relationships between ROIs, various studies have relied
+almost entirely on PCC, assuming only synchronized
+BOLD signals indicate FC between two regions. Over
+the past decade, various studies have attempted to
+classify based on this FC using traditional machine
+learning classifiers [Yang et al., 2019, Yang et al.,
+2020, Biswal et al., 1995]. The focus is on the methods of interest to this paper - PCC, SCC, and DTW.
+A 2019 study reported that a Ridge classifier
+achieved an accuracy of 71.98% using a 5-fold crossvalidation and the Craddock 400 (CC400) brain atlas [Yang et al., 2019]. Cao et al. (2021) [Cao et al.,
+2021] have used PCC to extract FC with a graph convolutional network classifier and a 10-fold cross validation, resulting in accuracy of 73.3%. However, the
+listed studies applied hyperparameter tuning including the test set, which may cause data leakage and
+lead to overoptimistic results [Rosenblatt et al., 2024].
+A research from 2020 employing a deep neural network for classification attained a higher accuracy of
+75.27% with a 5-fold cross-validation [Yang et al.,
+2020]. More recently, Li et al. [Li et al., 2022] (2022)
+suggested that a transformer-based model achieved a
+classification accuracy of 74.18% with 10-fold crossvalidation.
+The aforementioned studies used PCC to assess
+FC with the ABIDE dataset, including more than
+1000 scans of ASD and HC [Santana et al., 2022]
+[Biswal et al., 1995]. PCC accounts only for the linear
+correlation of different time series, which may prevent reliable identification of time series that share a
+non-linear correlation pattern. Therefore, other correlation methods may outperform PCC. For instance, a
+study from 2022 suggests that SCC (a non-linear correlation method) may be more applicable that PCC
+[Yang et al., 2022]. Furthermore, brain atlases typically contain many ROIs which scales quadratically
+with the number of features in pairwise connectivity.
+This might convolute direct clinical interpretation.
+A different method is DTW, a powerful non-linear
+approach that compares the similarity of time series
+with varying speeds. Linke et al. [Linke et al., 2020]
+state that using the non-linear DTW method has detected more FC differences and improved the estimation of resting-state FC in ASD. However, the study
+utilized a relatively small sample size (fewer than 200
+Figure 1: The suggested block scheme of the proposed
+approach in which ICA time series are input and extracts
+three types of features. These are analyzed in feature selection and classification. (ICA - Independent Component
+Analysis; PCC - Pearson’s Correlation Coefficient; SCC Spearman’s Correlation Coefficient; DTW - Dynamic Time
+Warping)
+participants) divided into three distinct age groups.
+Consequently, generalizability remains to be tested on
+a larger sample.
+In summary, many recent studies have delivered
+promising results using FC. These studies attempted
+to diagnose ASD with different methodological approaches to feature extraction techniques and classification. While the effects of the feature extraction
+techniques and the choice of classifier vary across
+studies, all the aforementioned researchers agree on
+testing different algorithms and evaluating their performance on accuracy, sensitivity, and specificity
+through k-fold cross-validation [Rosenblatt et al.,
+2024]. Important to note is that FC was based on
+PCC in all these studies, which involves adopting its
+underlying assumptions. It remains unclear whether
+considering only linear correlation misses important
+information about coactivation patterns between time
+series.
+**3 METHODOLOGY**
+To predict ASD, the suggested approach is shown in
+Fig. 1. The system takes as an input the ICA time
+series (14 signals) and provides a binary prediction as
+an output.
+**3.1** **Data Set**
+A preprocessed version of the ABIDE dataset was
+used in this study and comprises 900 participants: 417
+subjects are diagnosed with ASD (361 males and 56
+females; mean age 22 years) and 483 subjects are diagnosed as HC (377 males and 106 females; mean
+age 27 years) [Schielen et al., 2024a]. A subset of
+the data, consisting of 260 participants originating entirely from NYU Langone Health system, is examined. The subset represents the largest dataset pro
+viding a homogeneous scanning protocol, potentially
+leading to improved classification performance and
+reliability.
+Initially, the rs-fMRI data were preprocessed to
+ensure slice-timing alignment, spatial normalization,
+smoothing and noise reduction. Then, a group ICA
+was performed on the fMRI data, where the components corresponding to the RSNs were selected with
+the Smith atlas as an initial reference [Beckmann
+et al., 2009]. This procedure yielded spatial maps,
+which then served as a design matrix in a multiple
+linear regression to derive subject-specific time series [Nickerson et al., 2017]. Each time series is constructed from 146 samples, as illustrated in Fig. 2.
+The study’s results are focused on 14 of the 32
+identified independent components, examining their
+inter-network correlation patterns to improve ASD
+classification and to explore their potential clinical
+significance. The 14 components and their labeling
+are shown in Fig. 3.
+**3.2** **Feature Extraction**
+Both linear and non-linear correlation methods were
+considered to characterize brain connectivity patterns.
+The motivation behind the choice of extracting the
+PCC, SCC, and DTW features stems from considering the implicit assumption of linearity in PCC and
+investigating if a non-linear method can outperform.
+The initial part of the system is extracting the time series’ correlation features using PCC, SCC, and DTW.
+The calculation of r xy, the PCC between 2 time series,
+is obtained as follows:
+$\sum N i =1 ( x i  - x \textasciimacron)( y i  - y \textasciimacron) r xy = , (1) \textasciitilde\textasciitilde�\textasciitilde\textasciitilde \sum N i =1 ( x i  - x \textasciimacron) 2  \sum n i =1 ( y i  - y \textasciimacron) 2$
+Figure 2: An example of two network time series with a
+high Pearson correlation coefficient for subject ID 29228, a
+9-year-old male healthy control. The used repetition time is
+2 seconds.
+Figure 3: Visual representation of the RSNs found in the
+ABIDE dataset. The Z-score represents the level of correlation between a voxel and a network [Schielen et al., 2024a].
+where x, y are the input time series, ¯ x, ¯ y are the corresponding mean values and N being the length of
+the time series. The function provides as an output
+a R 14 × 14 matrix with all the correlation coefficients.
+To create a feature vector, the upper triangle of the
+matrix is transformed into a feature array of length
+91, where each entry can be traced backwards to find
+the indices of the correlated time series. The choice
+between using the upper or lower triangle is arbitrary,
+as the output matrix is symmetric and both triangles
+contain identical values.
+Additionally, SCC is defined as the PCC computed between the ranked variables of the time series
+values, making it a non-linear method. This procedure allows it to capture monotonic trends [Spearman,
+1904]. SCC-based features were extracted following the same methodology as for PCC, serving as a
+benchmark to identify the best-performing classifier.
+The final considered feature type is the DTW distance between 2 time series. The algorithm to find the
+distance DTW ( x, y ) between two time series x, y is
+performed in the following manner:
+D ( i, j ) = d ( x i , y i ) +
+$min \{D ( i - 1 , j ) , D ( i, j - 1) , D ( i - 1 , j - 1) \} D (0 , 0) = 0 , D ( i, 0) = \infty , D (0 , j ) = \infty$
+d ( x i , y i ) = ( x i − y i ) 2
+DTW ( x, y ) = D ( N, M ) ,
+(2)
+where the length of each time series is N and M correspondingly. An l 2 normalization of the DTW feature
+vectors has been applied, to ensure robust comparability across subjects and mitigate the effects of heterogeneous scanning protocols. Similarly to PCC/SCC,
+DTW is a non-directional method and results in a
+symmetric output matrix. The 91-feature array is constructed from the upper triangle, excluding the diagonal. Correspondingly, the original pairs of correlated
+time series can be identified by their indices in the
+feature array.
+**3.3** **Feature Selection**
+The applied feature-selection strategy is a forward sequential selection. This feature selection algorithm
+provides the most informative subset of features for
+the model. The process is initialized with the single
+most dominant feature and iteratively adds the next
+most contributive feature until 10 features have been
+selected. At each iteration, given a subset of selected
+features, the next additional feature is chosen so that
+the new set achieves the best performance [Kamalov
+et al., 2024]. This approach was chosen to find a set of
+strongly correlated features that can support a clinical
+interpretation for ASD classification.
+**3.4** **Classification**
+The features of each participant were labeled with
+ASD or HC to allow supervised learning. Several machine learning algorithms were applied to identify the
+most effective classifier for the feature space, including Logistic Regression (LR), Random Forest (RF),
+Support Vector Machine (SVM), K-Nearest Neighbor (KNN) and Neural Network (NN). The classifiers
+were trained on the features data and then assessed.
+To achieve a more reliable and generalized model,
+a 5-fold cross validation was applied. This method divides the data into random 5 sub-datasets, where for
+each training iteration one subset is used as the test
+set and the remaining subsets are used as the training set. Within each fold, an inner 3-fold CV guides
+feature addition and prevents data leakage by ensuring each subset is evaluated on unseen data. The
+Table 1: Top classifier performance across different metrics and datasets, best results are highlighted in bold
+**All Data** **NYU Sub Dataset with Feature Selection**
+**Metric** PCC **SCC** DTW PCC SCC **DTW**
+Classifier NN **SVM** SVM NN RF LR
+$Accuracy 61\textbackslash% **63\textbackslash%** 58\textbackslash% 54\textbackslash% 54\textbackslash% **65\textbackslash%**$
+$F1 Score 61\textbackslash% **63\textbackslash%** 57\textbackslash% 49\textbackslash% 54\textbackslash% **65\textbackslash%**$
+$Sensitivity 56\textbackslash% **55\textbackslash%** 40\textbackslash% 27\textbackslash% 48\textbackslash% **62\textbackslash%**$
+$Specificity 65\textbackslash% **70\textbackslash%** 74\textbackslash% 79\textbackslash% 60\textbackslash% **67\textbackslash%**$
+AUC 0.61 **0.62** 0.57 0.53 0.54 **0.67**
+PCC - Pearson Correlation Coefficient; SCC - Spearman Correlation Coefficient; DTW - Dynamic Time Warping; AUC - Area Under the Curve.
+combination of internal validation with an outer 5
+fold CV of the classifiers following feature selection
+is known as nested cross-validation, a method that
+rigorously guards against overfitting [Santana et al.,
+2022] [Rosenblatt et al., 2024]. The evaluation metrics of each fold is calculated and averaged to derive
+the final performance of the model.
+The classification was initially based on all the
+available data. An additional classification was performed on a subset of the data, containing only scans
+originating from the NYU Langone Health system.
+**4 RESULTS**
+In this section, the outcomes and implementation details of the applied methodology are listed and discussed. The processes of feature extraction, feature
+selection, and classification are examined along with
+the results of the BEP extension.
+**4.1** **Feature Extraction**
+The Python version used in this research is 3.11.11.
+To extract the PCC and SCC features, the function
+corr has been used, provided by the Python library
+Pandas. Since both correlation methods are non direc
+tional, the output matrix is symmetric and thus only
+the upper triangle of the matrix is used as features,
+excluding the diagonal.
+For DTW, the distance function from the
+Table 2: Feature selection recurrence across 50 folds
+$using Spearman\textquoterights correlation coefficient \textbackslash& dynamic time$
+warping methods
+**Correlated Time Series Feature** **Count**
+Anterior Default Mode Network & Posterior Default Mode Network 23
+Salience Network & Language Network 13
+Lateral Sensorimotor Network & Right Frontoparietal Network 11
+Primary Visual Network & Left Frontoparietal Network 10
+Salience Network & Primary Visual Network 9
+Posterior Default Mode Network & Dorsal Attention Network 9
+Left Frontoparietal Network & Language Network 9
+Primary Visual Network & Dorsal Attention Network 9
+Lateral Sensorimotor Network & Auditory Network 9
+Primary Sensorimotor Network & Auditory Network 9
+DTAIDistance Python library computes the shortest
+distance that aligns 2 time series, where short distance
+indicates high FC and long distance indicates low FC.
+**4.2** **Feature Selection**
+A sequential feature selection algorithm was applied, using SequentialFeatureSelector from the
+scikit-learn Python library.
+Since both aforementioned metrics yield feature
+vectors in which each index corresponds to the same
+pair of time series, the frequency of selection for
+each feature was recorded to identify the most consistently chosen features. A selection-frequency analysis across all CV folds and classifier types identified the most recurrent features. Table 2 shows the
+10 time-series pairs that exhibited the greatest consistency, along their recurrence frequency. Each selected
+pair of networks correlation serves as a basis for ASD
+classification. The connectivity between the anterior
+and posterior default mode networks (DMNs) proved
+to be the most informative, selected in 23 out of 50
+folds. This was followed by distinguished correlations involving the salience and language networks,
+the sensorimotor and frontoparietal networks, and the
+frontoparietal and visual sub networks (see Fig. 6).
+Related studies have reported that individuals with
+ASD often experience communication difficulties,
+which are associated with decreased FC between the
+anterior and posterior DMNs, supporting the findings
+of the present research (see Fig. 4 [Padmanabhan
+et al., 2017, Di Martino et al., 2014]. FC between
+the salience and language networks, identified in this
+study as highly informative, has likewise been reported to show decreased connectivity in ASD, further reinforcing the results [Bernas, 2020]. Moreover,
+decreased connectivity between the lateral sensorimotor and right frontoparietal networks has also been
+documented in the literature, in agreement with the
+findings [Minnigulova et al., 2025].
+The classification models trained on the chosen
+feature subset were evaluated and their performance
+Figure 4: A comparison of the distribution of Spearman’s
+correlation coefficient between the anterior and posterior
+default mode networks, among Healthy Controls (HCs)
+and Autistic Spectrum Disorders (ASDs) across the whole
+dataset.
+Figure 5: Receiver Operating Characteristic (ROC) curve of
+the dynamic time warping based classification on the NYU
+sub-dataset, representing the highest-performing model,
+with an achieved Area Under Curve (AUC) of 0.666.
+benchmarked against models trained without any feature selection.
+**4.3** **Classification**
+The classification was performed using the Python library scikit-learn. Across all metrics, the applied classifiers shared the same configurations. LR was set
+with a maximum of 1000 iterations, while the SVM
+used a linear kernel. The RF was assembled of 100
+decision trees, KNN included 5 neighbors and the
+neural networks consisted of a single hidden layer
+with 100 perceptrons, a maximum of 1000 iterations
+and a learning rate of 0.005. Table 1 represents the
+assessment of the examined classifiers. Initial classification was performed using all examined metrics.
+Among them, SCC achieved the highest classification
+accuracy of 63% (AUC = 0.62) using an SVM classifier, followed by PCC with an accuracy of 61% (AUC
+= 0.61). DTW features achieved the best result with
+an SVM classifier reaching an accuracy of 58% (AUC
+= 0.57). Based on these results, it can be concluded
+that ASD classification using the linear monotonic relationships (SCC) of all examined RSNs across the
+entire dataset outperformed the other observed metrics.
+After evaluating the classification performance using all features, the performance based on the selected
+features was subsequently examined. The highest performance was achieved using PCC features with a Logistic Regression classifier, reaching an accuracy of
+59% (AUC = 0.58). SCC and DTW-based classifications yielded lower accuracies, with maximum values
+of 58% and 57%, respectively. Applying feature selection to the entire dataset resulted in decreased clas
+sification performance across all metrics. This decline
+in performance suggests there is no subset of features
+that sufficiently describes the heterogeneity inherent
+to ASD, as also observed by [Masi et al., 2017].
+Finally, classification performance based on the
+selected features was evaluated using the NYU subdataset, allowing analysis on a more homogeneous
+dataset. This evaluation revealed that DTW-based
+features yielded the highest performance, achieving
+an accuracy of 65% (AUC = 0.67) with a LR classifier (see Fig. 5). Following that, SCC-based features
+reached an accuracy of 54% (AUC = 0.54) using an
+RF classifier, while PCC-based features resulted in
+slightly lower performance, with an accuracy of 54%
+(AUC = 0.53) using a NN classifier. This result suggests that non-linear connectivity, when using homogeneous fMRI scans, can outperform linear connectivity in classification.
+**5 CONCLUSIONS**
+Autism spectrum disorder diagnosis remains a challenging task and an objective diagnosis is desired.
+This study aimed to address this challenge by evaluating multiple brain connectivity metrics - PCC, SCC,
+and DTW - for classifying ASD using resting-state
+fMRI scans. While modest classification performance
+was achieved overall, DTW features showed better
+results than the rest of the examined metrics. The
+best performance (65% accuracy) was achieved using DTW-based features with a Logistic Regression
+Figure 6: A bar chart that illustrates the count of selected
+features and the corresponding correlated Resting State
+Networks (RSNs), ranked by feature count in the feature
+selection procedure.
+classifier on the large homogeneous NYU sub dataset
+(including 260 subjects).
+Feature selection did not consistently improve
+performance across the full dataset, likely due to
+noise and site-related variability in the data. However, selected features performed better only when
+using DTW features with the homogeneous scanning
+protocol NYU sub dataset, which highlights the effectiveness of non-linear correlation methods under
+consistent scanning protocols. Additionally, the brain
+networks identified as informative align with findings
+from clinically related literature on autism diagnosis.
+These findings demonstrate that non-linear correlation measures such as DTW can offer a meaningful
+advantage over traditional linear methods. They also
+reinforce the value of nested cross-validation and ho
+mogeneous scanning protocol data sources in developing generalizable classifiers.
+Nonetheless, this study has several limitations.
+The method shows reduced performance when applied to heterogeneous datasets with varying scanning
+protocols, which may affect its generalizability. In
+addition, the calculation of DTW distances is approximated due to computational complexity, which may
+lead to reduced alignment precision. Moreover, the
+highest diagnostic accuracy achieved falls below the
+threshold typically required for clinical application.
+Future research should explore the integration of alternative brain atlases and evaluate more advanced
+classification frameworks such as deep neural networks or transformers to further enhance diagnostic
+accuracy.
+**REFERENCES**
+Beckmann, C., Mackay, C., Filippini, N., and Smith, S.
+(2009). Group comparison of resting-state fMRI data
+using multi-subject ICA and dual regression. Neu-
+roImage, 47:S148.
+Beckmann, C. F., DeLuca, M., Devlin, J. T., and Smith,
+S. M. (2005). Investigations into resting-state connectivity using independent component analysis. Philo-
+sophical Transactions of the Royal Society B Biologi-
+cal Sciences, 360(1457):1001–1013.
+Bernas, A. (2020). Resting-state fMRI neurodynamics in
+neuropsychiatric disorders . PhD thesis, Maastricht
+University.
+Biswal, B., Zerrin Yetkin, F., Haughton, V. M., and Hyde,
+J. S. (1995). Functional connectivity in the motor cortex of resting human brain using echo-planar MRI.
+Magnetic Resonance in Medicine, 34(4):537–541.
+Cao, M., Yang, M., Qin, C., Zhu, X., Chen, Y., Wang,
+J., and Liu, T. (2021). Using DeepGCN to identify
+the autism spectrum disorder from multi-site restingstate data. Biomedical Signal Processing and Control,
+70:103015.
+Di Martino, A., Yan, C.-G., Li, Q., Denio, E., Castellanos, F. X., Alaerts, K., Anderson, J. S., Assaf, M.,
+Bookheimer, S. Y., Dapretto, M., Deen, B., Delmonte,
+S., Dinstein, I., Ertl-Wagner, B., Fair, D. A., Gallagher, L., Kennedy, D. P., Keown, C. L., Keysers,
+C., Lainhart, J. E., Lord, C., Luna, B., Menon, V.,
+Minshew, N. J., Monk, C. S., Mueller, S., M¨uller, R.A., Nebel, M. B., Nigg, J. T., O’Hearn, K., Pelphrey,
+K. A., Peltier, S. J., Rudie, J. D., Sunaert, S., Thioux,
+M., Tyszka, J. M., Uddin, L. Q., Verhoeven, J. S.,
+Wenderoth, N., Wiggins, J. L., Mostofsky, S. H., and
+Milham, M. P. (2014). The autism brain imaging data
+exchange: Towards a large-scale evaluation of the intrinsic brain architecture in autism. Molecular Psychi-
+atry, 19(6):659–667.
+Insel, T., Cuthbert, B., Garvey, M., Heinssen, R., Pine,
+D. S., Quinn, K., Sanislow, C., and Wang, P. (2010).
+Research domain criteria (rdoc): Toward a new classification framework for research on mental disorders. American Journal of Psychiatry, 167(7):748–
+751. PMID: 20595427.
+Kamalov, F., Elnaffar, S., Cherukuri, A. K., and Jonnalagadda, A. (2024). Forward feature selection: empirical analysis. Journal of Intelligent Systems and Inter-
+net of Things, 11:44–54.
+Laumann, T. O., Snyder, A. Z., Mitra, A., Gordon, E. M.,
+Gratton, C., Adeyemo, B., Gilmore, A. W., Nelson,
+S. M., Berg, J. J., Greene, D. J., McCarthy, J. E., Tagliazucchi, E., Laufs, H., Schlaggar, B. L., Dosenbach,
+N. U. F., and Petersen, S. E. (2017). On the stability of
+bold fmri correlations. Cerebral Cortex, 27(10):4719–
+4732.
+Li, W., Wang, S., and Liu, G. (2022). Transformer-based
+Model for fMRI Data: ABIDE Results. 2022 7th In-
+ternational Conference on Computer and Communi-
+cation Systems (ICCCS), pages 162–167.
+Linke, A., Mash, L., Fong, C., Kinnear, M., Kohli, J.,
+Wilkinson, M., Tung, R., Keehn, R. J., Carper, R.,
+Fishman, I., and M¨uller, R.-A. (2020). Dynamic time
+warping outperforms Pearson correlation in detecting
+atypical functional connectivity in autism spectrum
+disorders. NeuroImage, 223:117383.
+Martino, A. D. (2014). The autism brain imaging data exchange: towards a large-scale evaluation of the intrinsic brain architecture in autism. Molecular Psychiatry,
+19:659–667.
+Martino, A. D. (2017). Enhancing studies of the connectome in autism using the autism brain imaging data
+exchange ii.
+Masi, A., DeMayo, M. M., Glozier, N., and Guastella, A. J.
+(2017). An overview of autism spectrum disorder, heterogeneity and treatment options. Neuroscience Bul-
+letin, 33(2):183–193.
+Minnigulova, A., Dragoy, O., and Arutiunian, V. (2025).
+Atypical segregation of frontoparietal and sensorimotor networks is related to social and executive function
+impairments in children with asd. Brain Imaging and
+Behavior, 19(4):846–855.
+Muhei-Aldin, O., VanSwearingen, J., Karim, H., Huppert,
+T., Sparto, P. J., Erickson, K. I., and Sejdi´c, E. (2014).
+An investigation of fmri time series stationarity during
+motor sequence learning foot tapping tasks. Journal
+of Neuroscience Methods, 227(0):75–82.
+$Nickerson, L. D., Smith, S. M., Ong\textasciidieresisur, D., and Beckmann, \textasciidieresis$
+C. F. (2017). Using dual regression to investigate network shape and amplitude in functional connectivity
+analyses. Frontiers in Neuroscience, 11:115.
+Padmanabhan, A., Lynch, C. J., Schaer, M., and Menon, V.
+(2017). The default mode network in autism. Bio-
+logical Psychiatry: Cognitive Neuroscience and Neu-
+roimaging, 2(6):476–486.
+Poldrack, R. A., Mumford, J. A., and Nichols, T. E. (2011).
+Handbook of Functional MRI Data Analysis . Cambridge University Press.
+Rosenblatt, M., Tejavibulya, L., Jiang, R., Noble, S., and
+Scheinost, D. (2024). Data leakage inflates prediction
+performance in connectome-based machine learning
+models.
+Santana, C., Carvalho, E., Rodrigues, I., Bastos, G., Diniz de Souza, A., and Lacerda, L. (2022). rs-fMRI
+and machine learning for ASD diagnosis: a systematic review and meta-analysis. Scientific Reports, 12.
+Schielen, S., Pilmeyer, J., Aldenkamp, A., and Ruijters, D.
+(2024a). ICA-based Resting-State Networks Obtained
+on Large Autism fMRI Dataset ABIDE.
+Schielen, S. J. C., Pilmeyer, J., Aldenkamp, A. P., and
+Zinger, S. (2024b). The diagnosis of ASD with MRI:
+a systematic review and meta-analysis. Translational
+psychiatry, 14(1):318.
+Spearman, C. (1904). The proof and measurement of association between two things. The American Journal of
+Psychology, 15(1):72–101.
+S´olon, A., Franco, A., Craddock, C., Buchweitz, A., and
+Meneguzzi, F. (2017). Identification of autism spectrum disorder using deep learning and the ABIDE
+dataset. NeuroImage: Clinical, 17.
+Yang, X., Islam, M. S., and Khaled, A. M. A. (2019). Functional connectivity magnetic resonance imaging clas
+sification of autism spectrum disorder using the multisite ABIDE dataset. In 2019 IEEE EMBS Interna-
+tional Conference on Biomedical Health Informatics
+(BHI), pages 1–4.
+Yang, X., Rimal, R., and Rogers, T. (2022). Functional
+connectivity based classification for autism spectrum
+disorder using spearman’s rank correlation. In 2022
+IEEE-EMBS Conference on Biomedical Engineering
+and Sciences (IECBES), pages 46–51.
+Yang, X., T., P., and Zhang, N. (2020). A Deep Neural
+Network Study of the ABIDE Repository on Autism
+Spectrum Classification. International Journal of Ad-
+vanced Computer Science and Applications, 11.
+=== END: Submission_VISAPP2026_Paper_Matan.pdf (8 equations) ===

@@ -1,0 +1,129 @@
+=== PDF: brainviz-vcbm2026.pdf ===
+
+Eurographics Workshop on Visual Computing for Biology and Medicine (VCBM) (2026), pp. 1–3
+Tim Gerrits and Marina Evers (Poster Chairs)
+**Interactive Visualization of Dynamic Functional Connectivity** **in the ABIDE Autism Cohort**
+D. Eliad 1 and S. Schielen 1 and S. Zinger 1
+1 Department of Electrical Engineering, Eindhoven University of Technology (TU/e), The Netherlands
+**Figure 1:** Overview pane: each subject’s connectivity matrix over the whole recording, split into HC (N = 483 ) and ASD
+(N = 417 ) columns grouped by acquisition site.
+**Abstract**
+Resting-state functional connectivity in autism is increasingly understood to be dynamic, with the coupling be-
+tween brain networks rising and falling over a scan, yet the tools most researchers reach for collapse a recording
+into a single static connectome and discard this temporal structure. We present an interactive web application for
+exploring time-resolved functional connectivity in the large ABIDE I+II autism cohort. The system decomposes
+each subject into 14 ICA-derived resting-state networks and computes connectivity between every network pair
+within a sliding time window, using symmetric correlation (Pearson, Spearman) or an asymmetric wavelet mea-
+sure that exposes directionality, then animates the resulting graph so that connection strength and lead or follow
+direction can be scrubbed through time. A complementary overview lays out every subject’s connectivity matrix
+by diagnosis (ASD vs. healthy control) and site and compares it against the class mean and median, supporting
+visual identification of individual, group, and site differences. The result turns a large, otherwise opaque dataset
+into something a domain expert can interrogate directly.
+**CCS Concepts**
+• Human-centered computing → Visualization systems and tools; • Applied computing → Life and medical
+sciences
+**1. Introduction**
+Resting-state fMRI (rs-fMRI) and the functional connectivity it yields, the statistical coupling between brain network time series, are central to studying autism spectrum
+submitted to Eurographics Workshop on Visual Computing for Biology and Medicine
+(VCBM) (2026 )
+disorder (ASD), and the most studied imaging modality for
+it [SPAZ24]. This coupling is conventionally computed once
+over a whole recording, giving one static matrix per subject,
+yet it reconfigures over seconds to minutes within a scan, and
+2 D. Eliad et al. / Dynamic Functional Connectivity in ABIDE
+these dynamics carry information a static average discards.
+Exploring them means treating connectivity as a sequence
+of matrices and letting a researcher see how the network of
+couplings evolves, compare it across individuals, and relate
+it to diagnosis.
+The Autism Brain Imaging Data Exchange (ABIDE) is a
+large, multisite rs-fMRI resource. Recent work preprocessed
+ABIDE I+II with independent component analysis (ICA)
+into atlas-free resting-state networks (RSNs) for 900 subjects (417 ASD, 483 controls) [SPA ∗ 25]. ABIDE underpins
+most MRI-based ASD research [SPAZ24] and is an ideal
+testbed for dynamic connectivity, yet common connectome
+viewers are static and lack the interactive, time-resolved,
+comparative exploration it demands. We present a web application that fills this gap with an animated graph view of
+windowed connectivity between 14 RSNs (symmetric correlation and a directional wavelet measure), a comparative
+overview of the whole cohort, and connectivity computed
+on demand over every subject.
+**2. Data and Connectivity**
+Group ICA with dual regression yields, per subject, 32 component time series, of which 14 are kept as RSNs (default
+mode, salience, visual, sensorimotor, auditory, frontoparietal, dorsal attention and language networks) [SPA ∗ 25], giving a T × 14 activity matrix. A window of fixed length slides
+across it, and at each step a 14 × 14 connectivity matrix is
+computed over all network pairs, producing a sequence of
+frames.
+The system offers three measures. Pearson and Spearman
+correlation give symmetric matrices in [ − 1 , 1]. The third
+is directional. Wavelet coherence acts as a localized cor
+relation coefficient in time-frequency space, and its crosswavelet phase angle gives the lead or lag between two signals [GMJ04, TC98], classifying each network pair as inphase, anti-phase, leading, or lagging [BAZ17,CPB ∗ 23]. Per
+window, it reports a phase-leading ratio in 0 , 1, the fraction of time-frequency points at which one network leads
+the other, computed in both directions, so the wavelet matrix is asymmetric ( A → B ̸ = B → A ) and encodes which network drives which, a directional reading absent from correlation [CPB ∗ 23].
+**3. Visualization**
+The graph view places the 14 networks on a ring and draws
+the current frame’s connectivity as edges (Figure 2). Color
+encodes the coupling’s sign on a blue to red diverging scale
+and thickness its magnitude, and a threshold hides weak
+edges. Directional wavelet edges are curved and carry arrowheads that show which network leads. A timeline scrubs or
+plays the frames, animating how the graph reconfigures, and
+hovering a network isolates its edges. The view also plays
+aggregate sequences, the mean or median over all ASD or
+**Figure 2:** Graph view: the 14 networks on a ring with the
+current window’s connectivity drawn as edges, color encod-
+ing each coupling’s sign and thickness its magnitude.
+all control subjects at each frame, so an individual’s dynamics can be read against either class.
+**4. Comparative Overview**
+A complementary overview (Figure 1) reduces each subject to a single matrix over the whole recording, shown as a
+heatmap or graph glyph in healthy control and ASD columns
+grouped by site. Read against the class mean and median, it
+supports rapid scanning for individual outliers, group contrasts, and site variation, a known confound in multisite rs
+fMRI.
+**5. Conclusion**
+The system makes dynamic functional connectivity in a
+large autism cohort directly explorable, adding a directional wavelet view to standard correlation and placing every subject against ASD and HC baselines. It runs as a web
+(https://brainviz.ideabattery.org/)
+(https://brainviz.ideabattery.org/)
+tative comparison of ASD against HC, namely statistics and
+significance testing on the dynamic measures, turning exploratory observations into testable group differences.
+**Acknowledgements**
+This work builds on the Autism Brain Imaging Data Exchange (ABIDE). We thank the ABIDE initiative and its
+contributing sites for openly sharing the data, and the authors of the ICA-preprocessed ABIDE release for making
+the resting-state network time series available.
+**References**
+BAZ17 B ERNAS A., A LDENKAMP A. P., Z INGER S.: Wavelet
+coherence-based classifier: A resting-state functional MRI study
+on neurodynamics in adolescents with high-functioning autism.
+Computer Methods and Programs in Biomedicine 154 (11
+2017), 143–151. [URL: https://doi.org/10.1016/](https://doi.org/10.1016/j.cmpb.2017.11.017)
+(https://doi.org/10.1016/j.cmpb.2017.11.017)
+[11.017. 2](http://dx.doi.org/10.1016/j.cmpb.2017.11.017)
+submitted to Eurographics Workshop on Visual Computing for Biology and Medicine (VCBM) (2026 )
+D. Eliad et al. / Dynamic Functional Connectivity in ABIDE 3
+[CPB ∗ 23] C ÎRSTIAN R., P ILMEYER J., B ERNAS A., J ANSEN J.
+F. A., B REEUWER M., A LDENKAMP A. P., Z INGER S.: Objective biomarkers of depression: A study of Granger causality and
+wavelet coherence in resting-state fMRI. Journal of Neuroimag-
+ing 33 [, 3 (1 2023), 404–414. URL: https://doi.org/10.](https://doi.org/10.1111/jon.13085)
+[1111/jon.13085, doi:10.1111/jon.13085. 2](https://doi.org/10.1111/jon.13085)
+GMJ04 G RINSTED A., M OORE J. C., J EVREJEVA S.:
+Application of the cross wavelet transform and wavelet
+coherence to geophysical time series. Nonlinear pro-
+cesses in geophysics 11, 5/6 (11 2004), 561–566. URL:
+(https://doi.org/10.5194/npg-11-561-2004)
+(http://dx.doi.org/10.5194/npg-11-561-2004)
+[SPA ∗ 25] S CHIELEN S. J. C., P ILMEYER J., A LDENKAMP
+A. P., R UIJTERS D., Z INGER S.: ICA-Based Resting-State networks obtained on large Autism FMRI dataset ABIDE. Data
+10 [, 7 (7 2025), 109. URL: https://doi.org/10.3390/](https://doi.org/10.3390/data10070109)
+(https://doi.org/10.3390/data10070109)
+[SPAZ24] S CHIELEN S. J. C., P ILMEYER J., A LDENKAMP
+A. P., Z INGER S.: The diagnosis of ASD with MRI:
+a systematic review and meta-analysis. Translational Psy-
+chiatry 14, 1 (8 2024), 318. [URL: https://doi.](https://doi.org/10.1038/s41398-024-03024-5)
+(https://doi.org/10.1038/s41398-024-03024-5)
+(http://dx.doi.org/10.1038/s41398-024-03024-5)
+TC98 T ORRENCE C., C OMPO G. P.: A practical Guide to
+Wavelet analysis. Bulletin of the American Meteorological
+Society 79, 1 (1 1998), 61–78. [URL: https://doi.org/](https://doi.org/10.1175/1520-0477(1998)079<0061:apgtwa>2.0.co;2)
+[10.1175/1520-0477(1998)079<0061:apgtwa>2.](https://doi.org/10.1175/1520-0477(1998)079<0061:apgtwa>2.0.co;2)
+[0.co;2, doi:10.1175/1520-0477(1998)079. 2](https://doi.org/10.1175/1520-0477(1998)079<0061:apgtwa>2.0.co;2)
+submitted to Eurographics Workshop on Visual Computing for Biology and Medicine (VCBM) (2026 )
+=== END: brainviz-vcbm2026.pdf (0 equations) ===
