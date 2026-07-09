@@ -1,0 +1,905 @@
+=== PDF: bernas-2021.pdf ===
+
+PLOS ONE
+OPEN ACCESS
+**Citation:** Bernas A, Breuer LEM, Aldenkamp AP,
+Zinger S (2021) Emulative, coherent, and causal
+dynamics between large-scale brain networks are
+neurobiomarkers of Accelerated Cognitive Ageing
+(https://doi.org/10.1371/journal.pone.0250222)
+(https://doi.org/10.1371/journal.pone.0250222)
+**Editor:** Pan Lin, Hunan Normal University, CHINA
+**Received:** October 15, 2020
+**Accepted:** April 3, 2021
+**Published:** April 16, 2021
+**Peer Review History:** PLOS recognizes the
+benefits of transparency in the peer review
+process; therefore, we enable the publication of
+all of the content of peer review and author
+responses alongside final, published articles. The
+editorial history of this article is available here:
+(https://doi.org/10.1371/journal.pone.0250222)
+**Copyright:** © 2021 Bernas et al. This is an open
+access article distributed under the terms of the
+[Creative Commons Attribution License, which](http://creativecommons.org/licenses/by/4.0/)
+permits unrestricted use, distribution, and
+reproduction in any medium, provided the original
+author and source are credited.
+**Data Availability Statement:** All relevant data are
+within the manuscript and its Supporting
+Information files. The raw clinical data cannot be
+shared publicly because of privacy reasons and the
+RESEARCH ARTICLE
+Emulative, coherent, and causal dynamics between large-scale brain networks are neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**Antoine Bernas** **ID(https://orcid.org/0000-0002-2006-4891)** **1,2** ***, Lisanne E. M. Breuer** **3** **, Albert P. Aldenkamp** **1,2,3** **, Svitlana Zinger** **1**
+**1** Department of Electrical Engineering, Eindhoven University of Technology, Eindhoven, The Netherlands,
+**2** Department of Cognitive Neuropsychiatry and Clinical Neurosciences, School for Mental Health and
+Neuroscience, Maastricht University, Maastricht, The Netherlands, **3** Department of Research and
+Development, Epilepsy Centre Kempenhaeghe, Heeze, The Netherlands
+- antoine.bernas1@gmail.com
+Abstract
+Accelerated cognitive ageing (ACA) is an ageing co-morbidity in epilepsy that is diagnosed
+through the observation of an evident IQ decline of more than 1 standard deviation (15 points)
+around the age of 50 years old. To understand the mechanism of action of this pathology, we
+assessed brain dynamics with the use of resting-state fMRI data. In this paper, we present
+novel and promising methods to extract brain dynamics between large-scale resting-state net
+works: the emulative power, wavelet coherence, and granger causality between the networks
+were extracted in two resting-state sessions of 24 participants (10 ACA, 14 controls). We also
+calculated the widely used static functional connectivity to compare the methods. To find the
+best biomarkers of ACA, and have a better understanding of this epilepsy co-morbidity we com
+pared the aforementioned between-network neurodynamics using classifiers and known
+machine learning algorithms; and assessed their performance. Results show that features
+based on the evolutionary game theory on networks approach, the emulative powers, are the
+best descriptors of the co-morbidity, using dynamics associated with the default mode and dor
+sal attention networks. With these dynamic markers, linear discriminant analysis could identify
+ACA patients at 82.9% accuracy. Using wavelet coherence features with decision-tree algo
+rithm, and static functional connectivity features with support vector machine, ACA could be
+identified at 77.1% and 77.9% accuracy respectively. Granger causality fell short of being a rel
+evant biomarker with best classifiers having an average accuracy of 67.9%. Combining the fea
+tures based on the game theory, wavelet coherence, Granger-causality, and static functional
+connectivity- approaches increased the classification performance up to 90.0% average accu
+racy using support vector machine with a peak accuracy of 95.8%. The dynamics of the net
+works that lead to the best classifier performances are known to be challenged in elderly. Since
+our groups were age-matched, the results are in line with the idea of ACA patients having an
+accelerated cognitive decline. This classification pipeline is promising and could help to diag
+nose other neuropsychiatric disorders, and contribute to the field of psychoradiology.
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 1 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+General Data Protection Regulation (GDPR)
+compliance.
+**Funding:** The authors received no specific funding
+for this work.
+**Competing interests:** The authors have declared
+that no competing interests exist.
+**1 Introduction**
+Cognitive impairment is a common comorbidity in epilepsy. It is estimated that 65% of all
+patients show impairment in cognition, accounting for about half of the burden of disease 1.
+Using fMRI, research has mainly focused on specific cognitive impairments, and correlated
+them with aberrant functional connectivity in brain areas involved in focal epilepsy. For
+instance, in rolandic epilepsy, language and motor-related functions are impaired, and were
+linked to a reduced functional connectivity between sensorimotor network and Broca’s area
+2. Also already at young age, children with frontal lobe epilepsy complicated by cognitive
+impairment (memory) showed decrease in frontal lobe connectivity 3. In an elderly population, the decline in cognitive abilities is also clearly present, yet often neglected 4. This more
+general cognitive decline is often due to long-term accumulating effects, i.e. early onset and
+chronic epilepsy, and heavy use of anti-epileptic drugs, which hinders healthy mental ageing
+5. This is often described as a chronic/accumulative model of cognitive decline, and viewed
+as a form of dementia 6. More recently, another model of cognitive decline in elderly has
+been presented. It is different from the chronic decline since it relates to epilepsy that has a late
+onset, where the decline is more abrupt and occurs soon after the diagnosis of epilepsy. Also, it
+does not seem to degrade the crystalized cognitive functions such as long-term memory and
+language abilities; but rather the fluid intelligence: perceptual reasoning and processing speed.
+This fast mental ageing is coined ‘accelerated cognitive ageing’, or ACA 7, 8. Even though the
+clinical characteristics of the ACA comorbidity has been described, the brain mechanism of
+action of the pathology remains unclear. This is why in this study we assess, using fMRI, different dynamic parameters of large-scale networks that could help describing neuronal mechanisms behind the decline.
+The brain has been proven to efficiently work in functionally connected networks, i.e. the
+aggregation of multiple region of interests (ROIs) 9, 10. Also, the links between brain activity
+and behavior/cognition are often better analyzed through the use of large-scale networks [11–
+14]. Therefore, the resting-state network (RSN) dynamics are informative features in neuropsychiatric disorders and can be used as neurobiomarkers. Between-network neurodynamics
+analysis can be performed using network time series from a spatial independent component
+analysis (ICA), a reliable data-driven method [15, 16]. In a seed-based approach (voxel-tovoxel, or ROI-to-ROI), the seeds or ROIs have to be defined a priori, and this can be quite
+inter-subject variable, especially for resting-state (task-free) fMRI. Hence the choice of ICA
+decomposition for extracting the functional brain RSNs and their activity time courses is
+favorable for robust rs-fMRI group analysis, and is preferred here.
+After extracting the time series per network, diverse methods can be applied to estimate the
+dynamics of these networks. Currently, to find the abnormalities in brain functioning of
+patients with neuropsychiatric disorders, research has mainly focused on static functional connectivity (sFC), i.e. pairwise correlations between the functional networks’ activity. It has been
+shown that at rest the default-mode network is involved in the impairment in autism [17, 18];
+and the attention and executive networks in attention deficit hyperactivity disorder (ADHD)
+[19, 20]. But for more complex mental illnesses (e.g. depression or schizophrenia) dynamic
+measures of the brain connectivity seem to be more robust biomarkers [21, 22].
+In that regard, effective connectivity (EC) can be used [23, 24]. The EC, or measure of causality in brain connectivity, has already shown promising results for autism and depression
+[25, 26]. However, in terms of cognitive decline in the ageing process, clear causal dynamics
+indicators are missing. Liu et al. have shown links between cognitive decline and changes in
+Granger causality (a measure of EC) of cognitive networks in mild cognitive impairment 27.
+Using a different—more hypothesis driven—causal measurement, the dynamic causal
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 2 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+modeling (DCM), Tsvetanov et al. showed that differences in between and within large-scale
+resting-state networks were linked to cognitive performance in elderly 28. More precisely
+they demonstrated that the DCM of the default mode, dorsal attention and salience networks
+(DMN, DAN, SN) where associates with increased influence on cognitive functioning—that
+tends to decline—in healthy elderly. Another study showed the involvement of DMN and SN
+in the cognitive decline in cognitively impaired elderly using also the DCM approach 29.
+More recently, to assess neuro- and psycho-pathology, the dynamic functional connectivity
+(dFC) methods have been used as well [21, 30–34]. These are similar to the sFC but when correlation coefficients are calculated over different time windows. By sliding these windows
+throughout the full time series, one can extract the dFC between the networks being assessed
+[35, 36]. This method of analysis has been for example applied to extract abnormal brain states
+in the study of schizophrenia, which has stronger classification power as compared to classic
+static functional connectivity 37. The same methods can also be applied in the frequency
+domain, and the sliding windows approach can be applied on Fourier spectra, giving rise to
+spectrograms. And similar spectro-temporal analysis of wavelet coherence has not been much
+used in fMRI studies. Chang and Glover have shown added value in assessing non-stationarity
+and time-varying anti-correlation between DMN and cognitive networks, using wavelet coherence 38. To relate to cognitive decline, only one study used wavelet coherence analysis of
+near-infrared spectroscopic signals to infer changes in brain functional connectivity in respect
+to performance in vigilance task, suggesting that decreased attention—a known phenomenon
+in ageing, and probably associated to cognitive decline—was attributed to reduced phase
+coherence between left prefrontal region and sensorimotor area. In a previous rs-fMRI study,
+we have successfully shown that coherent patterns, using wavelet coherence, are also impaired
+in autism; and the duration of these coherent patterns can be used as biomarker of the disorder
+39.
+Finally, evaluation of brain dynamics can be done through an evolutionary game theory
+approach on brain networks (EGN). Madeo and his colleagues were first to implement the
+methods on BOLD fMRI signals 40. They demonstrated that EGN model is able to mimic
+functional connectivity dynamics, which could then be used to simulate the impact of brain
+network lesions onto the networks’ dynamics. This was done using simulated time series and
+real fMRI data from healthy subjects. Here, we present the first fMRI study where the EGN
+model is applied to a clinical population in order to see if network emulative powers (parameters of the model) can be descriptors of ACA.
+The goal of our research is to define the most informative fMRI neurobiomarkers for ACA
+based on neurodynamics metrics. To achieve this, we use these metrics as features and train
+classifiers for ACA detection. The features that lead to the best classification results can then
+be considered the best descriptors of ACA. Therefore, in our study, the aforementioned neurodynamics techniques are used to extract fMRI-base dynamic features of brain networks, which
+are then fed to classifiers, to train and validate them. Decision tree, linear discriminant analysis, the K-nearest neighbors and the support vector machine are common supervised machine
+learning algorithms that divide the training data in two or more categories. Counting the number of correct binary classifications, in the validation dataset, leads to a certain amount of accuracy, i.e. the percentage of participants that has been correctly assigned to their respective label
+(in our case, ACA or non-ACA/controls); which shows the descriptive power of the features,
+and to a certain extent its usability in a clinical environment. Convolutional neural network
+(CNN) can also be used to extract and test specific brain features using resting-state fMRI. It
+has already been tested in order to help diagnosing neuropsychiatric disorders, such as autism
+41, ADHD 42, and schizophrenia 43. An important drawback of this classification technique is that it usually needs a large amount of data to be trained upon; Moreover, the
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 3 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+understanding and explanation of the feature maps obtained at different CNN layers can be
+arduous and troublesome. This is why we used here the aforementioned supervised machine
+learning algorithms and assessed the performance of classifiers using neurodynamics metrics,
+in order to find the best biomarkers of the ACA comorbidity, which if replicated could help
+describing the mechanism of action of the cognitive decline. Testing the classification pipeline
+we describe here, in a bigger dataset stratified, e.g. through duration since onset of epilepsyor
+age ranges, could even help predict the course of the decline and its severity.
+**2 Materials and methods**
+Fig 1 provides an overview of the Materials and methods section, and short descriptions of the
+steps of the study pipeline. The study was approved by the Dutch Medical Research Ethical
+Committee (MREC) of Maxima Medical Center. All subjects signed informed consent and
+gave permission to use the clinical data for scientific purposes.
+**2.1 Dataset, preprocessing, and brain network extraction**
+The dataset contains two resting-state, RS1 and RS2, sessions acquired from 10 ACA patients
+and 14 controls. Prior to RS2, a silent word generation task was performed for 7 min. Dynamics features that show significant differences between the two populations in RS1 as well as in
+RS2, would show robustness of the features as biomarkers. Indeed, since the task in-between
+resting-states was cognitively demanding, such features would have discriminant power
+regardless of the brain fatigue the participants experienced. On the contrary, the difference in
+findings between RS1 and RS2 could shed light on the cognitive reserve capacity of the ACA
+patients, which can be of interest too. Table 1 shows the demographics of the participants, the
+type of epilepsy, and the deterioration scores, i.e. cognitive decline, for Full-Scale IQ, Perceptual Reasoning Index, and Verbal Comprehension Index (respectively FSIQ, PRI, and VCI).
+Deterioration scores were calculated by subtracting the estimated premorbid IQ scores from
+the actual scores, i.e. WAIS-IV (actual) IQ-scores—OPIE-IV (premorbid) IQ-scores [44, 45].
+The T1-weighted anatomical images were acquired using a 3.0 T imaging system (Philips
+Achieva) with a 3D Fast Field Echo (FFE) sequence: echotime (TE) = 3.8 ms, repetition time
+(TR) = 8.3 ms; Inversion time (TI) = 1035 ms; field of view (FOV) = 240x240 mm 2, with 180
+sagittal slices; flip-angle (FA) = 8 deg.; and voxel size = 1x1x1 mm 3 ; with SENSE factor of 1.5,
+and scan duration of 6:02 min. Functional MRI-data were acquired using multi-echo echo-planar imaging (ME-EPI) sequences with 3 echoes: TEs = 12, 35, 58 ms, TR = 2 s; FA = 90 deg.;
+SENSE factor = 2.7; 208 dynamics for a total of 7 minutes; 27 axial slices (with no gap), 64x64
+matrix FOV, with a 3.5x3.5x4.5 mm 3 voxel size. The raw multi-echo fMRI data were first
+**Fig 1. Overview of the methodology.**
+(https://doi.org/10.1371/journal.pone.0250222.g001)
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 4 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**Table 1. Demographic and clinical information of the participants.**
+|Col1|ACA|Healthycontrols|
+|---|---|---|
+|**Age in years M (SD) range**|61.3 (8.9)|62.2 (9.8)|
+$|**Age in years M (SD) range**|50\textendash74 y|47\textendash79 y| |**Gender**|70.0\textbackslash% male|35.7\textbackslash% male| |**Handedness**|100.0\textbackslash% right-handed|92.9\textbackslash% right-handed|$
+|**Age at epilepsy onset M (SD) + range**|35.0 (14.6)|-|
+$|**Age at epilepsy onset M (SD) + range**|15\textendash59 y|15\textendash59 y|$
+|**Duration of epilepsy M (SD) + range**|22.3 (15.2)|-|
+$|**Duration of epilepsy M (SD) + range**|1\textendash50 y|1\textendash50 y|$
+|**Type of epilepsy**|40.0% cryptogenic localization-related|-|
+$|**Type of epilepsy**|40.0\textbackslash% symptomatic|40.0\textbackslash% symptomatic| |**Type of epilepsy**|20.0\textbackslash% idiopathic|20.0\textbackslash% idiopathic|$
+|**Dominant seizure type a**|10.0% simple partial|-|
+|**Dominant seizure type a**|20.0% complex partial|20.0% complex partial|
+$|**Dominant seizure type a**|20.0\textbackslash% absence|20.0\textbackslash% absence|$
+|**Dominant seizure type a**|0.0% tonic-clonic|0.0% tonic-clonic|
+|**Dominant seizure type a**|50.0% seizure free|50.0% seizure free|
+|**Status epilepticus**|50.0% yes||
+|**Seizure frequency**|50.0% seizure (sz) free|-|
+$|**Seizure frequency**|0.0\textbackslash% < 1 sz/y|0.0\textbackslash% < 1 sz/y| |**Seizure frequency**|20.0\textbackslash% 1\textendash5 sz/y|20.0\textbackslash% 1\textendash5 sz/y|$
+|**Seizure frequency**|20.0% 1 sz per 2 months|20.0% 1 sz per 2 months|
+$|**Seizure frequency**|0.0\textbackslash% monthly sz|0.0\textbackslash% monthly sz| |**Seizure frequency**|10.0\textbackslash% weekly sz|10.0\textbackslash% weekly sz| |**Seizure frequency**|0.0\textbackslash% daily sz|0.0\textbackslash% daily sz|$
+|**Drug load b**|1.5 (0.4)|-|
+|**WAIS-IV indexes**|||
+|FSIQ|76.7(8.7)|108.4(13.4)|
+|VCI|94.7 (10.6)|106.2 (12.2)|
+|PRI|75.8 (6.9)|103.2 (13.8)|
+|WMI|79.6 (10.0)|104.9 (13.3)|
+|PSI|67.0 (14.4)|114.6 (8.7)|
+|**Deterioration scoresc**|||
+|Det-FSIQ|-22.1 (5.0)|-1.3 (8.2)|
+|Det-VCI|-0.5 (8.9)|0.2 (6.0)|
+|Det-PRI|-21.0 (4.5)|0.0 (8.7)|
+|**Memory scores**|||
+|Auditory|93.9 (9.7)|109.9 (12.6)|
+|Visual|92.7 (7.0)|102.8 (10.9)|
+|Delayed memory|93.5 (8.4)|106.3 (10.9)|
+Note: � = p < 0.01 sign. difference between groups. WMI: Working Memory Index. PSI: Processing Speed Index.
+a Dominant seizure type is determined for the two years preceding neuropsychological assessment.
+b The prescribed daily dose of antiepileptic medication divided by the defined daily dose.
+c The deterioration scores = [WAIS-IV (actual) IQ-scores—OPIE-IV (premorbid) IQ-scores]
+(https://doi.org/10.1371/journal.pone.0250222.t001)
+preprocessed following the pipeline of 46, using the python script meica . py (available at
+[www.bitbucket.org/prantikk/me-ica). Multi-echo- (ME)-ICA cleaning was applied in order to](http://www.bitbucket.org/prantikk/me-ica)
+denoise each individual fMRI scan 47. ME-ICA cleaning has been proven to be the most
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 5 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+robust denoising method for resting-state fMRI, and tend to improve substantially effect sizes
+and statistical power [48, 49]. Multi-echo cleaned data were further processed using FEAT
+[(FMRI Expert Analysis Tool) Version 6.00, part of FSL (FMRIB’s Software Library, www.](http://www.fmrib.ox.ac.uk/fsl)
+[fmrib.ox.ac.uk/fsl). The following pre-statistics processing was applied; spatial smoothing](http://www.fmrib.ox.ac.uk/fsl)
+using a Gaussian kernel of FWHM 5.0mm; grand-mean intensity normalization of the entire
+4D dataset by a single multiplicative factor; high-pass temporal filtering (Gaussian-weighted
+least-squares straight line fitting, with sigma = 50.0 s). The ME-ICA cleaning preprocessing led
+to an average, among all participant/scans, of 18 activity-related independent components
+(ICs or networks). Therefore, we chose 18 degrees of freedom for our group-ICA decomposition. The 18 spatial maps corresponding to functional resting-state networks (RSNs) were
+extracted using group-ICA followed by dual regression as implemented in FSL [50, 51]. After
+the dual-regression steps, we obtained all subject/session-specific RSN maps and their associated time series. This brain network extraction step is depicted in Fig 2.
+After visual inspection and a goodness-of-fit function implementation 52, to match these
+maps with the RSN template from 11, 4 noise-related RSNs were discarded, and 14 relevant
+functional brain networks were kept for further analyses. The time series associated with these
+14 RSNs were then used to extract our brain networks features as explained in the next section.
+The 14 networks, or Independent Components (ICs), and their labelling are depicted in Fig 3.
+**2.2 Static connectivity, causality, phase-coherence and emulative power**
+First, static functional connectivity (sFC) analysis was performed on all pairs of brain network
+signals, using Pearson correlation. This is applied for each participant’s RSN time series, and
+each session (RS1 and RS2), leading to two times 24 (14 controls; 10 patients) correlation
+matrices. The total amount of sFC features per subject/session (unique entries of sFC matrix)
+was 91 (= 14x13/2; the connectivity matrix being symmetrical, and its diagonal discarded).
+Second, using the same ICs (or RSNs) time series we calculated the Granger causality (GC)
+matrices for each individual and resting-state session using the Matlab toolbox of 53. A GC
+connectivity matrix is defined as **G** = { g ij } 2 R N  ×  N ( N = numbers of networks), where each
+matrix entry g ij represent the directed causal connectivity from network j towards network i .
+More specifically g ij = F Y ! X | Z, which is the GC between signal Y (time series of network j ) and
+X (time series of network i ) conditional on Z (remaining time series of networks k 6¼ i 6¼ j )—
+more details in 54. The upper triangle of **G**, i.e. { g ij }, 8 j > i represent the inward causal pairwise connectivity g ij, while the lower triangle, i.e. { g ji }, 8 i > j is all the outward causal connections of { g ij }. Since GC matrices are asymmetrical (directed connectivity) by subtracting those
+**Fig 2. Brain networks (RSN) time series extraction.**
+(https://doi.org/10.1371/journal.pone.0250222.g002)
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 6 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**Fig 3. 14 large-scale brain functional resting-state networks (RSNs) used in the study.** LVISU–lateral visual
+network; MVISU–medial visual network; DMN–default mode network; AUD–auditory network; VAN–ventral
+attention network; LSM—lateral sensory-motor network; DAN–dorsal attention network; OVIS–occipital visual
+network; SSM–superior sensory-motor network; CB–cerebellar network; FPL–left fronto-parietal network; FPR–right
+fronto-parietal network; SN–salience network; CING–the cingulate network.
+(https://doi.org/10.1371/journal.pone.0250222.g003)
+triangular matrices, i.e lower-upper, we can extract the non-null net pairwise GC triangular
+matrix **NetGC** = { netg ij } = { g ij — g ji }, 8 i > j . We also extracted the In- and Out-causal degree of
+each network by summing respectively the columns and rows of the **G** matrices, i.e.
+N
+**DegIn** ¼ fX
+N N
+$j \textonequarter1 g ij g 2 R N , and **[ DegOut]**  \textonequarter f X j$
+j ¼1 g ij g 2 R N
+in) causal degree of each network, i.e. **NetDeg** **=** **DegOut—DegIn** **T** . Since we have N = 14 networks, the total amount of GC features was 315 (= 3x91 (in-, out-, net-GC triangular matrices)
++ 3x14 (DegIn, DegOut, and NetDeg vectors)). These GC feature matrices and vectors were
+calculated per subject and session, and are illustrated in Fig 4B.
+Thirdly, we applied the wavelet-coherence approach with the following processing steps: (i)
+extraction of spectro-temporal maps (also called scalograms) of significant phase coherence,
+i.e. localized (in time and frequency/scales) significant phase-locked correlation between pairs
+of signals, as in 55. The phasing between the signals is expressed in radians and extracted
+from θ = arg ( Wxy ) where Wxy is a complex number defining the cross-wavelet transform
+between the two network signals being assessed. The phase information are summarized in 4
+categories: in-phase when θ � (-π/4, +π/4); anti-phase when θ � (3π/4, -3π/4); and signal 1 leading (or lagging) signal 2 when θ � (π/4, 3π/4) (or θ � (-3π/4, -π/4)); for simplification we colored the phase information in the wavelet-coherence maps (see Fig 4C). For each of the 5
+period scales ([4, 8) s; [8, 16) s; [16, 32) s; [32, 64) s; and [64, 128] s) we extracted the time of
+coherence (in % of the scan duration) between the 91 pairs of networks. More details on the
+time of coherence metric in 39. The time of coherence extraction was performed for all of
+the 4 aforementioned phases. Therefore, in total we obtained 1820 (= 4x5x91) coherencebased features per subject’s session (Fig 4C).
+Finally, the Evolutionary Game theory on Network (EGN) was implemented as in 40.
+Instead of trying to predict brain signal (time series) dynamics and correlating them to the
+original BOLD time series, we here simply took the EGN-connectivity matrix **A** = { a ij } 2 R N  ×
+N ( N = numbers of networks), and derived the vectors of emulative powers (EPs). Briefly, each
+entry of **A**, a ij, described the pairwise and directed ( i ! j ) weight of the network i in its ability to
+emulate (positive value, a i, j > 0) or not (negative value, a ij < 0) the activity of the network j . **A**
+can be seen as similar to the GC connectivity matrices, albeit not in the sense of causality but
+in terms of replication mechanism. From these matrices of similar size ( N 2 ) as the sFC and GC
+matrices, we calculated our novel metrics, namely the In-EPs, Out-EPs, and Net-EPs, per participants and session (Fig 4D). The Out-EP of each network, i.e. its power to emulate
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 7 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**Fig 4. Network feature extraction and statistical analysis.** A: extraction of the static functional connectivity features. B: computation of the Granger causality
+matrices and vectors. C: Emulative power vectors derived from the EGN method; D: Wavelet coherence approach and the time-of-coherence metric extraction.
+(https://doi.org/10.1371/journal.pone.0250222.g004)
+(replicate) the other networks’ activity is calculated by summing the columns of the EGN-con
+N
+$nectivity matrix, i.e. OutEP i \textonequarter X j \textonequarter1 a ij$
+other networks is represented by its in-EP, that is, the sum of the EGN-connectivity matrix
+N
+$rows, i.e. InEP j \textonequarter X i \textonequarter1 a ij$
+EP, i.e. **NetEP** **=** **OutEP** **T** **—InEP** . Since N = 14, we ended up with three vectors of 14 EPs per
+person’s rs-fMRI session, i.e. 42 features (Fig 4D). The network feature extractions were
+repeated for the two resting-state sessions.
+**2.3 Selection of the most relevant features, and classification analysis**
+After obtaining the subject-/session-specific sFC, GC, time of phase-coherence matrices, and
+EP vectors, we performed non-parametric permutations tests (5000-permutations) for each
+entry of the mentioned matrices/vectors. The resulting matrices and vectors were then thresholded at 5% level (p < 0.05), giving us the list of pairs of networks where the sFC, GC, time of
+coherence, and EPs were significantly different between the two groups (ACA and Controls).
+This statistical analysis was performed to reduce the total number of fMRI-based features to be
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 8 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+used by the classifiers, which was initially 2268 (91 sFC, 315 GC, 1820 WCoh, 42 EGN). This
+statistical analysis to obtain the best features is depicted in Fig 4.
+In order to assess the strength of the abovementioned neurodynamics methods in describing an ACA in patients with epilepsy, classifiers were trained and validated. We used 4 types of
+machine learning, namely, the support vector machine (SVM), the linear discriminant analysis
+(LDA), the k-nearest neighborhood (KNN), and the decision tree (DT) algorithms. To validate
+the classifiers, 5 methods were used: validation on RS2 features (with classifiers trained on
+RS1’s); validation on RS1 features (with classifiers trained on RS2’s); leave-on-out cross-validation (LOOCV) in RS1 (24-folds cross-validation); LOOCV in RS2 (24-folds); LOOCV in RS1
+and RS2 concatenated (48-folds). 5 validation methods are used to allow us to fully trust the
+performances of the classifiers. It is also more robust: we can assess consistency and avoid
+depicting unreproducible ‘chance’ performances. For each of the classifier types of training
+and validation, different set-ups of features were used. First, we tested the classifiers using the
+best features (after statistical analyses) from one type of dynamics at a time, i.e. only best features from sFC analysis, then only significant features from GC analysis, and so on. Next, we
+refined these set-ups to the use of features that fell into two categories: (i) features/predictors
+that were used in the DT algorithm, i.e., selected by the Classification And Regression Trees
+(CART; default split predictor selection technique for classification trees in Matlab); (ii) features that involved the DMN, DAN or SN, since these networks are often mentioned in ageing
+and cognitive decline literature Then we reiterated refinements of the classifier setups by
+removing or adding features that still comply with the aforementioned criteria (i and ii), if
+they were improving classification accuracy in the previous refinement iterations. Such a
+search for the best combinations of features led us to a dozen of classification analyses per
+dynamics metrics. Finally, we tested classifiers with combined network features, e.g. using the
+best GC-based features combined with the best WCoh-based features. We refined the classifi
+cation models the same way it was performed in the classification analyses per network connectivity metric. We also tried the combination of all best features, i.e. combining all features
+selected by the statistical analyses of all static and dynamics metrics. In the combined network
+features setups, a dozen (through refinements) classifiers were also tested. For each of the classifier setup tested (~60 = 5x12), we reported the accuracy, sensitivity and specificity. For clarity, in the Results section, only the best classifiers performances per feature type, and per
+machine learning algorithms are reported: by looking at the highest average accuracy of the
+classifiers over the 5 validation methods—mentioned at the beginning of this paragraph.
+**3 Results**
+**3.1 Selection of the best network features**
+After extracting all static and dynamic features (sFC, GC, WCoh, EGN), 5000-permutation
+tests between the two groups’ features were applied and thresholded at (uncorrected) p < 0.05,
+giving us the most significant differences between the groups, i.e. the ‘best’ features. The results
+of the significant permutation tests for sFC-, GC- and EGN-based features are shown in Supporting Information (S1-S4 Figs in S1 File).
+Regarding the WCoh-based features, namely the time-of-coherence measurements, the permutation tests gave us an average of more than 50 significant features per phase (in-phase,
+anti-phase, leading, and lagging). In order to avoid an overfitting problem, we reduced the
+number of best features even further, as follows: (i) discarding features that also showed significant differences in controls when comparing RS1 and RS2; (ii) keeping features that showed
+robustness, i.e. significant in several scales, or in multiple phases; or (iii) time-of-coherence
+with higher evidence of between-group differences (p < 0.01). This led us to having an average
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 9 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+of 10 best features per phase. An example of a pairwise in-phase time-of-coherence that complied with the aforementioned criteria is depicted in Fig 5.
+All of the best features for each neurodynamics metric and their labels are summarized in
+Table 2.
+**3.2 Classification performances**
+After static (sFC) and dynamic analyses (GC, WCoh, EGN) followed by the statistical permutation testing we obtained the best descriptors (features) for each metric. All and subsets of
+these best features were used for training and validating classifiers. In Table 3, the best performances of each individual feature type are shown. For wavelet-coherence, the in-phase time of
+coherence were the best descriptors of ACA, reaching an average 77.1% accuracy with the
+decision-tree algorithm, using DMN, SN and visual networks. Using 4 DMN-based and 2 SNbased static connectivity features, the average classification accuracy was 77.9%, with LDA
+algorithm. With the emulative powers (EGN-based dynamics metric) of the DMN and the
+DAN we could reach 82.9% accuracy, also using LDA algorithm. Note that the Out-EP and
+Net-EP of the DAN were not part of selected best features (Table 2), but interestingly
+improved the classification accuracy when added. This phenomenon can be explained by the
+fact that, even though Out- and Net-EPs of the DAN are not statistically significant (p > 0.05),
+the way they are pooled with their significant counterparts (In-EPs) in SVM and LDA algorithms, can allow classifiers to be more discriminative. GC-based features, however, led only to
+67.9% accuracy with DT algorithm. Overall the metrics giving the best results for classification
+$can be ranked as EPs > sFC > in-phase coherence > GC.$
+After assessing the best features of each metric, we also trained and tested classifiers with
+combinations of the features. This gave us the best performances for each classifier type. LDA
+reached 85% average accuracy using all 86 best features (Table 2). KNN led to an average of
+80.8% accuracy with a mix of 82 features that is the 86 best features minus 4 EPs: Out-EPs of
+DMN and OVIS; and Net-EPs of DMN and CING. DT algorithm reached 80.0% with only 6
+features (3 Coherence, 2 EGN, and 1 sFC). And SVM had the best results with 15 features (2
+in-phase coherences, 4 in-EPs, 3 GC, and 6 sFC) reaching average accuracy of 90.0%. In the
+latter SVM set-up, it is worth noting that the independent training and validation, i.e.
+RS1-trained RS2-validated, and vice-versa, could classify ACA at 91.7% accuracy; the 48-fold
+LOOCV had 95.8% accuracy. Finally, the overall best average accuracy (81.0%), over all the
+**Fig 5. Boxplots of the time of in-phase coherence (in % of scan duration = 7min) for the network pair MVISU-DMN.** red boxplot–ACA; blue boxplot–
+controls; left–RS1; right–RS2. Middle line in the box–median value; box size– 25 th to 75 th percentiles; whisker limits–most extreme values that are not outliers;
+$\textquoteleft+\textquoteright\textendashoutliers.$
+(https://doi.org/10.1371/journal.pone.0250222.g005)
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 10 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**Table 2. 86 best features used in the classification analyses.**
+|Wavelet-coherence|Col2|Granger-causality|Col4|staticFC|EGN|
+|---|---|---|---|---|---|
+|in-phase time-of-coherence|leading time-of-coherence|net1!net2 GC|net1 net2 GC|net1$net2|EPs|
+|ipLVISU-OVISs1|leadAUDI-FPRs1|MVISU->LVISU|MVISU<-LSM|sFC-DMN-VAN|In-EP_DMN|
+|ipLSM-CINGs1|leadMVISU-DMNs1|MVISU->FPL|MVISU<-FPR|sFC-MVISU-DMN|In-EP_DAN|
+|ipOVIS-SNs2|leadMVISU-OVISs2|MVISU->CING|LVISU<-AUDI|sFC-DMN-LSM|In-EP_SSM|
+|ipCB-SNs2|leadDMN-OVISs2|DMN->AUDI|LVISU<-SSM|sFC-DMN-CB|In-EP_CING|
+|ipMVISU-DMNs2|leadLSM-OVISs2|DMN->SN|LVISU<-SN|sFC-AUDI-CING|Out-EP_DMN|
+|ipOVIS-SNs3|leadLSM-OVISs3|VAN->CING|VAN<-DAN|sFC-LSM-OVISU|Out-EP_OVIS|
+|ipCB-SNs3|leadOVIS-CBs3|DAN->FPR|VAN<-AUDI|sFC-DAN-SN|Net-EP_DMN|
+|ipDMN-DANs4|leadLVISU-VANs4|AUDI->SN|DAN<-CING|sFC-OVISU-SN|Net-EP_CING|
+|ipMVISU-DMNs4|leadDMN-VANs4|LSM->CING|AUDI<-SSM|sFC-CB-FPL||
+|anti-phase time-of-coherence|leadFPL-SNs4|FPL->FPR|net pairwise GC|sFC-CB-CING||
+|apAUDI-FPRs1|lagging time-of-coherence|FPL->CING|netgcMVISU->_LVISU|||
+|apVAN-FPLs1|lagLVISU-DANs1|network DegIn, DegOut,|netgcMVISU->_CING|||
+$|apAUDI-SSMs1|lagOVIS-SSMs1|and netDeg|netgcLVISU->\_LSM||| |apDMN-VANs2|lagOVIS-SNs2|GCDegOutLSM|netgcLVISU->\_SN||| |apOVIS-SNs2|lagOVIS-FPLs2|GCNetDegDAN|netgcDMN->\_VAN||| |apLVISU-VANs3|lagCB-FPRs2|GCNetDegAUDI|netgcDMN->\_AUDI||| |apOVIS-SNs3|lagCB-FPLs2|GCNetDegLSM|netgcDAN->\_CING||| |apVAN-SNs4|lagLSM-OVISs3||netgcFPL->\_FPR|||$
+|apDMN-AUDIs5|lagVAN-CBs3|||||
+ip–in-phase; ap–anti-phase; lead–leading; lag–lagging; s1 –scale 1 = 4, 8 s; s2 –scale 2 = 8, 16 s; s3 –scale 3 = [16, 32] s; s4 –scale 4 = [32, 64] s; s5 –scale 5 = [64, 128] s;
+!( )–direction of GC; netgc–net pairwise GC (out-in); GCDegOut–GC out degree of a network; GCDegIn–GC in degree of a network; sFC–pairwise static
+function connectivity; $ –bidirectional connectivity for sFC; EGN–evolutionary game theory on network; EPs–emulative powers; In-, Out-, Net-EP–in, out, net
+emulative power of a network; net1(2)–network 1 (or 2).
+(https://doi.org/10.1371/journal.pone.0250222.t002)
+machine-learning algorithms, was obtained using even fewer features (10: 2 in-phase coherence, 2 in-EPs, and 6 sFC). These results are depicted in Table 4. Looking at the classifier algorithms, in general, SVM was performing the best. With few features ( < 10), DT was
+performing quite well, but still not as good as SVM and LDA. KNN was overall the least accurate classification algorithm. It is worth noting that in some set-ups DT algorithm reached
+100% accuracy, such as for the LOOCV of RS2 with the mix of 6 features (Table 4); but this
+was not consistent, since in the same set-up, the RS1-trained-and-RS2-validated classifier
+reached only 66.7% accuracy.
+Overall, EGN-based net emulative powers are the best descriptors, especially when using
+DMN and DAN features. And when those are combined with specific time of in-phase coherence and static connectivity (correlation) values, SVM algorithm outperforms the other algorithm with an average of 90.0% accuracy; with peaks at 91.7% for the RS-independent
+training/validation classifications, and 95.8% in the 48-folds LOOCV. For a more intuitive
+visualization of the results presented above, we graphically summarize Tables 3 and 4 in Fig
+6A and 6B respectively.
+**4 Discussion**
+**4.1 Clinical relevance**
+We have shown that the emulative powers (Eps) of the default mode network and the dorsal
+attention networks are biomarkers of ACA. Combining these features with DMN and SN
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 11 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**Table 3. Summary tables of the best classifier performances for each network connectivity measures: EGN, coherence, sFC, and GC.**
+|Col1|Col2|Col3|Col4|Col5|SVM|Col7|Col8|LDA|Col10|Col11|KNN|Col13|Col14|DT|Col16|
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+||**List of feature used**|**List of feature used**|**Validation methods**|**acc**|**sens**|**spec**|**acc**|**sens**|**spec**|**acc**|**sens**|**spec**|**acc**|**sens**|**spec**|
+|**EGN**|In-EPDMN||tRS1vRS2|0.917|0.900|0.929|0.917|0.900|0.929|0.708|0.500|0.857|0.750|0.700|0.786|
+|**EGN**|In-EPDAN||tRS2vRS1|0.708|0.700|0.714|0.833|0.800|0.857|0.708|0.600|0.786|0.583|0.600|0.571|
+|**EGN**|Out-EPDMN||LoocvRS1|0.750|0.700|0.786|0.750|0.700|0.786|0.375|0.300|0.429|0.583|0.600|0.571|
+|**EGN**|Out-EPDAN||LoocvRS2|0.750|0.700|0.786|0.833|0.800|0.857|0.625|0.500|0.714|0.542|0.300|0.714|
+|**EGN**|Net-EPDMN||Loocvconca_RS|0.771|0.750|0.786|0.813|0.750|0.857|0.708|0.600|0.786|0.771|0.700|0.821|
+|**EGN**|Net-EP_DAN||**Average**|0.779|0.750|0.800|0.829|0.790|0.857|0.625|0.500|0.714|0.646|0.580|0.693|
+|||||acc|sens|spec|acc|sens|spec|acc|sens|spec|acc|sens|spec|
+|**WCoh**|||tRS1_vRS2|0.417|1.000|0.000|0.917|0.800|1.000|0.583|0.700|0.500|0.750|1.000|0.571|
+|**WCoh**|ipOVIS-SNs2||tRS2_vRS1|0.417|1.000|0.000|0.708|0.700|0.714|0.750|0.900|0.643|0.667|0.500|0.786|
+|**WCoh**|ipMVISU-DMNs2||Loocv_RS1|0.417|1.000|0.000|0.417|1.000|0.000|0.625|0.600|0.643|0.708|0.800|0.643|
+|**WCoh**|||Loocv_RS2|0.417|1.000|0.000|0.792|0.700|0.857|0.875|0.900|0.857|1.000|1.000|1.000|
+|**WCoh**|||LoocvconcaRS|0.417|1.000|0.000|0.729|0.650|0.786|0.729|0.750|0.714|0.729|0.750|0.714|
+|**WCoh**|||**Average**|0.417|1.000|0.000|0.713|0.770|0.671|0.713|0.770|0.671|0.771|0.810|0.743|
+|||||acc|sens|spec|acc|sens|spec|acc|sens|spec|acc|sens|spec|
+|**sFC**|||tRS1_vRS2|0.875|0.700|1.000|0.875|0.700|1.000|0.875|0.800|0.929|0.458|0.400|0.500|
+|**sFC**|sFC-DMN-VAN|sFC-DMN-CB|tRS2_vRS1|0.750|0.900|0.643|0.792|0.900|0.714|0.750|1.000|0.571|0.542|0.700|0.429|
+|**sFC**|sFC-MVISU-DMN|sFC-DAN-SN|Loocv_RS1|0.667|0.600|0.714|0.667|0.600|0.714|0.583|0.400|0.714|0.625|0.500|0.714|
+|**sFC**|sFC-DMN-LSM|sFC-OVISU-SN|Loocv_RS2|0.833|0.700|0.929|0.750|0.600|0.857|0.750|0.500|0.929|0.833|0.700|0.929|
+|**sFC**|||LoocvconcaRS|0.771|0.700|0.821|0.750|0.700|0.786|0.750|0.550|0.893|0.583|0.500|0.643|
+|**sFC**|||**Average**|0.779|0.720|0.821|0.767|0.700|0.814|0.742|0.650|0.807|0.608|0.560|0.643|
+|||||acc|sens|spec|acc|sens|spec|acc|sens|spec|acc|sens|spec|
+|**GC**|DMN->AUDI|VAN<-DAN|tRS1_vRS2|0.417|1.000|0.000|0.542|0.300|0.714|0.500|0.200|0.714|0.667|0.400|0.857|
+|**GC**|DAN->FPR|VAN<-SN|tRS2_vRS1|0.417|1.000|0.000|0.708|0.700|0.714|0.500|0.400|0.571|0.667|0.600|0.714|
+|**GC**|MVISU<-AUDI|FPR<-CB|Loocv_RS1|0.417|1.000|0.000|0.417|1.000|0.000|0.625|0.600|0.643|0.708|0.600|0.786|
+|**GC**|MVISU<-FPR|netgcMVISU->CING|LoocvRS2|0.417|1.000|0.000|0.458|0.600|0.357|0.542|0.600|0.500|0.750|0.800|0.714|
+|**GC**|LVISU<-OVIS|netgcLVISU->SN|Loocvconca_RS|0.417|1.000|0.000|0.729|0.700|0.750|0.563|0.500|0.607|0.604|0.550|0.643|
+|**GC**|LVISU<-FPR|netgcDMN->_AUDI|**Average**|0.417|1.000|0.000|0.571|0.660|0.507|0.546|0.460|0.607|0.679|0.590|0.743|
+$|**GC**|OVIS<-AUDI|netgcFPL->\_FPR||||||||||||||$
+Grey highlight–accuracy values; yellow highlight–best averages accuracy in each set-up; blue highlight–accuracy > 80%. SVM–support vector machine; LDA—linear
+discriminant analyses; KNN—K-nearest neighbours; DT–decision tree. Acc–accuracy; sens–sensitivity; spec–specificity; tRS1(2)_vRS2(1)–trained on RS1(or 2) and
+validated on RS2 (or 1); Loocv–leave one-out cross-validation; conca_RS–concatenation of RS1 and RS2 features.
+(https://doi.org/10.1371/journal.pone.0250222.t003)
+related in-phase coherence, and static functional connectivity would allow diagnosing the disorder at an overall 81.0% accuracy (average of all machine-learning algorithms tested). Adding
+CING- and SSM-related EPs and DAN-, AUDI-, and LSM-related GCs, could even improve
+SVM accuracy up to 95.8%. This shows the following: (i) dynamics metrics performs better
+than correlation and causal metrics at classifying an ACA in patients with epilepsy; and (ii)
+combining them with static functional connectivity improves the classifications. This is in line
+with a recent meta-analysis on the merit of using dynamic functional connectivity to describe
+psychological outcomes, especially when performance is assessed with objective measures such
+as IQ tests—as compared to more subjective (self-reported) psychological assessment—33.
+In the clinical context, the default mode, dorsal attention networks, and the salience network being involved and informative to distinguish neuropsychiatric patients from controls is
+already shown in previous research. In ageing the DMN and DAN are often mentioned and
+know to be challenged 56–58. Also the dynamics in terms of causality is shown to correlate
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 12 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**Table 4. Summary of the best performances of each classifier algorithm: SVM, LDA, KNN, and DT.**
+|Col1|Listoffeatures|Col3|Validation<br>methods|acc|sens|spec|acc|sens|spec|acc|sens|spec|acc|sens|spec|
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+|**EGN**<br>**+ WCoh**<br>**+ sFC**|ipOVIS-SNs2|sFC-DMN-VAN|tRS1_vRS2|0.792|0.500|1.000|0.750|0.600|0.857|0.833|0.800|0.857|0.833|1.000|0.714|
+|**EGN**<br>**+ WCoh**<br>**+ sFC**|ipCB-SNs2|sFC-MVISU-DMN|tRS2_vRS1|0.792|0.600|0.929|0.792|0.900|0.714|0.792|0.800|0.786|0.667|0.500|0.786|
+|**EGN**<br>**+ WCoh**<br>**+ sFC**|ipMVISU-DMNs2|In-EPDMN|LoocvRS1|0.833|0.700|0.929|0.833|0.700|0.929|0.833|0.900|0.786|0.750|0.600|0.857|
+|**EGN**<br>**+ WCoh**<br>**+ sFC**|||Loocv_RS2|0.708|0.300|1.000|0.708|0.600|0.786|0.667|0.600|0.714|1.000|1.000|1.000|
+|**EGN**<br>**+ WCoh**<br>**+ sFC**|||LoocvconcaRS|0.792|0.600|0.929|0.792|0.700|0.857|0.750|0.650|0.821|0.750|0.700|0.786|
+|**EGN**<br>**+ WCoh**<br>**+ sFC**|||**Average**|0.783|0.540|0.957|0.775|0.700|0.829|0.775|0.750|0.793|0.800|0.760|0.829|
+|||||acc|sens|spec|acc|sens|spec|acc|sens|spec|acc|sens|spec|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|82 features =|All best features|tRS1_vRS2|0.917|0.800|1.000|0.792|0.600|0.929|0.750|0.800|0.714|0.750|0.400|1.000|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**||without|tRS2_vRS1|0.917|0.800|1.000|0.833|0.800|0.857|0.833|0.700|0.929|0.667|0.500|0.786|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**||Out-EPDMN|LoocvRS1|0.750|0.700|0.786|0.750|0.700|0.786|0.750|0.700|0.786|0.458|0.300|0.571|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**||Out-EPOVIS|LoocvRS2|0.792|0.700|0.857|0.958|0.900|1.000|0.917|0.800|1.000|0.958|1.000|0.929|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**||Net-EPDMN|Loocvconca_RS|0.938|0.850|1.000|0.833|0.750|0.893|0.792|0.700|0.857|0.542|0.450|0.607|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**||Net-EP_CING|**Average**|0.863|0.770|0.929|0.833|0.750|0.893|0.808|0.740|0.857|0.675|0.530|0.779|
+|||||acc|sens|spec|acc|sens|spec|acc|sens|spec|acc|sens|spec|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|||tRS1_vRS2|0.750|0.600|0.857|0.792|0.600|0.929|0.750|0.700|0.786|0.750|0.400|1.000|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|||tRS2_vRS1|0.667|0.800|0.571|0.875|0.800|0.929|0.750|0.700|0.786|0.667|0.500|0.786|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|All best 86 features||Loocv_RS1|0.833|0.700|0.929|0.833|0.700|0.929|0.583|0.400|0.714|0.458|0.300|0.571|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|||Loocv_RS2|0.875|0.800|0.929|0.917|0.800|1.000|0.583|0.400|0.714|0.917|0.900|0.929|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|||LoocvconcaRS|0.917|0.800|1.000|0.833|0.750|0.893|0.688|0.500|0.821|0.542|0.450|0.607|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|||**Average**|0.808|0.740|0.857|0.850|0.730|0.936|0.671|0.540|0.764|0.667|0.510|0.779|
+|||||acc|sens|spec|acc|sens|spec|acc|sens|spec|acc|sens|spec|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|ipMVISU-DMNs2|sFC-DMN-VAN|tRS1_vRS2|0.917|0.800|1.000|0.917|0.800|1.000|0.708|0.500|0.857|0.708|0.600|0.786|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|ipMVISU-DMNs4|sFC-MVISU-DMN|tRS2_vRS1|0.917|0.800|1.000|0.583|0.500|0.643|0.708|0.600|0.786|0.667|0.600|0.714|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|GCNetDegDAN|sFC-DMN-LSM|Loocv_RS1|0.833|0.700|0.929|0.833|0.700|0.929|0.500|0.300|0.643|0.708|0.600|0.786|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|GCNetDegAUDI|sFC-DMN-CB|Loocv_RS2|0.875|0.800|0.929|0.708|0.500|0.857|0.875|0.800|0.929|0.792|0.800|0.786|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|GCNetDegLSM|sFC-DAN-SN|LoocvconcaRS|0.958|0.900|1.000|0.875|0.850|0.893|0.729|0.550|0.857|0.792|0.800|0.786|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**||sFC-OVISU-SN|**Average**|0.900|0.800|0.971|0.783|0.670|0.864|0.704|0.550|0.814|0.733|0.680|0.771|
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|In-EPDMN|In-EPSSM||||||||||||||
+|**EGN**<br>**+ WCoh**<br>**+ GC + sFC**|In-EPDAN|In-EPCING||||||||||||||
+|||||acc|sens|spec|acc|sens|spec|acc|sens|spec|acc|sens|spec|
+|**EGN**<br>**+ WCoh**<br>**+ sFC**|ipCB-SNs2|sFC-DMN-VAN|tRS1_vRS2|0.875|0.700|1.000|0.917|0.800|1.000|0.875|0.700|1.000|0.833|1.000|0.714|
+|**EGN**<br>**+ WCoh**<br>**+ sFC**|ipMVISU-DMNs2|sFC-MVISU-DMN|tRS2_vRS1|0.917|0.800|1.000|0.792|0.800|0.786|0.792|0.600|0.929|0.792|0.600|0.929|
+|**EGN**<br>**+ WCoh**<br>**+ sFC**||sFC-DMN-LSM|Loocv_RS1|0.750|0.500|0.929|0.750|0.500|0.929|0.625|0.700|0.571|0.792|0.700|0.857|
+|**EGN**<br>**+ WCoh**<br>**+ sFC**|InEPDMN|sFC-DMN-CB|Loocv_RS2|0.875|0.800|0.929|0.708|0.500|0.857|0.792|0.700|0.857|0.667|0.500|0.786|
+|**EGN**<br>**+ WCoh**<br>**+ sFC**|In-EPDAN|sFC-DAN-SN|Loocvconca_RS|0.917|0.800|1.000|0.875|0.850|0.893|0.854|0.750|0.929|0.813|0.700|0.893|
+|**EGN**<br>**+ WCoh**<br>**+ sFC**||sFC-OVISU-SN|**Average**|0.867|0.720|0.971|0.808|0.690|0.893|0.788|0.690|0.857|0.779|0.700|0.836|
+||||overall average =|||||||||||||
+||||0.810|||||||||||||
+Grey highlight–accuracy values; yellow highlight–best averages accuracy in each set-up; blue highlight–accuracy > 80%. SVM–support vector machine; LDA—linear
+discriminant analyses; KNN—K-nearest neighbours; DT–decision tree. Acc–accuracy; sens–sensitivity; spec–specificity; tRS1(2)_vRS2(1)–trained on RS1 (or 2) and
+validated on RS2(or 1); Loocv–leave one-out cross-validation; conca_RS–concatenation of RS1 and RS2 features.
+(https://doi.org/10.1371/journal.pone.0250222.t004)
+with psychological performances 28. Static and dynamic functional connectivity of the DMN
+and DAN might be explained by the compensatory mechanism observed in aging, as described
+in the CRUNCH model [59, 60]. This compensatory mechanism is defined as the cognitive
+reserve in the study of 61 wherein DMN and DAN are also involved. Other studies have
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 13 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**Fig 6. Graphical summary of the classification results.** A: best performances of each network connectivity metric. B: best performances of each classifier
+algorithm.
+(https://doi.org/10.1371/journal.pone.0250222.g006)
+linked cognitive decline with changes in static and dynamic functional connectivity between
+the DMN and DAN [56, 62, 63]. The salience network (SN), which was part of our sFC best
+features, and its overall decreased in functional connectivity, is also a marker of brain ageing
+[57, 59]. SN has also a pivotal role in predicting age and cognitive performances (ranging from
+episodic memory to executive functions), in healthy elderly with cognitive decline 64.
+Regarding mild cognitive impairment, which is a disorder wherein symptoms resemble the
+deficit in ACA patients, the sFC showed also disturbed network activity in the aforementioned
+brain regions [27, 65]. Finally in a review paper, from 81 fMRI studies where elderly had a significant cognitive decline, 50% of the studies showed changes in brain activation occurring in
+the DAN, and 15.3% in the DMN 66.
+Sensorimotor networks are also implicated in the process of cognitive ageing 67. That
+explains the involvement of the LSM-DMN sFC, the Net GC degree of the LSM, and the In-EP
+of the SSM, in our best classifier set-up. Finally, the time of in-phase coherence between the
+pair MVISU-DMN often helped the performances of our classifiers. This might be explained
+by the anterior-posterior shift observed in ageing in the PASA model of the ageing brain 68.
+This shift involved an over-recruitment of the posterior brain functional network (here
+DMN-MVISU connectivity) in order to compensate for the ‘normal’ decline in ageing of the
+visual abilities. And this correlates negatively with the cognitive performances, similar to the
+increase of in-phase coherence in ACA patients with deterioration in IQ.
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 14 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+ACA patient suffers more specifically from a deterioration in fluid intelligence, which is
+described as the ability to think logically and solve problems with a limited amount of taskrelated information 69. The aforementioned DMN, CING (for cognitive control), and sensorimotor (LSM/SSM) networks have been shown to be linked to this type of intelligence/cognitive processing 70. The fluid intelligence might come from the ability to switch from
+perceptive network to processing network, and the ability to switch and hold attention. The
+DMN, SN and DAN are the 3 networks involved in self-referential processes, dynamic switching between rest and task, and the voluntary allocation of attention 71–73. Having less copying mechanism here (as shown by the EGN dynamics) in those networks, might reflect a more
+rigid brain processing, i.e. less fluidic integration, which might explain the poor results in Perceptual Reasoning Index (PRI; fluid intelligence test).
+Overall, the DMN, DAN, SN and their dynamic and static functional connectivity to multiple sensory-related networks (visual, sensorimotor) could, no matter the resting-state, help
+classify correctly patients from healthy subjects. And the involvement of these networks are in
+line with current research on cognitive decline in ageing, and brain functional connectivity
+[28, 29, 59, 62, 64, 66, 74, 75].
+**4.2 Technical insights**
+Evolutionary game theory on networks and its derived emulative powers were the best at
+describing ACA (highest classifying performances) as compared to the other metrics used in
+this study. More specifically the In-emulative power of the DMN and DAN were strong biomarkers of ACA. In general, for RS1 and RS2, the DMN In-EPs of the patients were negative,
+whereas those of the controls, positive. This shows that patients’ DMN tends to have a nonemulative (non-replicative) attitude, i.e., all other networks do not tend to copy the DMN
+activity. For the DAN both groups showed negative in-EPs (non-emulative attitude), but with
+stronger negative power in ACA patients. The involvement of those networks make sense as
+seen in the previous paragraph on the clinical relevance. However, the rational for why this
+novel dynamics metric show stronger discriminatory power as compare to, say, the In or Outdegree of Granger-causality of the DMN and DAN remains unclear. It is indeed difficult to
+conceive that the replication mechanism between signals do not equate to some degree to a
+correlation (for sFC) or causal (with GC) effect. In a side study, we actually tried to find similitude between EPs and Deg. GC, which gave us non-significant correlation (between the two
+metric values). A hypothesis is that, since EGN model is based on differential equations, the
+emulative values between the networks are influencing not by the network signal directly, but
+rather by their rate of change in activity ~~(~~ dx dt ð t Þ ~~;~~ [ where]  x ( t [) = RSN activity signal). More details]
+about the EGN model, and its replicator dynamics, in 40.
+Regarding SVM and LDA approaches, their ranking in our study is in line with the way
+these algorithms work. Indeed, in a setup with features having co-variability, and normally distributed, LDA will perform better, with is shown when using many of our most relevant features, and trying to find overall separable (with all of the features) means/centroids. On the
+contrary SVM, which considers all training data points to find the values (vectors) that help to
+maximize margin between pools of features, is more robust to outliers—which are clearly present in our small dataset. However, we can expect that with a larger multi-dimensional dataset,
+the two algorithms (LDA and SVM) would not have substantial differences in performance. In
+order to increase their performances, a solution might be to combine the two algorithms [76,
+77]. The decision tree algorithm is attractive in its simplicity: sequential splitting of the features
+with thresholds, but might be too dependent on the training sample—as shown by our strong
+variance in classification accuracy over the 5 validation methods. Regarding KNN, a more
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 15 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+thorough testing with different K values might have been of benefit. Other type of classifier
+such as elastic net, logistic regression, or naïve Bayes classifier could possibly be applied as
+well. However, they have shown in general a substantial lower power at classifying neuropsychiatric disorders, as seen in the summary tables of 78.
+Finally, for all classifiers presented here, the Matlab default set-ups of each of the machine
+learning algorithm were used. We only tried, on our best SVM classifiers, to change the kernel,
+from Gaussian to polynomial; but this had given us less accurate results. More hyper-parameter optimization could be investigated. Also, the worst—but simplest to explain—algorithm,
+namely decision tree (best at 80%, using only 6 features, with GC), could further be optimized.
+For instance, by changing node splitting rules from an ascending impurity gain (of Gini’s
+Diversity Index) to descending one; or by changing directly the predictor selections (which
+features are used in the nodes of the tree) with curvature tests, or interaction tests.
+However, since the results are quite robust in SVM, the first step might be to reproduce the
+results with new (unseen) data, and see if these classifiers continue to provide high performances. Other neuropsychiatric disorders could also be tested with the same pipeline. E.g.
+[autism could be investigated using the rs-fMRI datasets of ABIDE repository (http://fcon](http://fcon1000.projects.nitrc.org/indi/abide/)
+[1000.projects.nitrc.org/indi/abide/). With such a large dataset, the reliability of the accuracy](http://fcon_1000.projects.nitrc.org/indi/abide/)
+obtained using our pipeline is much greater, and the optimisation would be more worthy.
+As mentioned in the introduction, a few fMRI research attempt similar classification of
+neuropsychiatric disorders using more advanced machine learning algorithms, such as convolutional neural networks, or deep auto-encoder [79, 80]. The added value is that those algorithms can be used not only in the supervised multi-labels classification process, but also
+directly in an unsupervised feature extraction. Though, an important drawback of these
+advanced classification techniques is that they usually need an important amount of data to be
+trained upon, which are often not available in case of rs-fMRI data of neuropsychiatric disorders. Also, the understanding and explanation of the feature maps obtained at different CNN
+layers can be arduous more computationally intensive and troublesome to be clearly explained
+and descriptive.
+Even though research in advance AI for psychoradiology seems promising in many fields,
+especially segmentation and auto-labelling of cancer or lesion for instance, common machine
+learning algorithms such as LDA or SVM make the results more understandable and explainable for the clinicians, radiologists and ultimately the patients. For instance, the linear combination of static and dynamic functional connectivity between a handful of well-described
+networks, can be easily display, and showing how the algorithm split the populations (patients
+vs controls) is readily feasible. Such simple design and visualization of the process make possible targetable treatment that must be less complicated to design. And following the evolution
+of such dynamic or static fMRI-based brain features is rather simple, and thus can greatly help
+to refine classification models to a prognostic level; or to assess lasting effects of different treatments of psychiatric disorders.
+**4.3 Limitations**
+There are several limitations in this study. First, as mentioned in the previous paragraph, the
+study would benefit from a larger dataset. Testing the classifiers on new and unseen data
+extracted from another scanner (different parameters, e.g. TR or duration of the rs-fMRI), and
+from another site (different medical centre, or country) would also provide insight regarding
+the robustness of the methods and the features presented here. However, gathering more fMRI
+data from ACA patients is not an easy task, since this epilepsy co-morbidity is only recently
+described, and acquiring systematic rs-fMRI data from elderly patients with epilepsy is not
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 16 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+common practise yet. Moreover, having a bigger in-house dataset of participants would not
+mean getting lower performances, but rather more stable. Indeed, it has been proven by testing
+pools of data of different sizes, that the accuracy of SVM classification gets simply more reliable
+less variability in performances as the training sample size increases, in case of data from
+schizophrenic patients acquired with the same protocol 81. Nevertheless, the cross-center
+robustness still needs to be tested.
+Second, with high performances of binary classification, we showed a strong diagnostic
+power of the dynamics features. However, the ACA patients were already diagnosed with ACA
+based on a clear loss of fluid IQ after psychological assessment. Hence, having an automated
+tool that diagnoses ACA with lower accuracy than diagnoses based on psychological tests are
+not needed. In that regards, our goal was not to show the highest performance, but to rank the
+dynamics features, and show the benefit of combining different dynamic features, using solely
+rs-fMRI data. Also, with refinement, this analysis could extrapolate from the two class (binary)
+classification/diagnosis to a multi-class separation, and show prognostic power, for example in
+order to predict mental ages, or rate of decline in intelligence of patients with ACA (based on a
+stratified approach, through severity of the ACA for instance).
+Despite those limitations, we are confident that the emulative powers, and the times of inphase coherence of large-scale resting-state networks are informative descriptors of neuropsychiatric disorders, and that combining them with known metrics such as sFC and GC can lead
+to accurate diagnoses. One could expect similar performance, when testing the new metrics
+upon schizophrenic, autistic, or depressive patients for example. And this pipeline to train data
+and validate clinical diagnoses of (neuro)psychiatric disorders can be of great help in clinics
+and contribute to the field of psychoradiology 82.
+**5 Conclusions**
+We presented a novel metric for neurodynamics extracted from the evolutionary game theory
+on network approach: The emulative power of brain networks, i.e. the propensity of a network
+for replicating another network activity. The emulative powers of the default mode network
+and dorsal attention network seem defective in ACA; and using these features combined with
+in-phase coherence measurements, and static functional connectivity yield to an average diagnostic accuracy of 90%, using the SVM algorithm. With regard to the field of neuropsychoradiology, other neuropsychiatric disorders could be tested using similar fMRI-based dynamics
+features, and could lead to better understanding, and subsequently better treatments of mental
+disorders. Also, with refinements of the models and the classification pipeline, we could envisage that the fMRI-based neurodynamics presented here would have a prognostic value, for
+example if labels are not simply binary (stratified models), other feature types are added (multimodal approaches), and using cohort study design (longitudinal cross-sectional studies).
+This pipeline applied on larger datasets, and if replicated, would demonstrate robustness of
+these new neurodynamics metrics and reliability of the methods, and hence could be to some
+extent clinically used.
+**Supporting information**
+**[S1 File.](http://www.plosone.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pone.0250222.s001)**
+(PDF)
+**[S1 Data. Network time series (.mat) and network images.](http://www.plosone.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pone.0250222.s002)**
+(ZIP)
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 17 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**Author Contributions**
+**Conceptualization:** Antoine Bernas.
+**Data curation:** Antoine Bernas, Lisanne E. M. Breuer.
+**Formal analysis:** Antoine Bernas.
+**Investigation:** Antoine Bernas, Lisanne E. M. Breuer.
+**Methodology:** Antoine Bernas, Svitlana Zinger.
+**Project administration:** Albert P. Aldenkamp.
+**Supervision:** Albert P. Aldenkamp, Svitlana Zinger.
+**Validation:** Albert P. Aldenkamp, Svitlana Zinger.
+**Visualization:** Antoine Bernas.
+**Writing – original draft:** Antoine Bernas.
+**Writing – review & editing:** Albert P. Aldenkamp, Svitlana Zinger.
+**References**
+**1.** Helmstaedter C, Aldenkamp AP, Baker GA, Mazarati A, Ryvlin P, Sankar R. Disentangling the relationship between epilepsy and its behavioral comorbidities—The need for prospective studies in new-onset
+[epilepsies. Epilepsy Behav. 2014; 31: 43–47. https://doi.org/10.1016/j.yebeh.2013.11.010 PMID:](https://doi.org/10.1016/j.yebeh.2013.11.010)
+[24333577](http://www.ncbi.nlm.nih.gov/pubmed/24333577)
+**2.** Besseling RMH, Jansen JFA, Overvliet GM, Van Der Kruijs SJM, Vles JSH, Ebus SCM, et al. Reduced
+functional integration of the sensorimotor and language network in rolandic epilepsy. NeuroImage Clin.
+[2013; 2: 239–246. https://doi.org/10.1016/j.nicl.2013.01.004 PMID: 24179777](https://doi.org/10.1016/j.nicl.2013.01.004)
+**3.** Braakman HMH, Vaessen MJ, Jansen JFA, Debeij-Van Hall MHJA, De Louw A, Hofman PAM, et al.
+Frontal lobe connectivity and cognitive impairment in pediatric frontal lobe epilepsy. Epilepsia. 2013; 54:
+[446–454. https://doi.org/10.1111/epi.12044 PMID: 23253092](https://doi.org/10.1111/epi.12044)
+**4.** Hermann B, Seidenberg M, Sager M, Carlsson C, Gidal B, Sheth R, et al. Growing old with epilepsy: the
+neglected issue of cognitive and brain health in aging and elder persons with chronic epilepsy. Epilep[sia. 2008; 49: 731–40. https://doi.org/10.1111/j.1528-1167.2007.01435.x PMID: 18031544](https://doi.org/10.1111/j.1528-1167.2007.01435.x)
+**5.** Helmstaedter C, Elger CE. Chronic temporal lobe epilepsy: A neurodevelopmental or progressively
+[dementing disease. Brain. 2009; 132: 2822–2830. https://doi.org/10.1093/brain/awp182 PMID:](https://doi.org/10.1093/brain/awp182)
+[19635728](http://www.ncbi.nlm.nih.gov/pubmed/19635728)
+**6.** Sen A, Capelli V, Husain M. Cognition and dementia in older patients with epilepsy. Brain. 2018; 141:
+[1592–1608. https://doi.org/10.1093/brain/awy022 PMID: 29506031](https://doi.org/10.1093/brain/awy022)
+**7.** Breuer LEM, Boon P, Bergmans JWM, Mess WH, Besseling RMH, de Louw A, et al. Cognitive deterioration in adult epilepsy: Does accelerated cognitive ageing exist? Neurosci Biobehav Rev. 2016; 64: 1–
+[11. https://doi.org/10.1016/j.neubiorev.2016.02.004 PMID: 26900650](https://doi.org/10.1016/j.neubiorev.2016.02.004)
+**8.** Breuer LEM, Carrette ECB, Boon P, Bernas A, Besseling RMH, Aldenkamp AP, et al. Accelerated Cognitive Ageing in Epilepsy: A Neuropsychological Evaluation of Cognitive Deterioration. Arch Clin Neu (https://doi.org/10.1093/arclin/acy042)
+**9.** van den Heuvel MP, Hulshoff Pol HE. Exploring the brain network: A review on resting-state fMRI func[tional connectivity. Eur Neuropsychopharmacol. 2010; 20: 519–534. https://doi.org/10.1016/j.](https://doi.org/10.1016/j.euroneuro.2010.03.008)
+(https://doi.org/10.1016/j.euroneuro.2010.03.008)
+**10.** Power JD, Cohen AL, Nelson SM, Wig GS, Barnes KA, Church JA, et al. Functional Network Organiza[tion of the Human Brain. Neuron. 2011; 72: 665–678. https://doi.org/10.1016/j.neuron.2011.09.006](https://doi.org/10.1016/j.neuron.2011.09.006)
+[PMID: 22099467](http://www.ncbi.nlm.nih.gov/pubmed/22099467)
+**11.** Smith SM, Fox PT, Miller KL, Glahn DC, Fox PM, Mackay CE, et al. Correspondence of the brain’s func[tional architecture during activation and rest. Proc Natl Acad Sci U S A. 2009; 106: 13040–5. https://doi.](https://doi.org/10.1073/pnas.0905267106)
+(https://doi.org/10.1073/pnas.0905267106)
+**12.** Cole DM, Smith SM, Beckmann CF. Advances and pitfalls in the analysis and interpretation of resting[state FMRI data. Front Syst Neurosci. 2010; 4: 8. https://doi.org/10.3389/fnsys.2010.00008 PMID:](https://doi.org/10.3389/fnsys.2010.00008)
+[20407579](http://www.ncbi.nlm.nih.gov/pubmed/20407579)
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 18 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**13.** Nomi JS, Uddin LQ. Developmental changes in large-scale network connectivity in autism. NeuroImage
+[Clin. 2015; 7: 732–741. https://doi.org/10.1016/j.nicl.2015.02.024 PMID: 25844325](https://doi.org/10.1016/j.nicl.2015.02.024)
+**14.** Laird AR, Fox PM, Eickhoff SB, Turner JA, Ray KL, McKay DR, et al. Behavioral Interpretations of Intrin[sic Connectivity Networks. J Cogn Neurosci. 2011; 23: 4022–4037. https://doi.org/10.1162/jocna](https://doi.org/10.1162/jocna00077)
+[00077 PMID: 21671731](https://doi.org/10.1162/jocna00077)
+**15.** Choe AS, Jones CK, Joel SE, Muschelli J, Belegu V, Caffo BS, et al. Reproducibility and temporal struc[ture in weekly resting-state fMRI over a period of 3.5 years. PLoS One. 2015; 10: 1–29. https://doi.org/](https://doi.org/10.1371/journal.pone.0140134)
+[10.1371/journal.pone.0140134 PMID: 26517540](https://doi.org/10.1371/journal.pone.0140134)
+**16.** Beckmann CF, DeLuca M, Devlin JT, Smith SM. Investigations into resting-state connectivity using
+[independent component analysis. Philos Trans R Soc Lond B Biol Sci. 2005; 360: 1001–13. https://doi.](https://doi.org/10.1098/rstb.2005.1634)
+(https://doi.org/10.1098/rstb.2005.1634)
+**17.** Hull J V., Jacokes ZJ, Torgerson CM, Irimia A, Van Horn JD, Aylward E, et al. Resting-state functional
+[connectivity in autism spectrum disorders: A review. Front Psychiatry. 2017;7. https://doi.org/10.3389/](https://doi.org/10.3389/fpsyt.2017.00007)
+(https://doi.org/10.3389/fpsyt.2017.00007)
+**18.** Mu¨ller RA, Shih P, Keehn B, Deyoe JR, Leyden KM, Shukla DK. Underconnected, but how? A survey of
+functional connectivity MRI studies in autism spectrum disorders. Cereb Cortex. 2011; 21: 2233–2243.
+(https://doi.org/10.1093/cercor/bhq296)
+**19.** Park B, Kim J, Park H. Differences in connectivity patterns between child and adolescent attention deficit hyperactivity disorder patients. 2016 38th Annual International Conference of the IEEE Engineering
+[in Medicine and Biology Society (EMBC). IEEE; 2016. pp. 1127–1130. https://doi.org/10.1109/EMBC.](https://doi.org/10.1109/EMBC.2016.7590902)
+[2016.7590902](https://doi.org/10.1109/EMBC.2016.7590902)
+**20.** Zang YF, Yong H, Chao-Zhe Z, Qing-Jiu C, Man-Qiu S, Meng L, et al. Altered baseline brain activity in
+[children with ADHD revealed by resting-state functional MRI. Brain Dev. 2007; 29: 83–91. https://doi.](https://doi.org/10.1016/j.braindev.2006.07.002)
+(https://doi.org/10.1016/j.braindev.2006.07.002)
+**21.** Kaiser RH, Whitfield-Gabrieli S, Dillon DG, Goer F, Beltzer M, Minkel J, et al. Dynamic Resting-State
+Functional Connectivity in Major Depression. Neuropsychopharmacology. 2016; 41: 1822–1830.
+(https://doi.org/10.1038/npp.2015.352)
+**22.** Rashid B, Damaraju E, Pearlson GD, Calhoun VD. Dynamic connectivity states estimated from resting
+fMRI Identify differences among Schizophrenia, bipolar disorder, and healthy control subjects. Front
+[Hum Neurosci. 2014; 8: 1–13. https://doi.org/10.3389/fnhum.2014.00001 PMID: 24474914](https://doi.org/10.3389/fnhum.2014.00001)
+**23.** [Friston KJ. Functional and Effective Connectivity: A Review. Brain Connect. 2011; 1: 13–36. https://doi.](https://doi.org/10.1089/brain.2011.0008)
+(https://doi.org/10.1089/brain.2011.0008)
+**24.** Friston K, Moran R, Seth AK. Analysing connectivity with Granger causality and dynamic causal modelling.
+[Curr Opin Neurobiol. 2013; 23: 172–178. https://doi.org/10.1016/j.conb.2012.11.010 PMID: 23265964](https://doi.org/10.1016/j.conb.2012.11.010)
+**25.** Bernas A, Barendse EM, Aldenkamp AP, Backes WH, Hofman PAM, Hendriks MPH, et al. Brain resting-state networks in adolescents with high-functioning autism: Analysis of spatial connectivity and tem[poral neurodynamics. Brain Behav. 2018; e00878. https://doi.org/10.1002/brb3.878 PMID: 29484255](https://doi.org/10.1002/brb3.878)
+**26.** Rolls ET, Cheng W, Gilson M, Qiu J, Hu Z, Ruan H, et al. Effective Connectivity in Depression. Biol Psy[chiatry Cogn Neurosci Neuroimaging. 2018; 3: 187–197. https://doi.org/10.1016/j.bpsc.2017.10.004](https://doi.org/10.1016/j.bpsc.2017.10.004)
+[PMID: 29529414](http://www.ncbi.nlm.nih.gov/pubmed/29529414)
+**27.** Zhenyu Liu, Lijun Bai, Ruwei Dai, Chongguang Zhong, Hu Wang, Youbo You, et al. Exploring the effective
+connectivity of resting state networks in Mild Cognitive Impairment: An fMRI study combining ICA and multivariate Granger causality analysis. 34th Annual International Conference of the IEEE Engineering in Med[icine and Biology Society. IEEE; 2012. pp. 5454–5457. https://doi.org/10.1109/EMBC.2012.6347228](https://doi.org/10.1109/EMBC.2012.6347228)
+**28.** Tsvetanov KA, Henson RNA, Tyler LK, Razi A, Geerligs L, Ham TE, et al. Extrinsic and Intrinsic Brain
+Network Connectivity Maintains Cognition across the Lifespan Despite Accelerated Decay of Regional
+[Brain Activation. J Neurosci. 2016; 36: 3115–3126. https://doi.org/10.1523/JNEUROSCI.2733-15.2016](https://doi.org/10.1523/JNEUROSCI.2733-15.2016)
+[PMID: 26985024](http://www.ncbi.nlm.nih.gov/pubmed/26985024)
+**29.** Chand G, Wu J, Hajjar I, Qiu D. Interactions of the salience network and its subsystems with the defaultmode and the central-executive networks in normal aging and mild cognitive impairment. Brain Con[nect. 2017;7: brain.2017.0509. https://doi.org/10.1089/brain.2017.0509 PMID: 28707959](https://doi.org/10.1089/brain.2017.0509)
+**30.** Damaraju E, Allen EA, Belger A, Ford JM, McEwen S, Mathalon DH, et al. Dynamic functional connectivity analysis reveals transient states of dysconnectivity in schizophrenia. NeuroImage Clin. 2014; 5:
+[298–308. https://doi.org/10.1016/j.nicl.2014.07.003 PMID: 25161896](https://doi.org/10.1016/j.nicl.2014.07.003)
+**31.** Di X, Biswal BB. Dynamic brain functional connectivity modulated by resting-state networks. Brain
+[Struct Funct. 2013; 220: 37–46. https://doi.org/10.1007/s00429-013-0634-3 PMID: 25713839](https://doi.org/10.1007/s00429-013-0634-3)
+**32.** Li C, Xia L, Ma J, Li S, Liang S, Ma X, et al. Dynamic functional abnormalities in generalized anxiety disorders and their increased network segregation of a hyperarousal brain state modulated by insomnia. J
+[Affect Disord. 2019; 246: 338–345. https://doi.org/10.1016/j.jad.2018.12.079 PMID: 30597294](https://doi.org/10.1016/j.jad.2018.12.079)
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 19 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**33.** Lie´geois R, Li J, Kong R, Orban C, Van De Ville D, Ge T, et al. Resting brain dynamics at different time[scales capture distinct aspects of human behavior. Nat Commun. 2019; 10: 2317. https://doi.org/10.](https://doi.org/10.1038/s41467-019-10317-7)
+[1038/s41467-019-10317-7 PMID: 31127095](https://doi.org/10.1038/s41467-019-10317-7)
+**34.** Calhoun VD, Miller R, Pearlson G, Adali T. The Chronnectome: Time-Varying Connectivity Networks as
+[the Next Frontier in fMRI Data Discovery. Neuron. 2014; 84: 262–274. https://doi.org/10.1016/j.neuron.](https://doi.org/10.1016/j.neuron.2014.10.015)
+[2014.10.015 PMID: 25374354](https://doi.org/10.1016/j.neuron.2014.10.015)
+**35.** Shakil S, Lee CH, Keilholz SD. Evaluation of sliding window correlation performance for characterizing
+[dynamic functional connectivity and brain states. Neuroimage. 2016; 133: 111–128. https://doi.org/10.](https://doi.org/10.1016/j.neuroimage.2016.02.074)
+[1016/j.neuroimage.2016.02.074 PMID: 26952197](https://doi.org/10.1016/j.neuroimage.2016.02.074)
+**36.** Hindriks R, Adhikari MH, Murayama Y, Ganzetti M, Mantini D, Logothetis NK, et al. Can sliding-window
+correlations reveal dynamic functional connectivity in resting-state fMRI? Neuroimage. 2016; 127: 242–
+[256. https://doi.org/10.1016/j.neuroimage.2015.11.055 PMID: 26631813](https://doi.org/10.1016/j.neuroimage.2015.11.055)
+**37.** Rashid B, Arbabshirani MR, Damaraju E, Cetin MS, Miller R, Pearlson GD, et al. Classification of
+schizophrenia and bipolar patients using static and dynamic resting-state fMRI brain connectivity.
+[Neuroimage. 2016; 134: 645–657. https://doi.org/10.1016/j.neuroimage.2016.04.051 PMID:](https://doi.org/10.1016/j.neuroimage.2016.04.051)
+[27118088](http://www.ncbi.nlm.nih.gov/pubmed/27118088)
+**38.** Chang C, Glover GH. Time–frequency dynamics of resting-state brain connectivity measured with
+[fMRI. Neuroimage. 2010; 50: 81–98. https://doi.org/10.1016/j.neuroimage.2009.12.011 PMID:](https://doi.org/10.1016/j.neuroimage.2009.12.011)
+[20006716](http://www.ncbi.nlm.nih.gov/pubmed/20006716)
+**39.** Bernas A, Aldenkamp AP, Zinger S. Wavelet coherence-based classifier: A resting-state functional MRI
+study on neurodynamics in adolescents with high-functioning autism. Comput Methods Programs
+[Biomed. 2018; 154: 143–151. https://doi.org/10.1016/j.cmpb.2017.11.017 PMID: 29249338](https://doi.org/10.1016/j.cmpb.2017.11.017)
+**40.** Madeo D, Talarico A, Pascual-Leone A, Mocenni C, Santarnecchi E. An Evolutionary Game Theory
+[Model of Spontaneous Brain Functioning. Sci Rep. 2017; 7: 15978. https://doi.org/10.1038/s41598-](https://doi.org/10.1038/s41598-017-15865-w)
+[017-15865-w PMID: 29167478](https://doi.org/10.1038/s41598-017-15865-w)
+**41.** Ktena SI, Parisot S, Ferrante E, Rajchl M, Lee M, Glocker B, et al. Metric learning with spectral graph
+[convolutions on brain connectivity networks. Neuroimage. 2018; 169: 431–442. https://doi.org/10.1016/](https://doi.org/10.1016/j.neuroimage.2017.12.052)
+(https://doi.org/10.1016/j.neuroimage.2017.12.052)
+**42.** Deshpande G, Wang P, Rangaprakash D, Wilamowski B. Fully connected cascade artificial neural network architecture for attention deficit hyperactivity disorder classification from functional magnetic reso[nance imaging data. IEEE Trans Cybern. 2015; 45: 2668–2679. https://doi.org/10.1109/TCYB.2014.](https://doi.org/10.1109/TCYB.2014.2379621)
+[2379621 PMID: 25576588](https://doi.org/10.1109/TCYB.2014.2379621)
+**43.** Kim J, Calhoun VD, Shim E, Lee JH. Deep neural network with weight sparsity control and pre-training
+extracts hierarchical features and enhances classification performance: Evidence from whole-brain
+resting-state functional connectivity patterns of schizophrenia. Neuroimage. 2016; 124: 127–146.
+(https://doi.org/10.1016/j.neuroimage.2015.05.018)
+**44.** Holdnack JA, Schoenberg MR, Lange RT, Iverson GL. Predicting Premorbid Ability for WAIS-IV, WMSIV and WASI-II. WAIS-IV, WMS-IV, and ACS: Advanced Clinical Interpretation. Elsevier Inc.; 2013.
+(https://doi.org/10.1080/09297049.2012.705822)
+**45.** Wechsler D. WAIS-IV: Wechsler adult intelligence scale. San Antonio, TX: Psychological Corporation.
+[2008. https://doi.org/10.1016/S0043-1354(02)00019-2](https://doi.org/10.1016/S0043-1354(02)00019-2)
+**46.** Kundu P, Inati SJ, Evans JW, Luh W, Bandettini PA. Differentiating BOLD and non-BOLD signals in
+[fMRI time series using multi-echo EPI. Neuroimage. 2012; 60: 1759–1770. https://doi.org/10.1016/j.](https://doi.org/10.1016/j.neuroimage.2011.12.028)
+(https://doi.org/10.1016/j.neuroimage.2011.12.028)
+**47.** Kundu P, Voon V, Balchandani P, Lombardo M V., Poser BA, Bandettini P. Multi-Echo fMRI: A Review
+[of Applications in fMRI Denoising and Analysis of BOLD Signals. Neuroimage. 2017; 1–22. https://doi.](https://doi.org/10.1016/j.neuroimage.2017.03.033)
+(https://doi.org/10.1016/j.neuroimage.2017.03.033)
+**48.** Dipasquale O, Sethi A, Laganà MM, Baglio F, Baselli G, Kundu P, et al. Comparing resting state fMRI
+de-noising approaches using multi- and single-echo acquisitions. PLoS One. 2017; 12: e0173289.
+(https://doi.org/10.1371/journal.pone.0173289)
+**49.** Lombardo M V., Auyeung B, Holt RJ, Waldman J, Ruigrok AN V, Mooney N, et al. Improving effect size
+estimation and statistical power with multi-echo fMRI and its impact on understanding the neural sys[tems supporting mentalizing. Neuroimage. 2016; 142: 55–66. https://doi.org/10.1016/j.neuroimage.](https://doi.org/10.1016/j.neuroimage.2016.07.022)
+[2016.07.022 PMID: 27417345](https://doi.org/10.1016/j.neuroimage.2016.07.022)
+**50.** Beckmann CF, Mackay CE, Filippini N, Smith SM. Group comparison of resting-state FMRI data using
+multi-subject ICA and dual regression. Human Brain Mapping Conference. 2009. p. 181. Available:
+(http://fsl.fmrib.ox.ac.uk/analysis/dualreg/dualregposter.pdf)
+**51.** Filippini N, MacIntosh BJ, Hough MG, Goodwin GM, Frisoni GB, Smith SM, et al. Distinct patterns of
+[brain activity in young carriers of the APOE-epsilon4 allele. Pnas. 2009; 106: 7209–7214. https://doi.](https://doi.org/10.1073/pnas.0811879106)
+(https://doi.org/10.1073/pnas.0811879106)
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 20 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**52.** Greicius MD, Srivastava G, Reiss AL, Menon V. Default-mode network activity distinguishes Alzheimer’s disease from healthy aging: evidence from functional MRI. Proc Natl Acad Sci U S A. 2004; 101:
+[4637–4642. https://doi.org/10.1073/pnas.0308627101 PMID: 15070770](https://doi.org/10.1073/pnas.0308627101)
+**53.** Barnett L, Seth AK. The MVGC multivariate Granger causality toolbox: A new approach to Granger[causal inference. J Neurosci Methods. 2014; 223: 50–68. https://doi.org/10.1016/j.jneumeth.2013.10.](https://doi.org/10.1016/j.jneumeth.2013.10.018)
+[018 PMID: 24200508](https://doi.org/10.1016/j.jneumeth.2013.10.018)
+**54.** Bressler SL, Seth AK. Wiener–Granger Causality: A well established methodology. Neuroimage. 2011;
+[58: 323–329. https://doi.org/10.1016/j.neuroimage.2010.02.059 PMID: 20202481](https://doi.org/10.1016/j.neuroimage.2010.02.059)
+**55.** Grinsted A, Moore JC, Jevrejeva S. Application of the cross wavelet transform and wavelet coherence
+[to geophysical time series. Nonlinear Process Geophys. 2004; 11: 561–566. https://doi.org/10.5194/](https://doi.org/10.5194/npg-11-561-2004)
+(https://doi.org/10.5194/npg-11-561-2004)
+**56.** Damoiseaux JS, Beckmann CF, Arigita EJS, Barkhof F, Scheltens P, Stam CJ, et al. Reduced resting[state brain activity in the “default network” in normal aging. Cereb Cortex. 2008; 18: 1856–1864. https://](https://doi.org/10.1093/cercor/bhm207)
+(https://doi.org/10.1093/cercor/bhm207)
+**57.** Onoda K, Ishihara M, Yamaguchi S. Decreased Functional Connectivity by Aging Is Associated with
+[Cognitive Decline. J Cogn Neurosci. 2012; 24: 2186–2198. https://doi.org/10.1162/jocna00269](https://doi.org/10.1162/jocna00269)
+[PMID: 22784277](http://www.ncbi.nlm.nih.gov/pubmed/22784277)
+**58.** Ferreira LK, Regina ACB, Kovacevic N, Martin MDGM, Santos PP, Carneiro CDG, et al. Aging effects
+on whole-brain functional connectivity in adults free of cognitive and psychiatric disorders. Cereb Cor (https://doi.org/10.1093/cercor/bhv190)
+**59.** Sala-Llonch R, Bartre´s-Faz D, Junque´ C. Reorganization of brain networks in aging: a review of func[tional connectivity studies. Front Psychol. 2015; 6: 663. https://doi.org/10.3389/fpsyg.2015.00663](https://doi.org/10.3389/fpsyg.2015.00663)
+[PMID: 26052298](http://www.ncbi.nlm.nih.gov/pubmed/26052298)
+**60.** Reuter-Lorenz PA, Cappell KA. Neurocognitive aging and the compensation hypothesis. Curr Dir Psy (https://doi.org/10.1111/j.1467-8721.2008.00570.x)
+**61.** Bastin C, Yakushev I, Bahri MA, Fellgiebel A, Eustache F, Landeau B, et al. Cognitive reserve impacts
+on inter-individual variability in resting-state cerebral metabolism in normal aging. Neuroimage. 2012;
+[63: 713–722. https://doi.org/10.1016/j.neuroimage.2012.06.074 PMID: 22796505](https://doi.org/10.1016/j.neuroimage.2012.06.074)
+**62.** [Tomasi D, Volkow ND. Aging and functional brain networks. Mol Psychiatry. 2012; 17: 549–558. https://](https://doi.org/10.1038/mp.2011.81)
+(https://doi.org/10.1038/mp.2011.81)
+**63.** Onoda K, Ishihara M, Yamaguchi S. Aging effects on functional connectivity within and between rest[ing-state networks. 2012 ICME Int Conf Complex Med Eng C 2012 Proc. 2012;8: 119–124. https://doi.](https://doi.org/10.1109/ICCME.2012.6275599)
+(https://doi.org/10.1109/ICCME.2012.6275599)
+**64.** La Corte V, Sperduti M, Malherbe C, Vialatte F, Lion S, Gallarda T, et al. Cognitive Decline and Reorganization of Functional Connectivity in Healthy Aging: The Pivotal Role of the Salience Network in the
+[Prediction of Age and Cognitive Performances. Front Aging Neurosci. 2016; 8: 1–12. https://doi.org/10.](https://doi.org/10.3389/fnagi.2016.00001)
+[3389/fnagi.2016.00001 PMID: 26858637](https://doi.org/10.3389/fnagi.2016.00001)
+**65.** Farràs-Permanyer L, Guàrdia-Olmos J, Pero´-Cebollero M. Mild cognitive impairment and fMRI studies
+[of brain functional connectivity: the state of the art. Front Psychol. 2015; 6: 1–18. https://doi.org/10.](https://doi.org/10.3389/fpsyg.2015.00001)
+[3389/fpsyg.2015.00001 PMID: 25688217](https://doi.org/10.3389/fpsyg.2015.00001)
+**66.** Li HJ, Hou XH, Liu HH, Yue CL, Lu GM, Zuo XN. Putting age-related task activation into large-scale
+brain networks: A meta-analysis of 114 fMRI studies on healthy aging. Neurosci Biobehav Rev. 2015;
+[57: 156–174. https://doi.org/10.1016/j.neubiorev.2015.08.013 PMID: 26318367](https://doi.org/10.1016/j.neubiorev.2015.08.013)
+**67.** Siman-Tov T, Bosak N, Sprecher E, Paz R, Eran A, Aharon-Peretz J, et al. Early age-related functional
+[connectivity decline in high-order cognitive networks. Front Aging Neurosci. 2017; 8: 1–17. https://doi.](https://doi.org/10.3389/fnagi.2016.00330)
+(https://doi.org/10.3389/fnagi.2016.00330)
+**68.** Davis SW, Dennis NA, Daselaar SM, Fleck MS, Cabeza R. Que´ PASA? the posterior-anterior shift in
+[aging. Cereb Cortex. 2008; 18: 1201–1209. https://doi.org/10.1093/cercor/bhm155 PMID: 17925295](https://doi.org/10.1093/cercor/bhm155)
+**69.** Ezaki T, Fonseca dos Reis E, Watanabe T, Sakaki M, Masuda N. Closer to critical resting-state neural
+[dynamics in individuals with higher fluid intelligence. Commun Biol. 2020; 3: 52. https://doi.org/10.1038/](https://doi.org/10.1038/s42003-020-0774-y)
+(https://doi.org/10.1038/s42003-020-0774-y)
+**70.** Cole MW, Yarkoni T, Repovsˇ G, Anticevic A, Braver TS. Global connectivity of prefrontal cortex predicts
+[cognitive control and intelligence. J Neurosci. 2012; 32: 8988–8999. https://doi.org/10.1523/](https://doi.org/10.1523/JNEUROSCI.0536-12.2012)
+[JNEUROSCI.0536-12.2012 PMID: 22745498](https://doi.org/10.1523/JNEUROSCI.0536-12.2012)
+**71.** Beason-Held LL, Kraut MA, Resnick SM. Stability of default-mode network activity in the aging brain.
+[Brain Imaging Behav. 2009; 3: 123–131. https://doi.org/10.1007/s11682-008-9054-z PMID: 19568331](https://doi.org/10.1007/s11682-008-9054-z)
+**72.** Menon V, Uddin LQ. Saliency, switching, attention and control: a network model of insula function.
+[Brain Struct Funct. 2010; 214: 655–667. https://doi.org/10.1007/s00429-010-0262-0 PMID:](https://doi.org/10.1007/s00429-010-0262-0)
+[20512370](http://www.ncbi.nlm.nih.gov/pubmed/20512370)
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 21 / 22
+PLOS ONE Resting-state fMRI dynamics as neurobiomarkers of Accelerated Cognitive Ageing in epilepsy
+**73.** Vossel S, Geng JJ, Fink GR. Dorsal and Ventral Attention Systems. Neurosci. 2014; 20: 150–159.
+(https://doi.org/10.1177/1073858413494269)
+**74.** Luo N, Sui J, Abrol A, Lin D, Chen J, Vergara VM, et al. Age-related structural and functional variations
+[in 5,967 individuals across the adult lifespan. Hum Brain Mapp. 2020; 41: 1725–1737. https://doi.org/](https://doi.org/10.1002/hbm.24905)
+[10.1002/hbm.24905 PMID: 31876339](https://doi.org/10.1002/hbm.24905)
+**75.** Andrews-Hanna JR, Snyder AZ, Vincent JL, Lustig C, Head D, Raichle ME, et al. Disruption of Large[Scale Brain Systems in Advanced Aging. Neuron. 2007; 56: 924–935. https://doi.org/10.1016/j.neuron.](https://doi.org/10.1016/j.neuron.2007.10.038)
+[2007.10.038 PMID: 18054866](https://doi.org/10.1016/j.neuron.2007.10.038)
+**76.** Alam S, Kwon GR. Alzheimer disease classification using KPCA, LDA, and multi-kernel learning SVM.
+[Int J Imaging Syst Technol. 2017; 27: 133–143. https://doi.org/10.1002/ima.22217](https://doi.org/10.1002/ima.22217)
+**77.** Xiong T, Cherkassky V. A combined SVM and LDA approach for classification. Proc Int Jt Conf Neural
+[Networks. 2005; 3: 1455–1459. https://doi.org/10.1109/IJCNN.2005.1556089](https://doi.org/10.1109/IJCNN.2005.1556089)
+**78.** Du Y, Fu Z, Calhoun VD. Classification and Prediction of Brain Disorders Using Functional Connectivity:
+[Promising but Challenging. Front Neurosci. 2018;12. https://doi.org/10.3389/fnins.2018.00012 PMID:](https://doi.org/10.3389/fnins.2018.00012)
+[29410610](http://www.ncbi.nlm.nih.gov/pubmed/29410610)
+**79.** Meszle´nyi RJ, Buza K, Vidnya´nszky Z. Resting State fMRI Functional Connectivity-Based Classification
+Using a Convolutional Neural Network Architecture. Front Neuroinform. 2017; 11: 1–12. (https://doi.org/10.3389/fninf.2017.00001)
+[10.3389/fninf.2017.00001 PMID: 28154532](https://doi.org/10.3389/fninf.2017.00001)
+**80.** Suk H Il, Wee CY, Lee SW, Shen D. State-space model with deep learning for functional dynamics esti[mation in resting-state fMRI. Neuroimage. 2016; 129: 292–307. https://doi.org/10.1016/j.neuroimage.](https://doi.org/10.1016/j.neuroimage.2016.01.005)
+[2016.01.005 PMID: 26774612](https://doi.org/10.1016/j.neuroimage.2016.01.005)
+**81.** Nieuwenhuis M, van Haren NEM, Hulshoff Pol HE, Cahn W, Kahn RS, Schnack HG. Classification of
+schizophrenia patients and healthy controls from structural MRI scans in two large independent sam[ples. Neuroimage. 2012; 61: 606–612. https://doi.org/10.1016/j.neuroimage.2012.03.079 PMID:](https://doi.org/10.1016/j.neuroimage.2012.03.079)
+[22507227](http://www.ncbi.nlm.nih.gov/pubmed/22507227)
+**82.** Lui S, Zhou XJ, Sweeney JA, Gong Q. Psychoradiology: The Frontier of Neuroimaging in Psychiatry.
+[Radiology. 2016; 281: 357–372. https://doi.org/10.1148/radiol.2016152149 PMID: 27755933](https://doi.org/10.1148/radiol.2016152149)
+[PLOS ONE | https://doi.org/10.1371/journal.pone.0250222](https://doi.org/10.1371/journal.pone.0250222) April 16, 2021 22 / 22
+=== END: bernas-2021.pdf (14 equations) ===

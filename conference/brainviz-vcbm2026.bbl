@@ -7,6 +7,12 @@
 \newblock \emph{Computer Methods and Programs in Biomedicine 154} (11 2017), 143--151.
 \newblock URL: \url{https://doi.org/10.1016/j.cmpb.2017.11.017}, \href {http://dx.doi.org/10.1016/j.cmpb.2017.11.017} {\path{doi:10.1016/j.cmpb.2017.11.017}}.
 
+\bibitem[BBAZ21]{bernas-2021}
+\textsc{Bernas A., Breuer L. E.~M., Aldenkamp A.~P., Zinger S.}:
+\newblock {Emulative, coherent, and causal dynamics between large-scale brain networks are neurobiomarkers of Accelerated Cognitive Ageing in epilepsy}.
+\newblock \emph{PLoS ONE 16}, 4 (4 2021), e0250222.
+\newblock URL: \url{https://doi.org/10.1371/journal.pone.0250222}, \href {http://dx.doi.org/10.1371/journal.pone.0250222} {\path{doi:10.1371/journal.pone.0250222}}.
+
 \bibitem[CG09]{chang-2009}
 \textsc{Chang C., Glover G.~H.}:
 \newblock {Time--frequency dynamics of resting-state brain connectivity measured with fMRI}.
@@ -36,6 +42,12 @@
 \newblock {The dynamic functional connectome: State-of-the-art and perspectives}.
 \newblock \emph{NeuroImage 160} (12 2016), 41--54.
 \newblock URL: \url{https://doi.org/10.1016/j.neuroimage.2016.12.061}, \href {http://dx.doi.org/10.1016/j.neuroimage.2016.12.061} {\path{doi:10.1016/j.neuroimage.2016.12.061}}.
+
+\bibitem[PLS{\etalchar{*}}24]{pilmeyer-2024}
+\textsc{Pilmeyer J., Lamerichs R., Schielen S., Ramsaransing F., Van Kranen-Mastenbroek V., Jansen J.~F., Breeuwer M., Zinger S.}:
+\newblock {Multi-modal MRI for objective diagnosis and outcome prediction in depression}.
+\newblock \emph{NeuroImage Clinical 44} (1 2024), 103682.
+\newblock URL: \url{https://doi.org/10.1016/j.nicl.2024.103682}, \href {http://dx.doi.org/10.1016/j.nicl.2024.103682} {\path{doi:10.1016/j.nicl.2024.103682}}.
 
 \bibitem[SPA{\etalchar{*}}25]{schielen-2025}
 \textsc{Schielen S. J.~C., Pilmeyer J., Aldenkamp A.~P., Ruijters D., Zinger S.}:

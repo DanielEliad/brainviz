@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex brainviz-vcbm2026"] 1782903704.32975 "brainviz-vcbm2026.aux" "brainviz-vcbm2026.bbl" "brainviz-vcbm2026" 1782903705.19271 0
-  "./brainviz.bib" 1782570598.1811 4072 8a453f55ecddbfebc73d9bb7101f1ffd ""
+["bibtex brainviz-vcbm2026"] 1783583271.33127 "brainviz-vcbm2026.aux" "brainviz-vcbm2026.bbl" "brainviz-vcbm2026" 1783586207.14973 0
+  "./brainviz.bib" 1783454248.64096 5056 53e5e108206be290f19693c27d492d45 ""
   "./eg-alpha-doi.bst" 1782108142 39853 e345f81ff8eb6ab3f5a163c5a5fe2910 ""
-  "brainviz-vcbm2026.aux" 1782903704.96152 3140 a7aab16020117b26549e47a4150454f9 "pdflatex"
+  "brainviz-vcbm2026.aux" 1783586207.00545 3540 3a139d3d18e8ea8ed7f84c1b4c104b90 "pdflatex"
   (generated)
   "brainviz-vcbm2026.bbl"
   "brainviz-vcbm2026.blg"
   (rewritten before read)
-["pdflatex"] 1782903704.42636 "brainviz-vcbm2026.tex" "brainviz-vcbm2026.pdf" "brainviz-vcbm2026" 1782903705.19299 0
+["pdflatex"] 1783586206.6895 "brainviz-vcbm2026.tex" "brainviz-vcbm2026.pdf" "brainviz-vcbm2026" 1783586207.14985 0
   "/nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/enc/dvips/base/8r.enc" 1 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/map/fontname/texfonts.map" 1 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/tfm/adobe/courier/pcrr8r.tfm" 1 1292 bd42be2f344128bff6d35d98474adfe3 ""
@@ -168,11 +168,11 @@
   "/nix/store/nwgahyjvwdlvqcydk8brw6dsaqp9rxma-texlive-2025-env/share/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1 5523625 91576c4205ae44a89d44ebb0878dfeb9 ""
   "/nix/store/nwgahyjvwdlvqcydk8brw6dsaqp9rxma-texlive-2025-env/share/texmf-var/web2c/pdftex/pdflatex.fmt" 1 3600366 c91f89ee759bb7f6aa28fbc6eb704ac6 ""
   "/nix/store/nwgahyjvwdlvqcydk8brw6dsaqp9rxma-texlive-2025-env/share/texmf-var/web2c/texmf.cnf" 1 43847 a4c5488fd7a7e0ba5c4c233c28a45e08 ""
-  "brainviz-vcbm2026.aux" 1782903704.96152 3140 a7aab16020117b26549e47a4150454f9 "pdflatex"
-  "brainviz-vcbm2026.bbl" 1782903704.42153 4064 f773836469a6b7017d36e314c2a5c49e "bibtex brainviz-vcbm2026"
-  "brainviz-vcbm2026.brf" 1782903704.96152 606 c35cda30147948d5216c2c0aa7dcbf3a "pdflatex"
-  "brainviz-vcbm2026.lbl" 1782903704.96152 22 edd77f81622dbffc8aed76f9e19ea656 "pdflatex"
-  "brainviz-vcbm2026.tex" 1782903701.30856 10145 e4c0cb1ac0a407315a5c638abcfa576e ""
+  "brainviz-vcbm2026.aux" 1783586207.00545 3540 3a139d3d18e8ea8ed7f84c1b4c104b90 "pdflatex"
+  "brainviz-vcbm2026.bbl" 1783583271.37063 5014 696f9660ad789900f000864cc4985bad "bibtex brainviz-vcbm2026"
+  "brainviz-vcbm2026.brf" 1783586207.00645 760 5fe81aa96f14788fd43be5f303812dbc "pdflatex"
+  "brainviz-vcbm2026.lbl" 1783586207.00645 22 edd77f81622dbffc8aed76f9e19ea656 "pdflatex"
+  "brainviz-vcbm2026.tex" 1783586205.14848 10373 34e7291e23f5719367a16108996392be ""
   "dfT1pcr.fd" 1782108142 1618 df77d0a8d49b76e400e2cfb6614f3614 ""
   "dfT1phv.fd" 1782108142 1930 c437fc3f2c3b74b390046388285c0940 ""
   "dfT1ptm.fd" 1782108142 1618 cba8efae5d0b3a791f6740bde37aa849 ""

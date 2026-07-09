@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025/nixos.org) (preloaded format=pdflatex 1980.1.1)  1 JUL 2026 13:01
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025/nixos.org) (preloaded format=pdflatex 1980.1.1)  9 JUL 2026 10:36
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -538,11 +538,19 @@ File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 File: ./figures/overview.png Graphic file (type png)
 <use ./figures/overview.png>
 Package pdftex.def Info: ./figures/overview.png  used on input line 73.
-(pdftex.def)             Requested size: 282.71777pt x 138.67686pt.
+(pdftex.def)             Requested size: 364.80139pt x 178.95316pt.
+
+Underfull \hbox (badness 4765) in paragraph at lines 86--87
+\T1/ptm/m/n/9 ing method in autism spec-trum dis-or-der (ASD) re-
+ []
+
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
+
+
+LaTeX Warning: Text page 1 contains only floats.
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -553,14 +561,15 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
  <./figures/overview.png (PNG copy)>]
-<./figures/graph-view.png, id=43, 2876.49657pt x 1414.53468pt>
+
+<./figures/graph-view.png, id=47, 2876.49657pt x 1414.53468pt>
 File: ./figures/graph-view.png Graphic file (type png)
 <use ./figures/graph-view.png>
-Package pdftex.def Info: ./figures/graph-view.png  used on input line 110.
+Package pdftex.def Info: ./figures/graph-view.png  used on input line 103.
 (pdftex.def)             Requested size: 216.0pt x 106.21503pt.
 
 
-(./brainviz-vcbm2026.bbl (./brainviz-vcbm2026.brf)
+[2 <./figures/graph-view.png (PNG copy)>] (./brainviz-vcbm2026.bbl (./brainviz-vcbm2026.brf)
 \tf@brf=\write4
 \openout4 = `brainviz-vcbm2026.brf'.
 
@@ -575,129 +584,150 @@ Underfull \hbox (badness 1616) in paragraph at lines 9--9
  []
 
 
+Underfull \hbox (badness 2229) in paragraph at lines 15--15
+[]\T1/ptm/m/sc/8 Bernas A., Breuer L. E. M., Aldenkamp
+ []
 
-[2 <./figures/graph-view.png (PNG copy)>]
-Underfull \hbox (badness 1122) in paragraph at lines 15--15
+
+Underfull \hbox (badness 5726) in paragraph at lines 15--15
+\T1/ptm/m/sc/8 A. P., Zinger S.\T1/ptm/m/n/8 :  Em-u-la-tive, co-her-ent, and causal
+ []
+
+
+Underfull \hbox (badness 5022) in paragraph at lines 15--15
+\T1/ptm/m/n/8 dy-nam-ics be-tween large-scale brain net-works are neu-ro-
+ []
+
+
+Underfull \hbox (badness 3838) in paragraph at lines 15--15
+\T1/ptm/m/n/8 biomark-ers of Ac-cel-er-ated Cog-ni-tive Age-ing in epilepsy.
+ []
+
+
+Underfull \hbox (badness 2261) in paragraph at lines 15--15
+\T1/ptm/m/it/8 PLoS ONE 16\T1/ptm/m/n/8 , 4 (4 2021), e0250222.  URL: [][]$\T1/pcr/m/n/8 https :
+ []
+
+
+Underfull \hbox (badness 1122) in paragraph at lines 21--21
 []\T1/ptm/m/sc/8 Chang C., Glover G. H.\T1/ptm/m/n/8 :  Time--frequency dy-
  []
 
 
-Underfull \hbox (badness 4505) in paragraph at lines 15--15
+Underfull \hbox (badness 4505) in paragraph at lines 21--21
 \T1/ptm/m/n/8 nam-ics of resting-state brain con-nec-tiv-ity mea-sured with
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 15--15
+Underfull \hbox (badness 10000) in paragraph at lines 21--21
 \T1/pcr/m/n/8 / / doi . org / 10 . 1016 / j . neuroimage . 2009 . 12 . 011$[][]\T1/ptm/m/n/8 ,
  []
 
 
-Underfull \hbox (badness 6204) in paragraph at lines 27--27
+Underfull \hbox (badness 6204) in paragraph at lines 33--33
 []\T1/ptm/m/sc/8 Grinsted A., Moore J. C., Jevre-jeva S.\T1/ptm/m/n/8 :
  []
 
 
-Underfull \hbox (badness 4726) in paragraph at lines 27--27
+Underfull \hbox (badness 4726) in paragraph at lines 33--33
 \T1/ptm/m/n/8 Ap-pli-ca-tion of the cross wavelet trans-form and wavelet
  []
 
 
-Underfull \hbox (badness 5203) in paragraph at lines 27--27
+Underfull \hbox (badness 5203) in paragraph at lines 33--33
 \T1/ptm/m/n/8 co-her-ence to geo-phys-i-cal time se-ries.  \T1/ptm/m/it/8 Non-lin-ear pro-
  []
 
 
-Underfull \hbox (badness 1308) in paragraph at lines 27--27
+Underfull \hbox (badness 1308) in paragraph at lines 33--33
 \T1/ptm/m/it/8 cesses in geo-physics 11\T1/ptm/m/n/8 , 5/6 (11 2004), 561--566.  URL:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 27--27
+Underfull \hbox (badness 10000) in paragraph at lines 33--33
 [][]$\T1/pcr/m/n/8 https : / / doi . org / 10 . 5194 / npg-[]11-[]561-[]2004$[][]\T1/ptm/m/n/8 ,
  []
 
 
-Underfull \hbox (badness 1769) in paragraph at lines 33--33
+Underfull \hbox (badness 1769) in paragraph at lines 39--39
 []\T1/ptm/m/sc/8 Hutchison R. M., Wom-els-dorf T., Allen
  []
 
 
-Underfull \hbox (badness 2564) in paragraph at lines 33--33
+Underfull \hbox (badness 2564) in paragraph at lines 39--39
 \T1/ptm/m/sc/8 M., Della Penna S., Duyn J. H., Glover G. H.,
  []
 
 
-Underfull \hbox (badness 4543) in paragraph at lines 33--33
+Underfull \hbox (badness 4543) in paragraph at lines 39--39
 \T1/ptm/m/sc/8 Gonzalez-Castillo J., Handw-erker D. A., Keil-
  []
 
 
-Underfull \hbox (badness 3930) in paragraph at lines 33--33
+Underfull \hbox (badness 3930) in paragraph at lines 39--39
 \T1/ptm/m/sc/8 F., Sporns O., Wal-ter M., Chang C.\T1/ptm/m/n/8 :  Dy-namic
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 33--33
+Underfull \hbox (badness 10000) in paragraph at lines 39--39
 \T1/ptm/m/n/8 func-tional con-nec-tiv-ity: Promise, is-sues, and in-ter-pre-ta-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 33--33
+Underfull \hbox (badness 10000) in paragraph at lines 39--39
 \T1/pcr/m/n/8 / / doi . org / 10 . 1016 / j . neuroimage . 2013 . 05 . 079$[][]\T1/ptm/m/n/8 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 39--39
+Underfull \hbox (badness 10000) in paragraph at lines 45--45
 \T1/pcr/m/n/8 / / doi . org / 10 . 1016 / j . neuroimage . 2016 . 12 . 061$[][]\T1/ptm/m/n/8 ,
  []
 
 
-Underfull \hbox (badness 1062) in paragraph at lines 45--45
+
+
+Underfull \hbox (badness 1062) in paragraph at lines 57--57
 []\T1/ptm/m/sc/8 Schielen S. J. C., Pilmeyer J., Aldenkamp
  []
 
 
-Underfull \hbox (badness 2142) in paragraph at lines 51--51
+Underfull \hbox (badness 2142) in paragraph at lines 63--63
 \T1/ptm/m/sc/8 A. P., Zinger S.\T1/ptm/m/n/8 :  The di-ag-no-sis of ASD with MRI:
  []
 
 
-Underfull \hbox (badness 4120) in paragraph at lines 51--51
+Underfull \hbox (badness 4120) in paragraph at lines 63--63
 \T1/ptm/m/it/8 chi-a-try 14\T1/ptm/m/n/8 , 1 (8 2024), 318.  URL: [][]$\T1/pcr/m/n/8 https : / / doi .
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 57--57
+Underfull \hbox (badness 10000) in paragraph at lines 69--69
 \T1/pcr/m/n/8 10 . 1175 / 1520-[]0477(1998 ) 079<[]0061 : apgtwa >[] 2 .
  []
 
 )
 
-
-
-[3
-
-] (./brainviz-vcbm2026.aux)
+[3] (./brainviz-vcbm2026.aux)
  ***********
 LaTeX2e <2025-06-01> patch level 1
 L3 programming layer <2025-06-09>
  ***********
 Package rerunfilecheck Info: File `brainviz-vcbm2026.brf' has not changed.
-(rerunfilecheck)             Checksum: C35CDA30147948D5216C2C0AA7DCBF3A;606.
+(rerunfilecheck)             Checksum: 5FE81AA96F14788FD43BE5F303812DBC;760.
  ) 
 Here is how much of TeX's memory you used:
- 20436 strings out of 467890
- 402653 string characters out of 5410143
- 781555 words of memory out of 5000000
- 48609 multiletter control sequences out of 15000+600000
+ 20446 strings out of 467890
+ 402811 string characters out of 5410143
+ 786640 words of memory out of 5000000
+ 48617 multiletter control sequences out of 15000+600000
  674212 words of font info for 102 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 90i,13n,93p,1042b,876s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,13n,93p,1269b,876s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/public/amsfonts/cm/cmr10.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/urw/courier/ucrr8a.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/urw/courier/ucrr8a.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/urw/times/utmb8a.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/urw/times/utmr8a.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on brainviz-vcbm2026.pdf (3 pages, 1957834 bytes).
+Output written on brainviz-vcbm2026.pdf (3 pages, 1959088 bytes).
 PDF statistics:
- 163 PDF objects out of 1000 (max. 8388607)
- 134 compressed objects within 2 object streams
- 19 named destinations out of 1000 (max. 500000)
+ 178 PDF objects out of 1000 (max. 8388607)
+ 149 compressed objects within 2 object streams
+ 21 named destinations out of 1000 (max. 500000)
  23 words of extra memory for PDF output out of 10000 (max. 10000000)
 

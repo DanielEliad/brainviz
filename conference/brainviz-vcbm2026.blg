@@ -8,44 +8,44 @@ Reallocated glb_str_end (elt_size=4) to 20 items from 10.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Database file #1: brainviz.bib
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
-You've used 9 entries,
+You've used 11 entries,
             3585 wiz_defined-function locations,
-            822 strings with 8495 characters,
-and the built_in function-call counts, 5891 in all, are:
-= -- 608
-> -- 324
+            839 strings with 9198 characters,
+and the built_in function-call counts, 7254 in all, are:
+= -- 744
+> -- 405
 < -- 0
-+ -- 120
-- -- 120
-* -- 548
-:= -- 908
-add.period$ -- 27
-call.type$ -- 9
-change.case$ -- 83
-chr.to.int$ -- 9
-cite$ -- 9
-duplicate$ -- 126
-empty$ -- 428
-format.name$ -- 126
-if$ -- 1335
++ -- 151
+- -- 151
+* -- 678
+:= -- 1115
+add.period$ -- 33
+call.type$ -- 11
+change.case$ -- 103
+chr.to.int$ -- 11
+cite$ -- 11
+duplicate$ -- 154
+empty$ -- 526
+format.name$ -- 158
+if$ -- 1643
 int.to.chr$ -- 1
 int.to.str$ -- 0
-missing$ -- 9
-newline$ -- 58
-num.names$ -- 27
-pop$ -- 92
+missing$ -- 11
+newline$ -- 70
+num.names$ -- 33
+pop$ -- 114
 preamble$ -- 1
-purify$ -- 92
+purify$ -- 114
 quote$ -- 0
-skip$ -- 283
+skip$ -- 346
 stack$ -- 0
-substring$ -- 238
-swap$ -- 36
+substring$ -- 294
+swap$ -- 44
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 81
+type$ -- 99
 warning$ -- 0
-while$ -- 43
-width$ -- 12
-write$ -- 138
+while$ -- 51
+width$ -- 14
+write$ -- 168

@@ -318,6 +318,9 @@ INPUT ./figures/graph-view.png
 INPUT ./figures/graph-view.png
 INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/tfm/adobe/courier/pcrr8t.tfm
 INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/tfm/public/pslatex/pcrr8tn.tfm
+INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/tfm/adobe/times/ptmri8t.tfm
+INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/vf/adobe/times/ptmri8t.vf
+INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/tfm/adobe/times/ptmri8r.tfm
 INPUT ./brainviz-vcbm2026.bbl
 INPUT ./brainviz-vcbm2026.bbl
 INPUT brainviz-vcbm2026.bbl
@@ -328,10 +331,7 @@ INPUT ./brainviz-vcbm2026.brf
 INPUT ./brainviz-vcbm2026.brf
 OUTPUT brainviz-vcbm2026.brf
 INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/tfm/adobe/times/ptmrc8t.tfm
-INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/tfm/adobe/times/ptmri8t.tfm
 INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/tfm/adobe/courier/pcrr8t.tfm
-INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/vf/adobe/times/ptmri8t.vf
-INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/tfm/adobe/times/ptmri8r.tfm
 INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/vf/public/pslatex/pcrr8tn.vf
 INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/tfm/public/pslatex/pcrr8rn.tfm
 INPUT /nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/vf/adobe/times/ptmrc8t.vf
