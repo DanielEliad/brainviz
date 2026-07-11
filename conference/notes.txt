@@ -29,12 +29,12 @@ DONE:
 * Our approach where is the innovation
 * emphasize the dynamics over time not static
 * make it clearer what the innovation is: wavelet as connectivity novel but not totally new, first visualization, but we need to underline the novelty, section 3 has to include novelty or what I am visualizing: visualizations of brain dynamics
-
-changes:
-
 * maybe change the figure: image of the RSNs and a flow chart, list of the RSNS (some) + process like which correlations and then the graph
 *   add a small title of figure 1, should also be a description of the figure in the text as well and describe what it shows.
 * figure 2 -> make the lines thicker in graph and the words bigger and the side configuration pane is not visible enough.
+
+changes:
+
 
 
 

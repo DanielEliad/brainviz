@@ -8,7 +8,7 @@
                  minimum height=10mm, fill=red!7, line width=0.5pt},
     arr/.style={-{Stealth[length=4pt]}, line width=0.6pt},
   ]
-  \node[box] (raw) {Raw rs-fMRI\\\textit{ABIDE I+II}};
+  \node[box] (raw) {rs-fMRI\\\textit{ABIDE I+II}};
   \node[box, right=5mm of raw] (ica) {Group ICA\\\textit{32 components}};
   \node[box, right=5mm of ica] (rsn) {14 RSN\\time series};
   \node[op,  right=5mm of rsn] (corr) {Sliding-window\\connectivity};

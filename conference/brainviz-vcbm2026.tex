@@ -64,15 +64,16 @@ Netherlands}
 
 \teaser{
   \centering
-  \includegraphics[width=0.8\linewidth]{overview.png}
-  \caption{\label{fig:overview}
-    Overview tab: per subject connectivity matrix split into control ($N=483$) and ASD ($N=417$) classes grouped by acquisition site.}
+  \includegraphics[width=\linewidth]{unified/final.png}
+  \caption{\label{fig:overview} Windowed connectivity between the 14 resting state networks, computed per
+    subject and explored through an interactive graph view and a comparative
+    overview across diagnostic classes and sites.}
 }
 
 \maketitle
 
 \begin{abstract}
-Autism spectrum disorder (ASD) is currently diagnosed using observation-based criteria, while an objective test is desired~\cite{schielen-2024}. Resting state functional connectivity between brain regions is increasingly understood to be a dynamic process, varying in time~\cite{hutchison-2013,preti-2016}. However, the tools currently available collapse a recording into a single correlation matrix and discard the time variations. We present an interactive web application for exploring the time varying functional connectivity between brain regions in the large ABIDE I+II autism fMRI dataset. Each recording is decomposed into resting state networks whose dynamic connectivity is measured over a sliding window using several methods, including wavelet lead coherence, a directional measure of which network leads which. These connections are visualized as a video of a graph with weighted edges, alongside a complementary overview pane to compare individual scans, or one diagnostic class against the other. This system turns a large, otherwise opaque dataset into a visual format for discovering time varying functional connectivity patterns. It is a step toward an interpretable neuroimaging tool that may aid diagnosis.
+Autism spectrum disorder (ASD) is currently diagnosed using observation-based criteria, while an objective test is desired~\cite{schielen-2024}. Resting state functional connectivity between brain regions is increasingly understood to be a dynamic process, varying in time~\cite{hutchison-2013,preti-2016}. However, the tools currently available collapse a recording into a single correlation matrix and discard the time variations. We present an interactive web application for exploring the time varying functional connectivity between brain regions in the large ABIDE I+II autism fMRI dataset. Each recording is decomposed into resting state networks whose dynamic connectivity is measured over a sliding window using several methods, including wavelet lead coherence, a directional measure of which network leads which. These connections are visualized as a video of a graph with weighted edges, alongside an overview pane to compare individual scans, or entire diagnostic classes. Our system turns a large, otherwise opaque dataset into a visual format for discovering time varying functional connectivity patterns. It is a step toward an interpretable neuroimaging tool that may aid diagnosis.
 
    \begin{classification}
     $\bullet$ \emph{Information systems} $\rightarrow$ 
@@ -85,7 +86,7 @@ Information systems applications $\rightarrow$ Decision support systems $\righta
 
 Resting state fMRI (rs-fMRI) is the most studied imaging method in autism spectrum disorder (ASD) research~\cite{schielen-2024}, and the functional connectivity it reveals is central to studying the condition. This connectivity is conventionally computed over an entire recording, resulting in a single static connectivity matrix. However, dynamic functional connectivity captures information that static correlations discard~\cite{chang-2009}, and has shown promise as a biomarker for the diagnosis of autism~\cite{bernas-2017}, depression~\cite{cirstian-2023,pilmeyer-2024}, and cognitive aging~\cite{bernas-2021}. 
 
-The Autism Brain Imaging Data Exchange (ABIDE) is a large, multisite rs-fMRI dataset. Recent work preprocessed ABIDE~I+II using independent component analysis (ICA) into resting state networks (RSNs) for 900 subjects (417~ASD, 483~controls)~\cite{schielen-2025}. ABIDE is the most comprehensive fMRI ASD dataset~\cite{schielen-2024} and is an ideal dataset for this dynamic functional connectivity visualization. However, common connectivity visualizers are static and lack the interactive, time varying exploration needed to understand dynamic patterns. We present a novel web application that fills this gap with an animated graph view of windowed connectivity between 14 RSNs, computed per subject from configurable parameters using symmetric correlations and a directional wavelet lead coherence measure, alongside a comparative overview across diagnostic classes and specific sites.
+The Autism Brain Imaging Data Exchange (ABIDE) is a large, multisite rs-fMRI dataset. Recent work preprocessed ABIDE~I+II using independent component analysis (ICA) into resting state networks (RSNs) for 900 subjects (417~ASD, 483~controls)~\cite{schielen-2025}. ABIDE is the most comprehensive fMRI ASD dataset~\cite{schielen-2024} and is an ideal dataset for this dynamic functional connectivity visualization. However, common connectivity visualizers are static and lack the interactive, time varying exploration needed to understand dynamic patterns. We present a novel web application that fills this gap with an animated graph view of windowed connectivity between 14 RSNs, computed per subject from configurable parameters using symmetric correlations and a directional wavelet lead coherence measure, alongside a comparative overview across diagnostic classes and specific sites. Figure~\ref{fig:overview} shows an overview of the system, from the RSNs, through the windowed connectivity correlations, to the interactive graph and overview views.
 
 
 %-------------------------------------------------------------------------
@@ -98,16 +99,8 @@ matrices in the range $[-1,1]$. The third is a directional (asymmetric) measure,
 %-------------------------------------------------------------------------
 \section{Visualizations of Dynamic Brain Activity}
 
-\begin{figure}[tb]
-  \centering
-  \includegraphics[width=\linewidth]{graph-view.png}
-  \caption{\label{fig:graph}
-    Graph view: 14 resting state networks on a ring with the current window's connectivity
-    drawn as edges, where color encodes each correlation value and thickness encodes its magnitude.}
-\end{figure}
-
 The graph view places the resting state networks on a ring and draws the current frame's
-connectivity matrix as edges (Figure~\ref{fig:graph}). The color of an edge encodes the correlation value
+connectivity matrix as edges (Figure~\ref{fig:overview}, bottom right). The color of an edge encodes the correlation value
 on a blue to red scale and thickness encodes its absolute magnitude. A configurable threshold
 is used to hide weak edges and denoise the visualization. For wavelet lead coherence, the edges carry arrows showing the directionality of the correlation. The frames are animated over time, showing how the graph changes. Hovering over a network node isolates its edges, and hovering over an edge shows the two networks it connects and their connectivity correlation value. This view can also play aggregate sequences, the mean or median over all ASD or all control subjects, so an individual's dynamics can be compared against the mean or median of either class.
 

@@ -1,0 +1,60 @@
+\documentclass[border=14pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,shapes.misc,shadows,calc}
+\begin{document}
+\begin{tikzpicture}[
+  >=Latex,
+  proc/.style={rounded corners=3pt, draw=black!55, line width=0.7pt,
+     top color=white, bottom color=black!16,
+     drop shadow={shadow xshift=1.4pt, shadow yshift=-1.4pt, fill=black!45, opacity=0.5},
+     align=center, inner sep=5pt, minimum height=11mm, minimum width=30mm,
+     font=\bfseries\small},
+  meth/.style={proc, bottom color=black!9},
+  op/.style={chamfered rectangle, chamfered rectangle angle=40,
+     draw=black!55, line width=0.7pt, top color=white, bottom color=black!13,
+     drop shadow={shadow xshift=1.2pt, shadow yshift=-1.2pt, fill=black!45, opacity=0.5},
+     align=center, inner sep=3pt, minimum height=10mm, minimum width=24mm, font=\small},
+  vis/.style={proc, top color=blue!6, bottom color=blue!24, minimum height=44mm, minimum width=30mm},
+  hdr/.style={font=\bfseries, align=center},
+  arr/.style={->, line width=0.8pt, draw=black!75},
+  bus/.style={line width=0.8pt, draw=black!75},
+]
+% --- columns ---
+\def\xin{0}   \def\xrsn{2.8}  \def\xsw{6.4}  \def\xm{10.4}
+\def\xint{14.4}  \def\xthr{18.0}  \def\xvis{21.9}
+% --- input + rsn ---
+\node[font=\bfseries, align=center] (fmri) at (\xin,0) {fMRI\\scans};
+\node[proc] (rsn) at (\xrsn,0) {RSN time\\series};
+% --- sliding window (before the correlations) ---
+\node[op] (sw) at (\xsw,0) {sliding\\window};
+% --- methods ---
+\node[meth] (pear)  at (\xm, 2.2) {Pearson};
+\node[meth] (spear) at (\xm, 0.0) {Spearman};
+\node[meth] (wav)   at (\xm,-2.2) {Wavelet lead\\coherence};
+% --- processing operators ---
+\node[op] (int) at (\xint,0) {interpolation};
+\node[op] (thr) at (\xthr,0) {thresholding};
+% --- visualization ---
+\node[vis] (vis) at (\xvis,0) {Interactive\\[2pt]Graph and\\[2pt]Overview};
+% --- headers ---
+\node[hdr] at (\xm,   3.9) {Connectivity\\measure};
+\node[hdr] at ({(\xint+\xthr)/2}, 3.9) {Processing};
+\node[hdr] at (\xvis, 3.9) {Visualization};
+% --- arrows ---
+\draw[arr] (fmri) -- (rsn);
+\draw[arr] (rsn) -- (sw);
+% branch sliding window -> methods
+\coordinate (b) at ($(sw.east)+(0.7,0)$);
+\draw[bus] (sw.east) -- (b);
+\draw[arr] (b) |- (pear.west);
+\draw[arr] (b) |- (spear.west);
+\draw[arr] (b) |- (wav.west);
+% methods merge -> interpolation
+\draw[arr] (pear.east)  to[out=0,in=150] (int.north west);
+\draw[arr] (spear.east) -- (int.west);
+\draw[arr] (wav.east)   to[out=0,in=210] (int.south west);
+% chain -> visualization
+\draw[arr] (int) -- (thr);
+\draw[arr] (thr) -- (vis);
+\end{tikzpicture}
+\end{document}
