@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025/nixos.org) (preloaded format=pdflatex 1980.1.1)  11 JUL 2026 09:26
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025/nixos.org) (preloaded format=pdflatex 1980.1.1)  11 JUL 2026 12:56
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -694,11 +694,11 @@ Underfull \hbox (badness 4120) in paragraph at lines 63--63
  []
 
 
+
+
 Underfull \hbox (badness 10000) in paragraph at lines 69--69
 \T1/pcr/m/n/8 10 . 1175 / 1520-[]0477(1998 ) 079<[]0061 : apgtwa >[] 2 .
  []
-
-
 
 )
 
@@ -713,16 +713,16 @@ Package rerunfilecheck Info: File `brainviz-vcbm2026.brf' has not changed.
 Here is how much of TeX's memory you used:
  20433 strings out of 467890
  402525 string characters out of 5410143
- 783500 words of memory out of 5000000
+ 784500 words of memory out of 5000000
  48605 multiletter control sequences out of 15000+600000
  674212 words of font info for 102 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  90i,13n,93p,1242b,876s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/public/amsfonts/cm/cmr10.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/urw/courier/ucrr8a.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/urw/courier/ucrr8a.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/urw/times/utmb8a.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/urw/times/utmr8a.pfb></nix/store/9dj928q9970ri0n3b12q0p7yrr33kjvi-texlive-2025-env-texmfdist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on brainviz-vcbm2026.pdf (3 pages, 1870939 bytes).
+Output written on brainviz-vcbm2026.pdf (3 pages, 1536869 bytes).
 PDF statistics:
- 177 PDF objects out of 1000 (max. 8388607)
- 149 compressed objects within 2 object streams
+ 176 PDF objects out of 1000 (max. 8388607)
+ 148 compressed objects within 2 object streams
  20 named destinations out of 1000 (max. 500000)
  18 words of extra memory for PDF output out of 10000 (max. 10000000)
 
