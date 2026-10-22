@@ -15,3 +15,5 @@ frontend/dist/
 .DS_Store
 data/
 nginx/dist/
+shell.nix
+.envrc
