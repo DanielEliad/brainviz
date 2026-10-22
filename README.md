@@ -138,6 +138,11 @@ The backend returns raw values and the frontend reads the range from each respon
 
 The wavelet file `data/wavelet.h5` is much bigger than it needs to be. It is about 11 GB, while the same file zipped is only about 100 MB. The reason is that the conversion script saves the phase codes as uncompressed 64 bit floats, even though they only go from -2 to 2 and are mostly 0. Saving them as small integers with compression turned on would probably bring the file down to a similar size as the zip, and the backend would not need any changes to read it. This would be a change to the `create_dataset` call for `angle_maps` in `backend/scripts/convert_wavelet_to_subject_files.py`. It has not been tried yet, so the actual file size and the effect on loading speed are still open.
 
+## Citation
+
+If you use tools, code, or data described in this repository, please cite
+Eliad, D., Schielen, S. J. C., Aldenkamp, A. P., Ruijters, D., & Zinger, S. (2026). Interactive Visualization of Dynamic Functional Connectivity in the ABIDE Autism Dataset. Abstract of the 16th Eurographics Symposium on Visual Computing for Biology and Medicine, Ljubljana, Slovenia.
+
 ## References
 
 These are some papers referenced in the poster abstract and used throughout the development of the project.
